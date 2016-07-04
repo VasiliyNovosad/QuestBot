@@ -38,6 +38,10 @@ class QuestParser
   def parse_content
     content = @page.search('.content')
     parse_level_name(content)
+    if @level_name != @level_name_new
+      @question_texts = []
+      @question_texts_new = []
+    end
     parse_questions(content)
   end
 
@@ -59,36 +63,40 @@ class QuestParser
     @level_name_new = level.children.map { |c| c.name == 'span' ? c.children[0].text : c.text }.join
   end
 
-  def parse_questions(content)
-    @question_headers_new = []
-    @question_texts_new = []
-    # question_headers_from_content = content.css('h3')
-    # question_headers_from_content.each do |el|
-    #   if el.attributes['class'].nil?
-    #     question_header = el.text
-    #     unless question_headers.include?(question_header)
-    #       @question_headers_new.push(question_header)
-    #     end
-    #   end
-    # end
-
-    question_texts_from_content = content.css('h3, h3 + p')
-    question_texts_from_content.each do |el|
-      question_text = ''
-      el.children.each do |row|
-        case row.name
-          when 'img'
-            question_text += row.attributes['src']
-          when 'br'
-          when 'script'
-          else
-            question_text += row.text
+  def parse_element(element)
+    case element.name
+      when 'img'
+        element.attributes['src']
+      when 'br'
+        "\n"
+      when 'script'
+        ''
+      when 'div'
+        ''
+      else
+        if element.class.name == 'Nokogiri::XML::Comment'
+          ''
+        else
+          element.children.count == 0 ? remove_tab_from_text(element.text) : element.children.map do |c|
+            parse_element(c)
+          end.join(' ')
         end
-      end
-      question_text.gsub!("\r", "\n")
+    end
+  end
+
+  def remove_tab_from_text(text)
+    text.gsub("\r", '').gsub("\n", '').gsub("\t", '').strip
+  end
+
+  def parse_questions(content)
+    @question_texts_new = []
+    question_texts_from_content = content.children # css('h3, h3 + p')
+    question_texts_from_content.each do |el|
+      question_text = parse_element(el)
       puts question_text
-      if !@question_texts.include?(question_text)
-        if /^Автопереход на следующий уровень через/.match(question_text) || level_name != level_name_new
+      if question_text && question_text != '' && question_text != "\n" && !@question_texts.include?(question_text)
+        if /^Автопереход на следующий уровень через/.match(question_text) && level_name != level_name_new &&
+          !/^Подсказка [0-9]  будет через/.match(question_text) || !/^Автопереход на следующий уровень через/.match(question_text)
           @question_texts_new.push(question_text)
         end
       end

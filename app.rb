@@ -1,3 +1,5 @@
+# /start_http://lutsk.quest.ua/gameengines/encounter/play/54838
+
 require 'telegram/bot'
 require_relative 'quest_parser'
 
@@ -19,10 +21,10 @@ Telegram::Bot::Client.run(token) do |bot|
         if parser
           parser.get_html_from_url
           parser.parse_content
-          if parser.level_name != parser.level_name_new
-            parser.level_name = parser.level_name_new
-            bot.api.sendMessage(chat_id: chat_id, text: parser.level_name)
-          end
+          # if parser.level_name != parser.level_name_new
+          #   parser.level_name = parser.level_name_new
+          #   bot.api.sendMessage(chat_id: chat_id, text: parser.level_name)
+          # end
           parser.question_texts_new.each do |mess|
             bot.api.sendMessage(chat_id: chat_id, text: mess)
             parser.question_texts.push(mess)
