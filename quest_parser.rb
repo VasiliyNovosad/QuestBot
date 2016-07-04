@@ -62,17 +62,17 @@ class QuestParser
   def parse_questions(content)
     @question_headers_new = []
     @question_texts_new = []
-    question_headers_from_content = content.css('h3')
-    question_headers_from_content.each do |el|
-      if el.attributes['class'].nil?
-        question_header = el.text
-        unless question_headers.include?(question_header)
-          @question_headers_new.push(question_header)
-        end
-      end
-    end
+    # question_headers_from_content = content.css('h3')
+    # question_headers_from_content.each do |el|
+    #   if el.attributes['class'].nil?
+    #     question_header = el.text
+    #     unless question_headers.include?(question_header)
+    #       @question_headers_new.push(question_header)
+    #     end
+    #   end
+    # end
 
-    question_texts_from_content = content.css('h3 + p')
+    question_texts_from_content = content.css('h3, h3 + p')
     question_texts_from_content.each do |el|
       question_text = ''
       el.children.each do |row|
@@ -80,14 +80,17 @@ class QuestParser
           when 'img'
             question_text += row.attributes['src']
           when 'br'
+          when 'script'
           else
             question_text += row.text
         end
       end
       question_text.gsub!("\r", "\n")
       puts question_text
-      unless question_texts.include?(question_text)
-        @question_texts_new.push(question_text)
+      if !@question_texts.include?(question_text)
+        if /^Автопереход на следующий уровень через/.match(question_text) || level_name != level_name_new
+          @question_texts_new.push(question_text)
+        end
       end
     end
 

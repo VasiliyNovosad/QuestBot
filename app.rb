@@ -15,6 +15,20 @@ Telegram::Bot::Client.run(token) do |bot|
         parser = QuestParser.new(message.text[7..-1], 'link')
         p parser.url
         # bot.api.sendMessage(chat_id: chat_id, text: parser.url)
+      when '/+'
+        if parser
+          parser.get_html_from_url
+          parser.parse_content
+          if parser.level_name != parser.level_name_new
+            parser.level_name = parser.level_name_new
+            bot.api.sendMessage(chat_id: chat_id, text: parser.level_name)
+          end
+          parser.question_texts_new.each do |mess|
+            bot.api.sendMessage(chat_id: chat_id, text: mess)
+            parser.question_texts.push(mess)
+          end
+          parser.question_texts_new = []
+        end
       when '/parse'
         if parser
           parser.get_html_from_url
@@ -29,10 +43,10 @@ Telegram::Bot::Client.run(token) do |bot|
           end
           parser.question_texts_new = []
         end
-      when /^\./
-        p message.text[1..-1]
+      when /^\/\./
+        p message.text[2..-1]
         parser.get_html_from_url
-        parser.send_code(message.text[1..-1])
+        parser.send_code(message.text[2..-1])
     end
   end
 end
