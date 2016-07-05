@@ -26,29 +26,37 @@ Telegram::Bot::Client.run(token) do |bot|
           #   bot.api.sendMessage(chat_id: chat_id, text: parser.level_name)
           # end
           parser.question_texts_new.each do |mess|
-            bot.api.sendMessage(chat_id: chat_id, text: mess)
+            # bot.api.sendMessage(chat_id: chat_id, text: mess)
             parser.question_texts.push(mess)
           end
+          bot.api.sendMessage(chat_id: chat_id, text: parser.question_texts_new.join("\n"))
           parser.question_texts_new = []
         end
       when '/parse'
         if parser
           parser.get_html_from_url
           parser.parse_content
-          if parser.level_name != parser.level_name_new
-            parser.level_name = parser.level_name_new
-            bot.api.sendMessage(chat_id: chat_id, text: parser.level_name)
-          end
+          # if parser.level_name != parser.level_name_new
+          #   parser.level_name = parser.level_name_new
+          #   bot.api.sendMessage(chat_id: chat_id, text: parser.level_name)
+          # end
           parser.question_texts_new.each do |mess|
-            bot.api.sendMessage(chat_id: chat_id, text: mess)
             parser.question_texts.push(mess)
           end
+          bot.api.sendMessage(chat_id: chat_id, text: parser.question_texts_new.join("\n"))
           parser.question_texts_new = []
         end
       when /^\/\./
         p message.text[2..-1]
         parser.get_html_from_url
         parser.send_code(message.text[2..-1])
+        parser.get_html_from_url
+        parser.parse_content
+        parser.question_texts_new.each do |mess|
+          parser.question_texts.push(mess)
+        end
+        bot.api.sendMessage(chat_id: chat_id, text: parser.question_texts_new.join("\n"))
+        parser.question_texts_new = []
     end
   end
 end
