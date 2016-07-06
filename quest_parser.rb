@@ -49,7 +49,18 @@ class QuestParser
     code_form = @page.form
     code_form['LevelAction.Answer'] = code
     code_form.submit
-    parse_content
+  end
+
+  def parse_needed_sectors
+    content = @page.search('.content')
+    founded = []
+    sectors = content.css('.cols-wrapper p')
+    sectors.each do |sector|
+      if sector.children[1].children[0].text == 'код не введён'
+        founded.push(sector.children[0].text.strip.gsub(':', ''))
+      end
+    end
+    founded.uniq
   end
 
   private
@@ -67,12 +78,14 @@ class QuestParser
     case element.name
       when 'img'
         element.attributes['src']
+      when 'a'
+        ": #{element.attributes['href']}"
       when 'br'
         "\n"
-      when 'script'
+      when 'script', 'style', 'div', 'table'
         ''
-      when 'div'
-        ''
+      when /^h\d/
+        "\n#{element.children.count == 0 ? remove_tab_from_text(element.text) : element.children.map { |c| parse_element(c) }.join(' ')}"
       else
         if element.class.name == 'Nokogiri::XML::Comment'
           ''
@@ -93,10 +106,11 @@ class QuestParser
     question_texts_from_content = content.children # css('h3, h3 + p')
     question_texts_from_content.each do |el|
       question_text = parse_element(el)
-      puts question_text
+      # puts question_text
       if question_text && question_text != '' && question_text != "\n" && !@question_texts.include?(question_text)
-        if /^Автопереход на следующий уровень через/.match(question_text) && level_name != level_name_new &&
-          !/^Подсказка [0-9]  будет через/.match(question_text) || !/^Автопереход на следующий уровень через/.match(question_text)
+        if !/^Бонус (\d+|\d+: \d+)$/.match(question_text) &&
+            /^(?!(Бонус \d+: \d+ \(осталось))/.match(question_text)
+          # p question_text
           @question_texts_new.push(question_text)
         end
       end
