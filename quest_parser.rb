@@ -79,7 +79,7 @@ class QuestParser
       when 'img'
         element.attributes['src']
       when 'a'
-        ": #{element.attributes['href']}"
+        "#{element.children.count == 0 ? remove_tab_from_text(element.text) : element.children.map { |c| parse_element(c) }.join(' ')} ( #{element.attributes['href']} )"
       when 'br'
         "\n"
       when 'script', 'style', 'div', 'table'
