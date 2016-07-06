@@ -63,6 +63,23 @@ class QuestParser
     founded.uniq
   end
 
+  def parse_full_info
+    content = @page.search('.content')
+    full_info = []
+    content.children.each do |el|
+      question_text = parse_element(el)
+      # puts question_text
+      if question_text && question_text != '' && question_text != "\n"
+        if !/^Бонус (\d+|\d+: \d+)$/.match(question_text) &&
+            /^(?!(Бонус \d+: \d+ \(осталось))/.match(question_text)
+          # p question_text
+          full_info.push(question_text)
+        end
+      end
+    end
+    full_info
+  end
+
   private
 
   def need_log_in
