@@ -5,7 +5,7 @@ require 'mechanize'
 # http://quest.ua/Login.aspx
 
 class QuestParser
-  attr_accessor :page, :level_name, :level_name_new, :question_headers, :question_headers_new, :question_texts, :question_texts_new, :url, :type_url
+  attr_accessor :page, :level_name, :level_name_new, :question_texts, :question_texts_new, :url, :type_url, :login, :password, :errors
 
   def initialize(page_url, url_type)
     @level_name = ''
@@ -16,23 +16,31 @@ class QuestParser
     @url = page_url
     @type_url = url_type
     @agent = Mechanize.new
+    # @login = 'vnovosad'
+    # @password = 'V0rtex'
+    @errors = []
   end
 
   def get_html_from_url
-
     if type_url == 'file'
       @page = File.open(@url) { |f| Nokogiri::HTML(f) } # Nokogiri::HTML(html)
     else
       #@doc = Nokogiri::HTML(open(url))
       @page = @agent.get(@url)
       if need_log_in
+        if @login.nil? || @password.nil?
+          @errors.push('Login empty!!! Set login with command .setlogin "login" in private chat')  if @login.nil?
+          @errors.push('Password empty!!! Set password with command .setpassword "password" in private chat')  if @password.nil?
+          return false
+        end
         login_form = @page.form
-        login_form.Login = 'vnovosad'
-        login_form.Password = 'V0rtex'
+        login_form.Login = @login
+        login_form.Password = @password
         login_form.submit
       end
       @page = @agent.get(@url)
     end
+    true
   end
 
   def parse_content
@@ -41,6 +49,7 @@ class QuestParser
     if @level_name != @level_name_new
       @question_texts = []
       @question_texts_new = []
+      @level_name = @level_name_new
     end
     parse_questions(content)
   end
