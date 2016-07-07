@@ -14,7 +14,7 @@ Telegram::Bot::Client.run(token) do |bot|
         bot.api.sendMessage(chat_id: chat_id || message.chat.id, text: "Hello, #{message.from.first_name}")
       when /^\/start /
         # parser = QuestParser.new('http://lutsk.quest.ua/gameengines/encounter/play/50445', 'link')
-        parser = QuestParser.new(message.text[7..-1], 'link')
+        parser = QuestParser.new(message.text[7..-1].strip, 'link')
         p parser.url
         # bot.api.sendMessage(chat_id: chat_id, text: parser.url)
       when '/+', '/parse'
@@ -53,9 +53,9 @@ Telegram::Bot::Client.run(token) do |bot|
           end
         end
       when /^\/(\.|,)/
-        p message.text[2..-1]
+        p message.text[2..-1].strip
         if parser.get_html_from_url
-          parser.send_code(message.text[2..-1])
+          parser.send_code(message.text[2..-1].strip)
           parser.get_html_from_url
           parser.parse_content
           if parser.level_name != parser.level_name_new
@@ -71,11 +71,13 @@ Telegram::Bot::Client.run(token) do |bot|
           parser.errors = []
         end
       when /^\.setlogin /
-        parser.login = message.text[10..-1]
+        parser.login = message.text[10..-1].strip
       when /^\.setpassword /
-        parser.password = message.text[13..-1]
-      when '/setchat'
+        parser.password = message.text[13..-1].strip
+      when '/setchatcurrent'
         chat_id = message.chat.id
+      when /^\.setchat /
+        chat_id = message.text[9..-1].strip.to_i
     end
   end
 end
