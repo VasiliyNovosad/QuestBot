@@ -9,15 +9,13 @@ class QuestParser
 
   def initialize(page_url, url_type)
     @level_name = ''
-    @question_headers = []
-    @question_headers_new = []
     @question_texts = []
     @question_texts_new = []
     @url = page_url
     @type_url = url_type
     @agent = Mechanize.new
-    # @login = 'vnovosad'
-    # @password = 'V0rtex'
+    @login = nil
+    @password = nil
     @errors = []
   end
 
@@ -34,9 +32,11 @@ class QuestParser
           return false
         end
         login_form = @page.form
-        login_form.Login = @login
-        login_form.Password = @password
-        login_form.submit
+        if login_form
+          login_form.Login = @login
+          login_form.Password = @password
+          login_form.submit
+        end
       end
       @page = @agent.get(@url)
     end
@@ -45,28 +45,36 @@ class QuestParser
 
   def parse_content
     content = @page.search('.content')
-    parse_level_name(content)
-    if @level_name != @level_name_new
-      @question_texts = []
-      @question_texts_new = []
-      @level_name = @level_name_new
+    if content
+      parse_level_name(content)
+      if @level_name != @level_name_new
+        @question_texts = []
+        @question_texts_new = []
+        @level_name = @level_name_new
+      end
+      parse_questions(content)
     end
-    parse_questions(content)
   end
 
   def send_code(code)
     code_form = @page.form
-    code_form['LevelAction.Answer'] = code
-    code_form.submit
+    if code_form && code_form['LevelAction.Answer']
+      code_form['LevelAction.Answer'] = code
+      code_form.submit
+    end
   end
 
   def parse_needed_sectors
     content = @page.search('.content')
     founded = []
-    sectors = content.css('.cols-wrapper p')
-    sectors.each do |sector|
-      if sector.children[1].children[0].text == 'код не введён'
-        founded.push(sector.children[0].text.strip.gsub(':', ''))
+    if content
+      sectors = content.css('.cols-wrapper p')
+      if sectors
+        sectors.each do |sector|
+          if sector.children[1].children[0].text == 'код не введён'
+            founded.push(sector.children[0].text.strip.gsub(':', ''))
+          end
+        end
       end
     end
     founded.uniq
@@ -75,14 +83,16 @@ class QuestParser
   def parse_full_info
     content = @page.search('.content')
     full_info = []
-    content.children.each do |el|
-      question_text = parse_element(el)
-      # puts question_text
-      if question_text && question_text != '' && question_text != "\n"
-        if !/^Бонус (\d+|\d+: \d+)$/.match(question_text) &&
-            /^(?!(Бонус \d+: \d+ \(осталось))/.match(question_text)
-          # p question_text
-          full_info.push(question_text)
+    if content && content.children
+      content.children.each do |el|
+        question_text = parse_element(el)
+        # puts question_text
+        if question_text && question_text != '' && question_text != "\n"
+          if !/^Бонус (\d+|\d+: \d+)$/.match(question_text) &&
+              /^(?!(Бонус \d+: \d+ \(осталось))/.match(question_text)
+            # p question_text
+            full_info.push(question_text)
+          end
         end
       end
     end
@@ -92,7 +102,7 @@ class QuestParser
   private
 
   def need_log_in
-    @page.form.button_with(value: 'Вход') || @page.form.button_with(value: 'Sign In')
+    @page.form && (@page.form.button_with(value: 'Вход') || @page.form.button_with(value: 'Sign In'))
   end
 
   def parse_level_name(content)
@@ -132,11 +142,20 @@ class QuestParser
     question_texts_from_content = content.children # css('h3, h3 + p')
     question_texts_from_content.each do |el|
       question_text = parse_element(el)
-      # puts question_text
-      if question_text && question_text != '' && question_text != "\n" && !@question_texts.include?(question_text)
-        if !/^Бонус (\d+|\d+: \d+)$/.match(question_text) &&
-            /^(?!(Бонус \d+: \d+ \(осталось))/.match(question_text)
-          # p question_text
+      if question_text && question_text != '' && question_text != "\n" && !@question_texts.include?(question_text) &&
+          !(/^Бонус (\d+|\d+: \d+)$/ =~ question_text.strip) && /^(?!(Бонус \d+: \d+ \(осталось))/.match(question_text.strip)
+        unless /Автопереход на следующий уровень через/ =~ question_text && @question_texts.grep(/Автопереход на следующий уровень через/).count == 1 ||
+            /Подсказка 1  будет через/ =~ question_text && @question_texts.grep(/Подсказка 1  будет через/).count == 1 ||
+            /Подсказка 2  будет через/ =~ question_text && @question_texts.grep(/Подсказка 2  будет через/).count == 1 ||
+            /Подсказка 3  будет через/ =~ question_text && @question_texts.grep(/Подсказка 3  будет через/).count == 1 ||
+            /Подсказка 4  будет через/ =~ question_text && @question_texts.grep(/Подсказка 4  будет через/).count == 1 ||
+            /Подсказка 5  будет через/ =~ question_text && @question_texts.grep(/Подсказка 5  будет через/).count == 1 ||
+            /Подсказка 6  будет через/ =~ question_text && @question_texts.grep(/Подсказка 6  будет через/).count == 1 ||
+            /Подсказка 7  будет через/ =~ question_text && @question_texts.grep(/Подсказка 7  будет через/).count == 1 ||
+            /Подсказка 8  будет через/ =~ question_text && @question_texts.grep(/Подсказка 8  будет через/).count == 1 ||
+            /Подсказка 9  будет через/ =~ question_text && @question_texts.grep(/Подсказка 9  будет через/).count == 1 ||
+            /Подсказка 10  будет через/ =~ question_text && @question_texts.grep(/Подсказка 10  будет через/).count == 1 ||
+            /Подсказка 11  будет через/ =~ question_text && @question_texts.grep(/Подсказка 11  будет через/).count == 1
           @question_texts_new.push(question_text)
         end
       end

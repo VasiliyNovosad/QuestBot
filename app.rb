@@ -2,7 +2,10 @@
 
 require 'telegram/bot'
 require 'eventmachine'
+require 'openssl'
 require_relative 'quest_parser'
+
+OpenSSL::SSL::VERIFY_PEER = OpenSSL::SSL::VERIFY_NONE
 
 $token = '171556746:AAEd8YJrYhFsiLjVEkyIk2cmluEf2lWkA5s'
 $parser = nil
@@ -78,9 +81,9 @@ def run_bot
             $parser.errors = []
           end
         when /^\.setlogin /
-          $parser.login = message.text[10..-1].strip
+          $parser.login = message.text[10..-1].strip if $parser
         when /^\.setpassword /
-          $parser.password = message.text[13..-1].strip
+          $parser.password = message.text[13..-1].strip if $parser
         when '/setchatcurrent'
           $chat_id = message.chat.id
         when /^\.setchat /
@@ -94,12 +97,14 @@ end
 
 def run_em
   EM.run do
-    EM.add_periodic_timer(15) do
+    EM.add_periodic_timer(5) do
+=begin
       puts "Tick ..."
       p $stop_event
       puts $current_bot
       puts $parser
       puts $chat_id
+=end
       if !$stop_event && $current_bot
         if $parser
           if $parser.get_html_from_url
