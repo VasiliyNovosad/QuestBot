@@ -92,12 +92,12 @@ class QuestParser
   private
 
   def need_log_in
-    @page.form.button_with(value: 'Вход')
+    @page.form.button_with(value: 'Вход') || @page.form.button_with(value: 'Sign In')
   end
 
   def parse_level_name(content)
     level = content.at_css('h2')
-    @level_name_new = level.children.map { |c| c.name == 'span' ? c.children[0].text : c.text }.join
+    @level_name_new = level.children.map { |c| c.name == 'span' ? c.children[0].text : c.text }.join if level && level.children
   end
 
   def parse_element(element)
