@@ -1,4 +1,10 @@
-# /start_http://lutsk.quest.ua/gameengines/encounter/play/55442
+# /start http://kiev.quest.ua/gameengines/encounter/play/54104
+# .setlogin login
+# .setpassword password
+# /setchatcurrent
+# /starttimer
+
+
 
 require 'telegram/bot'
 require 'eventmachine'
@@ -10,7 +16,7 @@ OpenSSL::SSL::VERIFY_PEER = OpenSSL::SSL::VERIFY_NONE
 $token = '171556746:AAEd8YJrYhFsiLjVEkyIk2cmluEf2lWkA5s'
 $parser = nil
 $chat_id = nil#-24142491 # message.chat.id
-$stop_event = false
+$start_timer = false
 $current_bot = nil
 $current_chat_id = nil
 
@@ -30,11 +36,20 @@ def run_bot
 
             if $parser
               if $parser.get_html_from_url
-                $parser.parse_content
+                $parser.parse_content(true)
                 $parser.question_texts_new.each do |mess|
                   $parser.question_texts.push(mess)
                 end
-                bot.api.sendMessage(chat_id: $chat_id || message.chat.id, text: $parser.question_texts_new.join("\n")) if $parser.question_texts_new.count > 0
+                if $parser.question_texts_new.count > 0
+                  message_str = $parser.question_texts_new.join("\n")
+                  if message_str.length < 4000
+                    bot.api.sendMessage(chat_id: $chat_id || message.chat.id, text: message_str)
+                  else
+                    message_str.chars.each_slice(4000).map(&:join).each do |msg|
+                      bot.api.sendMessage(chat_id: $chat_id || message.chat.id, text: msg)
+                    end
+                  end
+                end
                 $parser.question_texts_new = []
               else
                 bot.api.sendMessage(chat_id: $chat_id || message.chat.id, text: $parser.errors.join("\n")) if $parser.errors.count > 0
@@ -56,7 +71,16 @@ def run_bot
           if $parser
             if $parser.get_html_from_url
               messages = $parser.parse_full_info
-              bot.api.sendMessage(chat_id: $chat_id || message.chat.id, text: messages.join("\n")) if messages.count > 0
+              if messages.count > 0
+                message_str = messages.join("\n")
+                if message_str.length < 4000
+                  bot.api.sendMessage(chat_id: $chat_id || message.chat.id, text: message_str)
+                else
+                  message_str.chars.each_slice(4000).map(&:join).each do |msg|
+                    bot.api.sendMessage(chat_id: $chat_id || message.chat.id, text: msg)
+                  end
+                end
+              end
             else
               bot.api.sendMessage(chat_id: $chat_id || message.chat.id, text: $parser.errors.join("\n")) if $parser.errors.count > 0
               $parser.errors = []
@@ -67,7 +91,7 @@ def run_bot
           if $parser.get_html_from_url
             $parser.send_code(message.text[2..-1].strip)
             $parser.get_html_from_url
-            $parser.parse_content
+            $parser.parse_content(true)
             if $parser.level_name != $parser.level_name_new
               $parser.level_name = $parser.level_name_new
             end
@@ -88,8 +112,10 @@ def run_bot
           $chat_id = message.chat.id
         when /^\.setchat /
           $chat_id = message.text[9..-1].strip.to_i
-        when /^\.stop /
-          $stop_event = true
+        when '/stoptimer'
+          $start_timer = false
+        when '/starttimer'
+          $start_timer = true
       end
     end
   end
@@ -105,15 +131,25 @@ def run_em
       puts $parser
       puts $chat_id
 =end
-      if !$stop_event && $current_bot
+      if $start_timer && $current_bot
+        p "$chat_id = #{$chat_id}"
         if $parser
           if $parser.get_html_from_url
-            $parser.parse_content
+            $parser.parse_content(false)
             $parser.question_texts_new.each do |mess|
               $parser.question_texts.push(mess)
             end
-            $current_bot.api.sendMessage(chat_id: $chat_id, text: $parser.question_texts_new.join("\n")) if $chat_id && $parser.question_texts_new.count > 0
-            $parser.question_texts_new = []
+            if $chat_id && $parser.question_texts_new.count > 0
+              message_str = $parser.question_texts_new.join("\n")
+              if message_str.length < 4000
+                $current_bot.api.sendMessage(chat_id: $chat_id, text: message_str)
+              else
+                message_str.chars.each_slice(4000).map(&:join).each do |msg|
+                  $current_bot.api.sendMessage(chat_id: $chat_id, text: msg)
+                end
+              end
+              $parser.question_texts_new = []
+            end
           else
             $current_bot.api.sendMessage(chat_id: $chat_id, text: $parser.errors.join("\n")) if $chat_id && $parser.errors.count > 0
             $parser.errors = []
