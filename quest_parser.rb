@@ -159,7 +159,16 @@ class QuestParser
             /^Подсказка 8  будет через/ =~ question_text && @question_texts.grep(/^Подсказка 8  будет через/).count >= 1 ||
             /^Подсказка 9  будет через/ =~ question_text && @question_texts.grep(/^Подсказка 9  будет через/).count >= 1 ||
             /^Подсказка 10  будет через/ =~ question_text && @question_texts.grep(/^Подсказка 10  будет через/).count >= 1 ||
-            /^Подсказка 11  будет через/ =~ question_text && @question_texts.grep(/^Подсказка 11  будет через/).count >= 1)
+            /^Подсказка 11  будет через/ =~ question_text && @question_texts.grep(/^Подсказка 11  будет через/).count >= 1 ||
+            /^Подсказка 12  будет через/ =~ question_text && @question_texts.grep(/^Подсказка 12  будет через/).count >= 1 ||
+            /^Подсказка 13  будет через/ =~ question_text && @question_texts.grep(/^Подсказка 13  будет через/).count >= 1 ||
+            /^Подсказка 14  будет через/ =~ question_text && @question_texts.grep(/^Подсказка 14  будет через/).count >= 1 ||
+            /^Подсказка 15  будет через/ =~ question_text && @question_texts.grep(/^Подсказка 15  будет через/).count >= 1 ||
+            /^Подсказка 16  будет через/ =~ question_text && @question_texts.grep(/^Подсказка 16  будет через/).count >= 1 ||
+            /^Подсказка 17  будет через/ =~ question_text && @question_texts.grep(/^Подсказка 17  будет через/).count >= 1 ||
+            /^Подсказка 18  будет через/ =~ question_text && @question_texts.grep(/^Подсказка 18  будет через/).count >= 1 ||
+            /^Подсказка 19  будет через/ =~ question_text && @question_texts.grep(/^Подсказка 19  будет через/).count >= 1 ||
+            /^Подсказка 20  будет через/ =~ question_text && @question_texts.grep(/^Подсказка 20  будет через/).count >= 1)
           @question_texts_new.push(question_text)
         end
       end
