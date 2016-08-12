@@ -1,9 +1,6 @@
 require 'open-uri'
 require 'mechanize'
 
-# http://zhitomir.quest.ua/gameengines/encounter/play/41977
-# http://quest.ua/Login.aspx
-
 class QuestParser
   attr_accessor :page, :level_name, :level_name_new, :question_texts, :question_texts_new, :url, :type_url, :login, :password, :errors
 
@@ -173,7 +170,5 @@ class QuestParser
         end
       end
     end
-
   end
-
 end
