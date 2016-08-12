@@ -33,7 +33,6 @@ def run_bot
           $parser = QuestParser.new(message.text[7..-1].strip, 'link')
           p $parser.url
         when '/+', '/parse'
-
             if $parser
               if $parser.get_html_from_url
                 $parser.parse_content(true)
@@ -56,7 +55,29 @@ def run_bot
                 $parser.errors = []
               end
             end
-
+        when '/++'
+          if $parser
+            if $parser.get_html_from_url
+              $parser.parse_content(true)
+              $parser.question_texts_new.each do |mess|
+                $parser.question_texts.push(mess)
+              end
+              if $parser.question_texts_new.count > 0
+                message_str = $parser.question_texts_new.join("\n")
+                if message_str.length < 4000
+                  bot.api.sendMessage(chat_id: message.chat.id, text: message_str)
+                else
+                  message_str.chars.each_slice(4000).map(&:join).each do |msg|
+                    bot.api.sendMessage(chat_id: message.chat.id, text: msg)
+                  end
+                end
+              end
+              $parser.question_texts_new = []
+            else
+              bot.api.sendMessage(chat_id: message.chat.id, text: $parser.errors.join("\n")) if $parser.errors.count > 0
+              $parser.errors = []
+            end
+          end
         when '/-'
           if $parser
             if $parser.get_html_from_url
@@ -64,6 +85,16 @@ def run_bot
               bot.api.sendMessage(chat_id: $chat_id || message.chat.id, text: "Осталось закрити:\n#{messages.join(', ')}") if messages.count > 0
             else
               bot.api.sendMessage(chat_id: $chat_id || message.chat.id, text: $parser.errors.join("\n")) if $parser.errors.count > 0
+              $parser.errors = []
+            end
+          end
+        when '/--'
+          if $parser
+            if $parser.get_html_from_url
+              messages = $parser.parse_needed_sectors
+              bot.api.sendMessage(chat_id: message.chat.id, text: "Осталось закрити:\n#{messages.join(', ')}") if messages.count > 0
+            else
+              bot.api.sendMessage(chat_id: message.chat.id, text: $parser.errors.join("\n")) if $parser.errors.count > 0
               $parser.errors = []
             end
           end
@@ -83,6 +114,25 @@ def run_bot
               end
             else
               bot.api.sendMessage(chat_id: $chat_id || message.chat.id, text: $parser.errors.join("\n")) if $parser.errors.count > 0
+              $parser.errors = []
+            end
+          end
+        when '/**'
+          if $parser
+            if $parser.get_html_from_url
+              messages = $parser.parse_full_info
+              if messages.count > 0
+                message_str = messages.join("\n")
+                if message_str.length < 4000
+                  bot.api.sendMessage(chat_id: message.chat.id, text: message_str)
+                else
+                  message_str.chars.each_slice(4000).map(&:join).each do |msg|
+                    bot.api.sendMessage(chat_id: message.chat.id, text: msg)
+                  end
+                end
+              end
+            else
+              bot.api.sendMessage(chat_id: message.chat.id, text: $parser.errors.join("\n")) if $parser.errors.count > 0
               $parser.errors = []
             end
           end
@@ -124,15 +174,7 @@ end
 def run_em
   EM.run do
     EM.add_periodic_timer(5) do
-=begin
-      puts "Tick ..."
-      p $stop_event
-      puts $current_bot
-      puts $parser
-      puts $chat_id
-=end
       if $start_timer && $current_bot
-        p "$chat_id = #{$chat_id}"
         if $parser
           if $parser.get_html_from_url
             $parser.parse_content(false)
