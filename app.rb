@@ -29,7 +29,6 @@ def run_bot
         when '/start'
           bot.api.sendMessage(chat_id: $chat_id || message.chat.id, text: "Hello, #{message.from.first_name}")
         when /^\/start /
-          # parser = QuestParser.new('http://lutsk.quest.ua/gameengines/encounter/play/50445', 'link')
           $parser = QuestParser.new(message.text[7..-1].strip, 'link')
           p $parser.url
         when '/+', '/parse'
@@ -140,16 +139,6 @@ def run_bot
           p message.text[2..-1].strip
           if $parser.get_html_from_url
             $parser.send_code(message.text[2..-1].strip)
-            $parser.get_html_from_url
-            $parser.parse_content(true)
-            if $parser.level_name != $parser.level_name_new
-              $parser.level_name = $parser.level_name_new
-            end
-            $parser.question_texts_new.each do |mess|
-              $parser.question_texts.push(mess)
-            end
-            bot.api.sendMessage(chat_id: $chat_id || message.chat.id, text: $parser.question_texts_new.join("\n")) if $parser.question_texts_new.count > 0
-            $parser.question_texts_new = []
           else
             bot.api.sendMessage(chat_id: $chat_id || message.chat.id, text: $parser.errors.join("\n")) if $parser.errors.count > 0
             $parser.errors = []
@@ -202,8 +191,8 @@ def run_em
   end
 end
 
-t1 = Thread.new{ run_bot }
-t2 = Thread.new{ run_em }
-t1.join
-t2.join
+threads = []
+threads << Thread.new{ run_bot }
+threads << Thread.new{ run_em }
+threads.each &:join
 
