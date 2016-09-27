@@ -13,6 +13,7 @@ GEM
       unf (>= 0.0.5, < 1.0.0)
     equalizer (0.0.11)
     eventmachine (1.2.0.1)
+    eventmachine (1.2.0.1-x64-mingw32)
     faraday (0.9.2)
       multipart-post (>= 1.2, < 3)
     http-cookie (1.0.2)
@@ -35,6 +36,9 @@ GEM
     nokogiri (1.6.8)
       mini_portile2 (~> 2.1.0)
       pkg-config (~> 1.1.7)
+    nokogiri (1.6.8-x64-mingw32)
+      mini_portile2 (~> 2.1.0)
+      pkg-config (~> 1.1.7)
     ntlm-http (0.1.1)
     pkg-config (1.1.7)
     telegram-bot-ruby (0.5.2)
@@ -44,6 +48,7 @@ GEM
     unf (0.1.4)
       unf_ext
     unf_ext (0.0.7.2)
+    unf_ext (0.0.7.2-x64-mingw32)
     virtus (1.0.5)
       axiom-types (~> 0.1)
       coercible (~> 1.0)
@@ -53,8 +58,12 @@ GEM
 
 PLATFORMS
   ruby
+  x64-mingw32
 
 DEPENDENCIES
   eventmachine
   mechanize
   telegram-bot-ruby
+
+BUNDLED WITH
+   1.12.5
