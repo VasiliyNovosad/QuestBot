@@ -25,6 +25,7 @@ def run_bot
     $current_bot = bot
     bot.listen do |message|
       $current_chat_id = message.chat.id
+      p "Message #{message.text} from #{message.from.first_name} #{message.from.last_name}"
       case message.text
         when '/start'
           bot.api.sendMessage(chat_id: $chat_id || message.chat.id, text: "Hello, #{message.from.first_name}")
@@ -165,6 +166,7 @@ def run_em
     EM.add_periodic_timer(5) do
       if $start_timer && $current_bot
         if $parser
+          p "-------Timer start---------#{Time.now}"
           if $parser.get_html_from_url
             $parser.parse_content(false)
             $parser.question_texts_new.each do |mess|
@@ -182,9 +184,11 @@ def run_em
               $parser.question_texts_new = []
             end
           else
+            p $parser.errors
             $current_bot.api.sendMessage(chat_id: $chat_id, text: $parser.errors.join("\n")) if $chat_id && $parser.errors.count > 0
             $parser.errors = []
           end
+          p "-------Timer end---------#{Time.now}"
         end
       end
     end

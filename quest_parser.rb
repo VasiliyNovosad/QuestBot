@@ -82,7 +82,7 @@ class QuestParser
   def parse_full_info
     content = @page.search('.content')
     full_info = []
-    if content && content.children
+    if content&.children
       content.children.each do |el|
         question_text = parse_element(el)
         # puts question_text
@@ -106,7 +106,7 @@ class QuestParser
 
   def parse_level_name(content)
     level = content.at_css('h2')
-    @level_name_new = level.children.map { |c| c.name == 'span' ? c.children[0].text : c.text }.join if level && level.children
+    @level_name_new = level.children.map { |c| c.name == 'span' ? c.children[0].text : c.text }.join if level&.children
   end
 
   def parse_element(element)
