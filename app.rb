@@ -197,10 +197,9 @@ end
 
 get '/' do
   "Hello World!"
+  threads = []
+  threads << Thread.new{ run_bot }
+  threads << Thread.new{ run_em }
+  threads.each &:join
 end
-
-threads = []
-threads << Thread.new{ run_bot }
-threads << Thread.new{ run_em }
-threads.each &:join
 
