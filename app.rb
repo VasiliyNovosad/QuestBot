@@ -196,10 +196,12 @@ def run_em
 end
 
 get '/' do
-  threads = []
-  threads << Thread.new{ run_bot }
-  threads << Thread.new{ run_em }
-  threads.each &:join
   "Hello World!"
 end
+
+threads = []
+threads << Thread.new{ run_bot }
+threads << Thread.new{ run_em }
+threads.each &:join
+
 
