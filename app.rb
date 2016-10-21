@@ -5,7 +5,7 @@
 # /starttimer
 
 
-
+require 'sinatra'
 require 'telegram/bot'
 require 'eventmachine'
 require 'openssl'
@@ -193,6 +193,10 @@ def run_em
       end
     end
   end
+end
+
+get '/' do
+  "Hello World!"
 end
 
 threads = []
