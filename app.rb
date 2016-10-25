@@ -137,17 +137,23 @@ def run_bot
             end
           end
         when /^\/(\.|,)/
-          p message.text[2..-1].strip
-          if $parser.get_html_from_url
-            $parser.send_code(message.text[2..-1].strip)
-          else
-            bot.api.sendMessage(chat_id: $chat_id || message.chat.id, text: $parser.errors.join("\n")) if $parser.errors.count > 0
-            $parser.errors = []
+          if $parser
+            p message.text[2..-1].strip
+            if $parser.get_html_from_url
+              $parser.send_code(message.text[2..-1].strip)
+            else
+              bot.api.sendMessage(chat_id: $chat_id || message.chat.id, text: $parser.errors.join("\n")) if $parser.errors.count > 0
+              $parser.errors = []
+            end
           end
         when /^\.setlogin /
-          $parser.login = message.text[10..-1].strip if $parser
+          if $parser
+            $parser.login = message.text[10..-1].strip if $parser
+          end
         when /^\.setpassword /
-          $parser.password = message.text[13..-1].strip if $parser
+          if $parser
+            $parser.password = message.text[13..-1].strip if $parser
+          end
         when '/setchatcurrent'
           $chat_id = message.chat.id
         when /^\.setchat /
