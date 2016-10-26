@@ -37,13 +37,15 @@ def run_bot
           $parser = QuestParser.new(message.text[7..-1].strip, 'link')
           # p $parser.url
         when '/restart'
-          url = $parser.url
-          login = $parser.login
-          password = $parser.password
-          $parser = nil
-          $parser = QuestParser.new(url, 'link')
-          $parser.login = login
-          $parser.password = password
+          if $parser
+            url = $parser.url
+            login = $parser.login
+            password = $parser.password
+            $parser = nil
+            $parser = QuestParser.new(url, 'link')
+            $parser.login = login
+            $parser.password = password
+          end
         when '/+', '/parse'
             if $parser
               if $parser.get_html_from_url
