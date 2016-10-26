@@ -7,7 +7,6 @@
 
 require 'sinatra'
 require 'telegram/bot'
-require 'eventmachine'
 require 'openssl'
 require_relative 'quest_parser'
 
@@ -19,6 +18,8 @@ $chat_id = nil#-24142491 # message.chat.id
 $start_timer = false
 $current_bot = nil
 $current_chat_id = nil
+$timer_interval = 5
+$message_str = nil
 
 def run_bot
   Telegram::Bot::Client.run($token) do |bot|
@@ -29,9 +30,20 @@ def run_bot
       case message.text
         when '/start'
           bot.api.sendMessage(chat_id: $chat_id || message.chat.id, text: "Hello, #{message.from.first_name}")
+        when '/stop'
+          $parser = nil
+          $chat_id = nil
         when /^\/start /
           $parser = QuestParser.new(message.text[7..-1].strip, 'link')
-          p $parser.url
+          # p $parser.url
+        when '/restart'
+          url = $parser.url
+          login = $parser.login
+          password = $parser.password
+          $parser = nil
+          $parser = QuestParser.new(url, 'link')
+          $parser.login = login
+          $parser.password = password
         when '/+', '/parse'
             if $parser
               if $parser.get_html_from_url
@@ -40,14 +52,15 @@ def run_bot
                   $parser.question_texts.push(mess)
                 end
                 if $parser.question_texts_new.count > 0
-                  message_str = $parser.question_texts_new.join("\n")
-                  if message_str.length < 4000
-                    bot.api.sendMessage(chat_id: $chat_id || message.chat.id, text: message_str)
+                  $message_str = $parser.question_texts_new.join("\n")
+                  if $message_str.length < 4000
+                    bot.api.sendMessage(chat_id: $chat_id || message.chat.id, text: $message_str)
                   else
-                    message_str.chars.each_slice(4000).map(&:join).each do |msg|
+                    $message_str.chars.each_slice(4000).map(&:join).each do |msg|
                       bot.api.sendMessage(chat_id: $chat_id || message.chat.id, text: msg)
                     end
                   end
+                  $message_str = nil
                 end
                 $parser.question_texts_new = []
               else
@@ -63,14 +76,15 @@ def run_bot
                 $parser.question_texts.push(mess)
               end
               if $parser.question_texts_new.count > 0
-                message_str = $parser.question_texts_new.join("\n")
-                if message_str.length < 4000
-                  bot.api.sendMessage(chat_id: message.chat.id, text: message_str)
+                $message_str = $parser.question_texts_new.join("\n")
+                if $message_str.length < 4000
+                  bot.api.sendMessage(chat_id: message.chat.id, text: $message_str)
                 else
-                  message_str.chars.each_slice(4000).map(&:join).each do |msg|
+                  $message_str.chars.each_slice(4000).map(&:join).each do |msg|
                     bot.api.sendMessage(chat_id: message.chat.id, text: msg)
                   end
                 end
+                $message_str = nil
               end
               $parser.question_texts_new = []
             else
@@ -81,8 +95,7 @@ def run_bot
         when '/-'
           if $parser
             if $parser.get_html_from_url
-              messages = $parser.parse_needed_sectors
-              bot.api.sendMessage(chat_id: $chat_id || message.chat.id, text: "Осталось закрити:\n#{messages.join(', ')}") if messages.count > 0
+              bot.api.sendMessage(chat_id: $chat_id || message.chat.id, text: "Осталось закрити:\n#{$parser.parse_needed_sectors.join(', ')}") if $parser.parse_needed_sectors.count > 0
             else
               bot.api.sendMessage(chat_id: $chat_id || message.chat.id, text: $parser.errors.join("\n")) if $parser.errors.count > 0
               $parser.errors = []
@@ -91,8 +104,7 @@ def run_bot
         when '/--'
           if $parser
             if $parser.get_html_from_url
-              messages = $parser.parse_needed_sectors
-              bot.api.sendMessage(chat_id: message.chat.id, text: "Осталось закрити:\n#{messages.join(', ')}") if messages.count > 0
+              bot.api.sendMessage(chat_id: message.chat.id, text: "Осталось закрити:\n#{$parser.parse_needed_sectors.join(', ')}") if $parser.parse_needed_sectors.count > 0
             else
               bot.api.sendMessage(chat_id: message.chat.id, text: $parser.errors.join("\n")) if $parser.errors.count > 0
               $parser.errors = []
@@ -101,16 +113,16 @@ def run_bot
         when '/*'
           if $parser
             if $parser.get_html_from_url
-              messages = $parser.parse_full_info
-              if messages.count > 0
-                message_str = messages.join("\n")
-                if message_str.length < 4000
-                  bot.api.sendMessage(chat_id: $chat_id || message.chat.id, text: message_str)
+              if $parser.parse_full_info.count > 0
+                $message_str = $parser.parse_full_info.join("\n")
+                if $message_str.length < 4000
+                  bot.api.sendMessage(chat_id: $chat_id || message.chat.id, text: $message_str)
                 else
-                  message_str.chars.each_slice(4000).map(&:join).each do |msg|
+                  $message_str.chars.each_slice(4000).map(&:join).each do |msg|
                     bot.api.sendMessage(chat_id: $chat_id || message.chat.id, text: msg)
                   end
                 end
+                $message_str = nil
               end
             else
               bot.api.sendMessage(chat_id: $chat_id || message.chat.id, text: $parser.errors.join("\n")) if $parser.errors.count > 0
@@ -120,16 +132,16 @@ def run_bot
         when '/**'
           if $parser
             if $parser.get_html_from_url
-              messages = $parser.parse_full_info
-              if messages.count > 0
-                message_str = messages.join("\n")
-                if message_str.length < 4000
-                  bot.api.sendMessage(chat_id: message.chat.id, text: message_str)
+              if $parser.parse_full_info.count > 0
+                $message_str = $parser.parse_full_info.join("\n")
+                if $message_str.length < 4000
+                  bot.api.sendMessage(chat_id: message.chat.id, text: $message_str)
                 else
-                  message_str.chars.each_slice(4000).map(&:join).each do |msg|
+                  $message_str.chars.each_slice(4000).map(&:join).each do |msg|
                     bot.api.sendMessage(chat_id: message.chat.id, text: msg)
                   end
                 end
+                $message_str = nil
               end
             else
               bot.api.sendMessage(chat_id: message.chat.id, text: $parser.errors.join("\n")) if $parser.errors.count > 0
@@ -161,6 +173,10 @@ def run_bot
         when '/stoptimer'
           $start_timer = false
         when '/starttimer'
+          $timer_interval = 5
+          $start_timer = true
+        when /^\/starttimer /
+          $timer_interval = message.text[12..-1].strip.to_i
           $start_timer = true
       end
     end
@@ -168,36 +184,36 @@ def run_bot
 end
 
 def run_em
-  EM.run do
-    EM.add_periodic_timer(5) do
-      if $start_timer && $current_bot
-        if $parser
-          p "-------Timer start---------#{Time.now}"
-          if $parser.get_html_from_url
-            $parser.parse_content(false)
+  loop do
+    if $start_timer && $current_bot
+      if $parser
+        # p "-------Timer start---------#{Time.now}"
+        if $parser.get_html_from_url
+          $parser.parse_content(false)
+          if $chat_id && $parser.question_texts_new.count > 0
             $parser.question_texts_new.each do |mess|
               $parser.question_texts.push(mess)
             end
-            if $chat_id && $parser.question_texts_new.count > 0
-              message_str = $parser.question_texts_new.join("\n")
-              if message_str.length < 4000
-                $current_bot.api.sendMessage(chat_id: $chat_id, text: message_str)
-              else
-                message_str.chars.each_slice(4000).map(&:join).each do |msg|
-                  $current_bot.api.sendMessage(chat_id: $chat_id, text: msg)
-                end
+            $message_str = $parser.question_texts_new.join("\n")
+            if $message_str.length < 4000
+              $current_bot.api.sendMessage(chat_id: $chat_id, text: $message_str)
+            else
+              $message_str.chars.each_slice(4000).map(&:join).each do |msg|
+                $current_bot.api.sendMessage(chat_id: $chat_id, text: msg)
               end
-              $parser.question_texts_new = []
             end
-          else
-            p $parser.errors
-            $current_bot.api.sendMessage(chat_id: $chat_id, text: $parser.errors.join("\n")) if $chat_id && $parser.errors.count > 0
-            $parser.errors = []
+            $message_str = nil
+            $parser.question_texts_new = []
           end
-          p "-------Timer end---------#{Time.now}"
+        else
+          # p $parser.errors
+          $current_bot.api.sendMessage(chat_id: $chat_id, text: $parser.errors.join("\n")) if $chat_id && $parser.errors.count > 0
+          $parser.errors = []
         end
+        # p "-------Timer end---------#{Time.now}"
       end
     end
+    sleep $timer_interval
   end
 end
 

@@ -67,9 +67,9 @@ class QuestParser
     if content
       sectors = content.css('.cols-wrapper p')
       if sectors
-        p sectors.count
+        # p sectors.count
         sectors.each do |sector|
-          p "#{sector.children[0].text} #{sector.children[1].children[0].text}"
+          # p "#{sector.children[0].text} #{sector.children[1].children[0].text}"
           if sector.children[1].children[0].text == 'код не введён' || sector.children[1].children[0].text == 'code is not entered'
             founded.push(sector.children[0].text.strip.gsub(':', ''))
           end
@@ -141,9 +141,9 @@ class QuestParser
     question_texts_from_content = content.children # css('h3, h3 + p')
     question_texts_from_content.each do |el|
       question_text = parse_element(el)
-      puts question_text
+      # puts question_text
       if question_text && question_text != '' && question_text != "\n" && !@question_texts.include?(question_text) &&
-          !(/^Бонус (\d+|\d+: \d+)$/ =~ question_text.strip) && /^(?!(Бонус \d+: \d+ \(осталось))/.match(question_text.strip)
+          !(/^Бонус (\d+|\d+: \d+)$/ =~ question_text.strip) && /^(?!(Бонус \d+: (\d*\s|\d+\.\d+\s|\w*\s)\(осталось))/.match(question_text.strip)
         unless !with_q_time && (/Автопереход на следующий уровень через/ =~ question_text && @question_texts.grep(/Автопереход на следующий уровень через/).count >= 1 ||
             /Autopass to the next level in/ =~ question_text && @question_texts.grep(/Autopass to the next level in/).count >= 1 ||
             /^Подсказка 1  будет через/ =~ question_text && @question_texts.grep(/^Подсказка 1  будет через/).count >= 1 ||
@@ -165,7 +165,27 @@ class QuestParser
             /^Подсказка 17  будет через/ =~ question_text && @question_texts.grep(/^Подсказка 17  будет через/).count >= 1 ||
             /^Подсказка 18  будет через/ =~ question_text && @question_texts.grep(/^Подсказка 18  будет через/).count >= 1 ||
             /^Подсказка 19  будет через/ =~ question_text && @question_texts.grep(/^Подсказка 19  будет через/).count >= 1 ||
-            /^Подсказка 20  будет через/ =~ question_text && @question_texts.grep(/^Подсказка 20  будет через/).count >= 1)
+            /^Подсказка 20  будет через/ =~ question_text && @question_texts.grep(/^Подсказка 20  будет через/).count >= 1 ||
+            /^Подсказка 21  будет через/ =~ question_text && @question_texts.grep(/^Подсказка 21  будет через/).count >= 1 ||
+            /^Подсказка 22  будет через/ =~ question_text && @question_texts.grep(/^Подсказка 22  будет через/).count >= 1 ||
+            /^Подсказка 23  будет через/ =~ question_text && @question_texts.grep(/^Подсказка 23  будет через/).count >= 1 ||
+            /^Подсказка 24  будет через/ =~ question_text && @question_texts.grep(/^Подсказка 24  будет через/).count >= 1 ||
+            /^Подсказка 25  будет через/ =~ question_text && @question_texts.grep(/^Подсказка 25  будет через/).count >= 1 ||
+            /^Подсказка 26  будет через/ =~ question_text && @question_texts.grep(/^Подсказка 26  будет через/).count >= 1 ||
+            /^Подсказка 27  будет через/ =~ question_text && @question_texts.grep(/^Подсказка 27  будет через/).count >= 1 ||
+            /^Подсказка 28  будет через/ =~ question_text && @question_texts.grep(/^Подсказка 28  будет через/).count >= 1 ||
+            /^Подсказка 29  будет через/ =~ question_text && @question_texts.grep(/^Подсказка 29  будет через/).count >= 1 ||
+            /^Подсказка 30  будет через/ =~ question_text && @question_texts.grep(/^Подсказка 30  будет через/).count >= 1 ||
+            /^Подсказка 31  будет через/ =~ question_text && @question_texts.grep(/^Подсказка 31  будет через/).count >= 1 ||
+            /^Подсказка 32  будет через/ =~ question_text && @question_texts.grep(/^Подсказка 32  будет через/).count >= 1 ||
+            /^Подсказка 33  будет через/ =~ question_text && @question_texts.grep(/^Подсказка 33  будет через/).count >= 1 ||
+            /^Подсказка 34  будет через/ =~ question_text && @question_texts.grep(/^Подсказка 34  будет через/).count >= 1 ||
+            /^Подсказка 35  будет через/ =~ question_text && @question_texts.grep(/^Подсказка 35  будет через/).count >= 1 ||
+            /^Подсказка 36  будет через/ =~ question_text && @question_texts.grep(/^Подсказка 36  будет через/).count >= 1 ||
+            /^Подсказка 37  будет через/ =~ question_text && @question_texts.grep(/^Подсказка 37  будет через/).count >= 1 ||
+            /^Подсказка 38  будет через/ =~ question_text && @question_texts.grep(/^Подсказка 38  будет через/).count >= 1 ||
+            /^Подсказка 39  будет через/ =~ question_text && @question_texts.grep(/^Подсказка 39  будет через/).count >= 1 ||
+            /^Подсказка 40  будет через/ =~ question_text && @question_texts.grep(/^Подсказка 40  будет через/).count >= 1)
           @question_texts_new.push(question_text)
         end
       end
