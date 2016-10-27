@@ -117,8 +117,10 @@ class QuestParser
         "#{element.children.count == 0 ? remove_tab_from_text(element.text) : element.children.map { |c| parse_element(c) }.join(' ')} ( #{element.attributes['href']} )"
       when 'br'
         "\n"
-      when 'script', 'style', 'div', 'table'
+      when 'script', 'style', 'div'
         ''
+      when 'table'
+        element.attributes['class'].nil? ? parse_table(element) : ''
       when /^h\d/
         "\n#{element.children.count == 0 ? remove_tab_from_text(element.text) : element.children.map { |c| parse_element(c) }.join(' ')}"
       else
@@ -130,6 +132,12 @@ class QuestParser
           end.join(' ')
         end
     end
+  end
+
+  def parse_table(element)
+    element.css('tr').map do |row|
+      row.css('td').map{ |el| parse_element(el)}.join(' : ')
+    end.join("\n")
   end
 
   def remove_tab_from_text(text)
