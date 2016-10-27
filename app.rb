@@ -152,7 +152,7 @@ def run_bot
           end
         when /^\/(\.|,)/
           if $parser
-            p message.text[2..-1].strip
+            # p message.text[2..-1].strip
             if $parser.get_html_from_url
               $parser.send_code(message.text[2..-1].strip)
             else
