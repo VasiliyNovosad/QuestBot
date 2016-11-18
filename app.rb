@@ -46,6 +46,19 @@ def run_bot
             $parser.login = login
             $parser.password = password
           end
+        when '.help'
+          bot.api.sendMessage(chat_id: $chat_id || message.chat.id,
+                              text: "List of commands:
+/start <game_link>
+/stop
+/restart
+/starttimer
+/starttimer <secs>
+/stoptimer
+/+
+/*
+/-
+/.<answer>  /,<answer>")
         when '/+', '/parse'
             if $parser
               if $parser.get_html_from_url
