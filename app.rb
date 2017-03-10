@@ -1,4 +1,4 @@
-# /start http://kiev.quest.ua/gameengines/encounter/play/54104
+# /start http://lutsk.quest.ua/gameengines/encounter/play/57568
 # .setlogin login
 # .setpassword password
 # /setchatcurrent
