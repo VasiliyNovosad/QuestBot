@@ -1,11 +1,10 @@
-# /start http://lutsk.quest.ua/gameengines/encounter/play/57568
+# /start http://lutsk.quest.ua/gameengines/encounter/play/57921
 # .setlogin login
 # .setpassword password
 # /setchatcurrent
 # /starttimer
 
 
-require 'sinatra'
 require 'telegram/bot'
 require 'openssl'
 require_relative 'quest_parser'
@@ -230,10 +229,6 @@ def run_em
     end
     sleep $timer_interval
   end
-end
-
-get '/' do
-  "Hello World!"
 end
 
 threads = []
