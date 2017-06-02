@@ -1,3 +1,3 @@
-bot: ruby main.rb
+bot: ruby app.rb
 heroku ps:scale web=0
 heroku ps:scale worker=1
