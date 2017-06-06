@@ -234,6 +234,6 @@ end
 threads = []
 threads << Thread.new{ run_bot }
 threads << Thread.new{ run_em }
-threads.each &:join
+threads.map(&:join)
 
 
