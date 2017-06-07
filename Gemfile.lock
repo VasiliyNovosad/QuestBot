@@ -35,6 +35,8 @@ GEM
     net-http-persistent (2.9.4)
     nokogiri (1.8.0)
       mini_portile2 (~> 2.2.0)
+    nokogiri (1.8.0-x86-mingw32)
+      mini_portile2 (~> 2.2.0)
     ntlm-http (0.1.1)
     telegram-bot-ruby (0.8.1)
       faraday
@@ -43,6 +45,7 @@ GEM
     unf (0.1.4)
       unf_ext
     unf_ext (0.0.7.4)
+    unf_ext (0.0.7.4-x86-mingw32)
     virtus (1.0.5)
       axiom-types (~> 0.1)
       coercible (~> 1.0)
@@ -52,6 +55,7 @@ GEM
 
 PLATFORMS
   ruby
+  x86-mingw32
 
 DEPENDENCIES
   mechanize
