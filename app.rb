@@ -138,7 +138,7 @@ def run_em
         # p "-------Timer end---------#{Time.now}"
       end
     end
-    sleep $timer_interval
+    sleep $timer_interval if $timer_interval
   end
 end
 
