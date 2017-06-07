@@ -13,7 +13,7 @@ OpenSSL::SSL::VERIFY_PEER = OpenSSL::SSL::VERIFY_NONE
 
 $token = '171556746:AAEd8YJrYhFsiLjVEkyIk2cmluEf2lWkA5s'
 $parser = nil
-$chat_id = nil#-24142491 # message.chat.id
+$chat_id = nil # -24142491 # message.chat.id
 $start_timer = false
 $current_bot = nil
 $current_chat_id = nil
@@ -60,109 +60,17 @@ def run_bot
 /. <answer1> <answer2> ... <answern>
 /.<answer>  /,<answer>")
         when '/+', '/parse'
-          if $parser
-            if $parser.get_html_from_url
-              $parser.parse_content(true)
-              $parser.question_texts_new.each do |mess|
-                $parser.question_texts.push(mess)
-              end
-              if $parser.question_texts_new.count > 0
-                $message_str = $parser.question_texts_new.join("\n")
-                if $message_str.length < 4000
-                  bot.api.sendMessage(chat_id: $chat_id || message.chat.id, text: $message_str)
-                else
-                  $message_str.chars.each_slice(4000).map(&:join).each do |msg|
-                    bot.api.sendMessage(chat_id: $chat_id || message.chat.id, text: msg)
-                  end
-                end
-                $message_str = nil
-              end
-              $parser.question_texts_new = []
-            else
-              bot.api.sendMessage(chat_id: $chat_id || message.chat.id, text: $parser.errors.join("\n")) if $parser.errors.count > 0
-              $parser.errors = []
-            end
-          end
+          send_updated_level(bot, $chat_id || message.chat.id, $parser)
         when '/++'
-          if $parser
-            if $parser.get_html_from_url
-              $parser.parse_content(true)
-              $parser.question_texts_new.each do |mess|
-                $parser.question_texts.push(mess)
-              end
-              if $parser.question_texts_new.count > 0
-                $message_str = $parser.question_texts_new.join("\n")
-                if $message_str.length < 4000
-                  bot.api.sendMessage(chat_id: message.chat.id, text: $message_str)
-                else
-                  $message_str.chars.each_slice(4000).map(&:join).each do |msg|
-                    bot.api.sendMessage(chat_id: message.chat.id, text: msg)
-                  end
-                end
-                $message_str = nil
-              end
-              $parser.question_texts_new = []
-            else
-              bot.api.sendMessage(chat_id: message.chat.id, text: $parser.errors.join("\n")) if $parser.errors.count > 0
-              $parser.errors = []
-            end
-          end
+          send_updated_level(bot, message.chat.id, $parser)
         when '/-'
-          if $parser
-            if $parser.get_html_from_url
-              bot.api.sendMessage(chat_id: $chat_id || message.chat.id, text: "Осталось закрити:\n#{$parser.parse_needed_sectors.join(', ')}") if $parser.parse_needed_sectors.count > 0
-            else
-              bot.api.sendMessage(chat_id: $chat_id || message.chat.id, text: $parser.errors.join("\n")) if $parser.errors.count > 0
-              $parser.errors = []
-            end
-          end
+          send_needed_sectors(bot, $chat_id || message.chat.id, $parser)
         when '/--'
-          if $parser
-            if $parser.get_html_from_url
-              bot.api.sendMessage(chat_id: message.chat.id, text: "Осталось закрити:\n#{$parser.parse_needed_sectors.join(', ')}") if $parser.parse_needed_sectors.count > 0
-            else
-              bot.api.sendMessage(chat_id: message.chat.id, text: $parser.errors.join("\n")) if $parser.errors.count > 0
-              $parser.errors = []
-            end
-          end
+          send_needed_sectors(bot, message.chat.id, $parser)
         when '/*'
-          if $parser
-            if $parser.get_html_from_url
-              if $parser.parse_full_info.count > 0
-                $message_str = $parser.parse_full_info.join("\n")
-                if $message_str.length < 4000
-                  bot.api.sendMessage(chat_id: $chat_id || message.chat.id, text: $message_str)
-                else
-                  $message_str.chars.each_slice(4000).map(&:join).each do |msg|
-                    bot.api.sendMessage(chat_id: $chat_id || message.chat.id, text: msg)
-                  end
-                end
-                $message_str = nil
-              end
-            else
-              bot.api.sendMessage(chat_id: $chat_id || message.chat.id, text: $parser.errors.join("\n")) if $parser.errors.count > 0
-              $parser.errors = []
-            end
-          end
+          send_full_level(bot, $chat_id || message.chat.id, $parser)
         when '/**'
-          if $parser
-            if $parser.get_html_from_url
-              if $parser.parse_full_info.count > 0
-                $message_str = $parser.parse_full_info.join("\n")
-                if $message_str.length < 4000
-                  bot.api.sendMessage(chat_id: message.chat.id, text: $message_str)
-                else
-                  $message_str.chars.each_slice(4000).map(&:join).each do |msg|
-                    bot.api.sendMessage(chat_id: message.chat.id, text: msg)
-                  end
-                end
-                $message_str = nil
-              end
-            else
-              bot.api.sendMessage(chat_id: message.chat.id, text: $parser.errors.join("\n")) if $parser.errors.count > 0
-              $parser.errors = []
-            end
-          end
+          send_full_level(bot, message.chat.id, $parser)
         when /^\/(\.|,) /
           if $parser
             # p message.text[2..-1].strip
@@ -244,9 +152,67 @@ def run_em
   end
 end
 
+def send_updated_level(bot, chat_id, parser)
+  if parser
+    if parser.get_html_from_url
+      parser.parse_content(true)
+      parser.question_texts_new.each do |mess|
+        parser.question_texts.push(mess)
+      end
+      if parser.question_texts_new.count > 0
+        message_str = parser.question_texts_new.join("\n")
+        if message_str.length < 4000
+          bot.api.sendMessage(chat_id: chat_id, text: message_str)
+        else
+          message_str.chars.each_slice(4000).map(&:join).each do |msg|
+            bot.api.sendMessage(chat_id: chat_id, text: msg)
+          end
+        end
+      end
+      parser.question_texts_new = []
+    else
+      bot.api.sendMessage(chat_id: chat_id, text: parser.errors.join("\n")) if parser.errors.count > 0
+      parser.errors = []
+    end
+  end
+end
+
+def send_full_level(bot, chat_id, parser)
+  if parser
+    if parser.get_html_from_url
+      full_info = parser.parse_full_info
+      if full_info.count > 0
+        message_str = full_info.join("\n")
+        if message_str.length < 4000
+          bot.api.sendMessage(chat_id: chat_id, text: message_str)
+        else
+          message_str.chars.each_slice(4000).map(&:join).each do |msg|
+            bot.api.sendMessage(chat_id: chat_id, text: msg)
+          end
+        end
+      end
+    else
+      bot.api.sendMessage(chat_id: chat_id, text: parser.errors.join("\n")) if parser.errors.count > 0
+      parser.errors = []
+    end
+  end
+end
+
+def send_needed_sectors(bot, chat_id, parser)
+  if parser
+    if parser.get_html_from_url
+      needed_sectors = parser.parse_needed_sectors
+      bot.api.sendMessage(chat_id: chat_id, text: "Осталось закрити:\n#{needed_sectors.join(', ')}") if needed_sectors.count > 0
+    else
+      bot.api.sendMessage(chat_id: chat_id, text: parser.errors.join("\n")) if parser.errors.count > 0
+      parser.errors = []
+    end
+  end
+end
+
 threads = []
-threads << Thread.new{ run_bot }
-threads << Thread.new{ run_em }
+threads << Thread.new { run_bot }
+threads << Thread.new { run_em }
 threads.map(&:join)
 
 
