@@ -89,25 +89,34 @@ class MessageResponder
     end
 
     on /^\/(\.|,) / do
-      if parser
-        if parser.get_html_from_url
-          message.text[3..-1].strip.split(' ').each do |code|
-            parser.send_code(code)
-            sleep 0.5
+      return if parser.nil?
+      if parser.get_html_from_url
+        message.text[3..-1].strip.split(' ').each do |code|
+          parser.send_code(code)
+          sleep 0.5
+          if parser.get_html_from_url
+            text = parser.sent_code_correct? ? "+ #{code}" : "- #{code}"
+            answer_with_message text, chat || message.chat
           end
-        else
-          send_errors(chat || message.chat)
         end
+      else
+        send_errors(chat || message.chat)
       end
     end
 
     on /^\/(\.|,)/ do
-      if parser
+      return if parser.nil?
+      if parser.get_html_from_url
+        code = message.text[2..-1]
+        return if code[0] == ' '
+        code = code.strip
+        parser.send_code(code)
         if parser.get_html_from_url
-          parser.send_code(message.text[2..-1].strip)
-        else
-          send_errors(chat || message.chat)
+          text = parser.sent_code_correct? ? "+ #{code}" : "- #{code}"
+          answer_with_message text, chat || message.chat
         end
+      else
+        send_errors(chat || message.chat)
       end
     end
 

@@ -53,6 +53,11 @@ class QuestParser
     end
   end
 
+  def sent_code_correct?
+    content = @page.search('.history span.color_correct')
+    content.count > 0
+  end
+
   def send_code(code)
     code_form = @page.form
     if code_form && code_form['LevelAction.Answer']
