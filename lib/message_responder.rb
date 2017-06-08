@@ -93,6 +93,7 @@ class MessageResponder
         if parser.get_html_from_url
           message.text[3..-1].strip.split(' ').each do |code|
             parser.send_code(code)
+            sleep 0.5
           end
         else
           send_errors(chat || message.chat)
@@ -146,29 +147,7 @@ class MessageResponder
   end
 
   def send_message_by_timer
-    if start_timer
-      if parser
-        if parser.get_html_from_url
-          parser.parse_content(false)
-          if chat && parser.question_texts_new.count > 0
-            parser.question_texts_new.each do |mess|
-              parser.question_texts.push(mess)
-            end
-            message_str = parser.question_texts_new.join("\n")
-            if message_str.length < 4000
-              answer_with_message message_str, chat
-            else
-              message_str.chars.each_slice(4000).map(&:join).each do |msg|
-                answer_with_message msg, chat
-              end
-            end
-            parser.question_texts_new = []
-          end
-        else
-          send_errors(chat || message.chat)
-        end
-      end
-    end
+    send_updated_level(chat, false) if start_timer && parser
   end
 
   private
@@ -196,9 +175,9 @@ class MessageResponder
     answer_with_message 'farewell_message', message.chat
   end
 
-  def send_updated_level(chat)
+  def send_updated_level(chat, with_q_time = true)
     if parser.get_html_from_url
-      parser.parse_content(true)
+      parser.parse_content(with_q_time)
       updated_info = parser.question_texts_new
       if updated_info.count > 0
         updated_info.each do |mess|

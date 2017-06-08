@@ -17,15 +17,11 @@ logger.debug 'Starting telegram bot'
 
 message_responder = nil
 
-
-
 threads = []
 threads << Thread.new {
   Telegram::Bot::Client.run(token) do |bot|
     bot.listen do |message|
       options = {bot: bot, message: message}
-
-
       logger.debug "@#{message.from.username}: #{message.text}"
       message_responder ||= MessageResponder.new(options)
       message_responder.message = message
