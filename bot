@@ -9,7 +9,6 @@ require 'openssl'
 OpenSSL::SSL::VERIFY_PEER = OpenSSL::SSL::VERIFY_NONE
 
 config = AppConfigurator.new
-config.configure
 
 token = config.get_token
 logger = config.get_logger
@@ -29,42 +28,17 @@ threads << Thread.new {
 
       logger.debug "@#{message.from.username}: #{message.text}"
       message_responder ||= MessageResponder.new(options)
+      message_responder.message = message
       message_responder.respond
     end
   end
 }
 threads << Thread.new {
   loop do
-    # p message_responder
-    if message_responder && message_responder.start_timer && message_responder.bot
-      # p "-------Timer start---------#{Time.now}"
-      if message_responder.parser
-        # p "-------Timer start---------#{Time.now}"
-        if message_responder.parser.get_html_from_url
-          message_responder.parser.parse_content(false)
-          if message_responder.chat && message_responder.parser.question_texts_new.count > 0
-            message_responder.parser.question_texts_new.each do |mess|
-              message_responder.parser.question_texts.push(mess)
-            end
-            message_str = message_responder.parser.question_texts_new.join("\n")
-            if message_str.length < 4000
-              message_responder.bot.api.sendMessage(chat_id: message_responder.chat.id, text: message_str)
-            else
-              message_str.chars.each_slice(4000).map(&:join).each do |msg|
-                message_responder.bot.api.sendMessage(chat_id: message_responder.chat.id, text: msg)
-              end
-            end
-            message_responder.parser.question_texts_new = []
-          end
-        else
-          # p $parser.errors
-          message_responder.bot.api.sendMessage(chat_id: message_responder.chat.id, text: message_responder.parser.errors.join("\n")) if message_responder.chat && message_responder.parser.errors.count > 0
-          message_responder.parser.errors = []
-        end
-        # p "-------Timer end---------#{Time.now}"
-      end
+    if message_responder
+      message_responder.send_message_by_timer
+      sleep message_responder.timer_interval
     end
-    sleep message_responder.timer_interval if message_responder
   end
 }
 threads.map(&:join)
