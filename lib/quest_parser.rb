@@ -53,10 +53,9 @@ class QuestParser
     end
   end
 
-  def sent_code_correct?(code)
+  def get_correct_codes
     content = @page.search('.history span.color_correct')
-    codes = content.map { |el| el.text.strip.downcase }
-    codes.include?(code.downcase)
+    content.map { |el| el.text.strip.downcase }.uniq
   end
 
   def send_code(code)

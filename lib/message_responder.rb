@@ -98,18 +98,27 @@ class MessageResponder
 
     on /^\/(\.|,) / do
       return if parser.nil?
-      message.text[3..-1].strip.split(' ').each do |code|
+      codes = message.text[3..-1].strip.split(' ')
+      codes.each do |code|
         if parser.get_html_from_url
           parser.send_code(code)
-          p code
-          sleep 0.1
-          if parser.get_html_from_url
-            text = parser.sent_code_correct?(code) ? "+ #{code}" : "- #{code}"
-            p text
-            answer_with_message text, chat || message.chat
-          end
+          # p code
+          sleep 0.3
+          # if parser.get_html_from_url
+          #   correct_codes = parser.get_correct_codes
+          #   text = correct_codes.include?(code.downcase) ? "+ #{code}" : "- #{code}"
+          #   # p text
+          #   answer_with_message text, chat || message.chat
+          # end
         else
           send_errors(chat || message.chat)
+        end
+      end
+      if parser.get_html_from_url
+        correct_codes = parser.get_correct_codes
+        codes.each do |code|
+          text = correct_codes.include?(code.downcase) ? "+ #{code}" : "- #{code}"
+          answer_with_message text, chat || message.chat
         end
       end
     end
@@ -118,14 +127,15 @@ class MessageResponder
       return if parser.nil?
       if parser.get_html_from_url
         code = message.text[2..-1]
-        return if code[0] == ' '
+        return if code.strip == '' || code[0] == ' '
         code = code.strip
         parser.send_code(code)
-        p code
-        sleep 0.1
+        # p code
+        # sleep 0.2
         if parser.get_html_from_url
-          text = parser.sent_code_correct?(code) ? "+ #{code}" : "- #{code}"
-          p text
+          correct_codes = parser.get_correct_codes
+          text = correct_codes.include?(code.downcase) ? "+ #{code}" : "- #{code}"
+          # p text
           answer_with_message text, chat || message.chat
         end
       else
