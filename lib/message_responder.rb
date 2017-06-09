@@ -98,7 +98,7 @@ class MessageResponder
 
     on /^\/(\.|,) / do
       return if parser.nil?
-      codes = message.text[3..-1].strip.split(' ')
+      codes = message.text[3..-1].strip.downcase.split(' ')
       codes.each do |code|
         if parser.get_html_from_url
           parser.send_code(code)
@@ -116,10 +116,11 @@ class MessageResponder
       end
       if parser.get_html_from_url
         correct_codes = parser.get_correct_codes
+        text = ''
         codes.each do |code|
-          text = correct_codes.include?(code.downcase) ? "+ #{code}" : "- #{code}"
-          answer_with_message text, chat || message.chat
+          text << correct_codes.include?(code) ? "+ #{code}\n" : "- #{code}\n"
         end
+        answer_with_message text, chat || message.chat
       end
     end
 
@@ -128,13 +129,13 @@ class MessageResponder
       if parser.get_html_from_url
         code = message.text[2..-1]
         return if code.strip == '' || code[0] == ' '
-        code = code.strip
+        code = code.strip.downcase
         parser.send_code(code)
         # p code
         # sleep 0.2
         if parser.get_html_from_url
           correct_codes = parser.get_correct_codes
-          text = correct_codes.include?(code.downcase) ? "+ #{code}" : "- #{code}"
+          text = correct_codes.include?(code) ? "+ #{code}" : "- #{code}"
           # p text
           answer_with_message text, chat || message.chat
         end
@@ -237,7 +238,7 @@ class MessageResponder
   def send_needed_sectors(chat)
     if parser.get_html_from_url
       needed_sectors = parser.parse_needed_sectors
-      text = "Осталось закрити:\n#{needed_sectors.join(', ')}"
+      text = "Осталось закрити:\n#{needed_sectors.join("\n")}"
       answer_with_message text, chat if needed_sectors.count > 0
     else
       send_errors(chat)
