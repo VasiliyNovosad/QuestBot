@@ -118,7 +118,7 @@ class MessageResponder
         correct_codes = parser.get_correct_codes
         text = ''
         codes.each do |code|
-          text << correct_codes.include?(code) ? "+ #{code}\n" : "- #{code}\n"
+          text << (correct_codes.include?(code) ? "+ #{code}\n" : "- #{code}\n")
         end
         answer_with_message text, chat || message.chat
       end
@@ -156,8 +156,8 @@ class MessageResponder
       if parser
         parser.login = message.text[9..-1].strip
         parser.password = AppConfigurator.new.get_user(parser.login)
-        p parser.login
-        p parser.password
+        # p parser.login
+        # p parser.password
       end
     end
 
