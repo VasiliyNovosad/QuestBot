@@ -85,6 +85,26 @@ class QuestParser
     founded.uniq
   end
 
+  def parse_all_sectors
+    content = @page.search('.content')
+    founded = []
+    if content
+      sectors = content.css('.cols-wrapper p')
+      if sectors
+        # p sectors.count
+        sectors.each do |sector|
+          # p "#{sector.children[0].text} #{sector.children[1].children[0].text}"
+          text = sector.children[1].children[0].text
+          if sector.children[1].children[0].text == 'код не введён' || sector.children[1].children[0].text == 'code is not entered'
+            text = '-'
+          end
+          founded.push(sector.children[0].text.strip.gsub(':', '') + ': ' + text)
+        end
+      end
+    end
+    founded
+  end
+
   def parse_full_info
     content = @page.search('.content')
     full_info = []

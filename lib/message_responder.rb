@@ -80,6 +80,14 @@ class MessageResponder
       send_needed_sectors(message.chat) if parser
     end
 
+    on /^\/-\+$/ do
+      send_all_sectors(chat || message.chat) if parser
+    end
+
+    on /^\/--\+$/ do
+      send_all_sectors(message.chat) if parser
+    end
+
     on /^\/\*$/ do
       send_full_level(chat || message.chat) if parser
     end
@@ -94,9 +102,9 @@ class MessageResponder
         if parser.get_html_from_url
           parser.send_code(code)
           p code
-          sleep 0.3
+          sleep 0.1
           if parser.get_html_from_url
-            text = parser.sent_code_correct? ? "+ #{code}" : "- #{code}"
+            text = parser.sent_code_correct?(code) ? "+ #{code}" : "- #{code}"
             p text
             answer_with_message text, chat || message.chat
           end
@@ -114,9 +122,9 @@ class MessageResponder
         code = code.strip
         parser.send_code(code)
         p code
-        sleep 0.3
+        sleep 0.1
         if parser.get_html_from_url
-          text = parser.sent_code_correct? ? "+ #{code}" : "- #{code}"
+          text = parser.sent_code_correct?(code) ? "+ #{code}" : "- #{code}"
           p text
           answer_with_message text, chat || message.chat
         end
@@ -221,6 +229,16 @@ class MessageResponder
       needed_sectors = parser.parse_needed_sectors
       text = "Осталось закрити:\n#{needed_sectors.join(', ')}"
       answer_with_message text, chat if needed_sectors.count > 0
+    else
+      send_errors(chat)
+    end
+  end
+
+  def send_all_sectors(chat)
+    if parser.get_html_from_url
+      all_sectors = parser.parse_all_sectors
+      text = "Сектори:\n#{all_sectors.join("\n")}"
+      answer_with_message text, chat if all_sectors.count > 0
     else
       send_errors(chat)
     end
