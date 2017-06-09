@@ -53,9 +53,10 @@ class QuestParser
     end
   end
 
-  def sent_code_correct?
+  def sent_code_correct?(code)
     content = @page.search('.history span.color_correct')
-    content.count > 0
+    codes = content.map { |el| el.text.strip.downcase }
+    codes.include?(code.downcase)
   end
 
   def send_code(code)

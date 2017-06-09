@@ -90,17 +90,19 @@ class MessageResponder
 
     on /^\/(\.|,) / do
       return if parser.nil?
-      if parser.get_html_from_url
-        message.text[3..-1].strip.split(' ').each do |code|
+      message.text[3..-1].strip.split(' ').each do |code|
+        if parser.get_html_from_url
           parser.send_code(code)
+          p code
           sleep 0.3
           if parser.get_html_from_url
             text = parser.sent_code_correct? ? "+ #{code}" : "- #{code}"
+            p text
             answer_with_message text, chat || message.chat
           end
+        else
+          send_errors(chat || message.chat)
         end
-      else
-        send_errors(chat || message.chat)
       end
     end
 
@@ -111,8 +113,11 @@ class MessageResponder
         return if code[0] == ' '
         code = code.strip
         parser.send_code(code)
+        p code
+        sleep 0.3
         if parser.get_html_from_url
           text = parser.sent_code_correct? ? "+ #{code}" : "- #{code}"
+          p text
           answer_with_message text, chat || message.chat
         end
       else
@@ -132,6 +137,8 @@ class MessageResponder
       if parser
         parser.login = message.text[9..-1].strip
         parser.password = AppConfigurator.new.get_user(parser.login)
+        p parser.login
+        p parser.password
       end
     end
 
