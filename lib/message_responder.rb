@@ -103,7 +103,7 @@ class MessageResponder
         if parser.get_html_from_url
           parser.send_code(code)
           # p code
-          sleep 0.3
+          sleep 0.1
           # if parser.get_html_from_url
           #   correct_codes = parser.get_correct_codes
           #   text = correct_codes.include?(code.downcase) ? "+ #{code}" : "- #{code}"
@@ -220,6 +220,7 @@ class MessageResponder
         end
         send_level_text(updated_info, chat)
         parser.question_texts_new = []
+        @parser = nil if parser.level_name == 'Finish'
       end
     else
       send_errors(chat)

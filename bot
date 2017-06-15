@@ -31,9 +31,9 @@ threads << Thread.new {
 }
 threads << Thread.new {
   loop do
-    if message_responder
+    if message_responder && message_responder.parser
       message_responder.send_message_by_timer
-      sleep message_responder.timer_interval
+      sleep message_responder.timer_interval || 5
     end
   end
 }

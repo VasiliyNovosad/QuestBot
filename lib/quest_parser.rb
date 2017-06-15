@@ -41,6 +41,14 @@ class QuestParser
   end
 
   def parse_content(with_q_time)
+    content = @page.search('.gameCongratulation')
+    if content
+      @question_texts = []
+      @level_name_new = 'Finish'
+      @level_name = @level_name_new
+      parse_finish_info(content)
+      return
+    end
     content = @page.search('.content')
     if content
       parse_level_name(content)
@@ -169,6 +177,15 @@ class QuestParser
 
   def remove_tab_from_text(text)
     text.gsub("\r", '').gsub("\n", '').gsub("\t", '').gsub('&nbsp', ' ').strip
+  end
+
+  def parse_finish_info(content)
+    @question_texts_new = []
+    question_texts_from_content = content.children.css('div.t_center')
+    question_texts_from_content.each do |el|
+      question_text = parse_element(el)
+      @question_texts_new.push(question_text)
+    end
   end
 
   def parse_questions(content, with_q_time, new_level = false)
