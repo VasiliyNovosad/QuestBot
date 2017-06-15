@@ -44,12 +44,14 @@ class QuestParser
     content = @page.search('.content')
     if content
       parse_level_name(content)
+      new_level = false
       if @level_name != @level_name_new
         @question_texts = []
         @question_texts_new = []
         @level_name = @level_name_new
+        new_level = true
       end
-      parse_questions(content, with_q_time)
+      parse_questions(content, with_q_time, new_level)
     end
   end
 
@@ -112,11 +114,11 @@ class QuestParser
         question_text = parse_element(el)
         # puts question_text
         if question_text && question_text != '' && question_text != "\n"
-          if !/^Бонус (\d+|\d+: \d+)$/.match(question_text) &&
-              /^(?!(Бонус .*\(осталось))/.match(question_text)
+          # if !/^Бонус (\d+|\d+: \d+)$/.match(question_text) &&
+          #     /^(?!(Бонус .*\(осталось))/.match(question_text)
             # p question_text
-            full_info.push(question_text)
-          end
+          full_info.push(question_text)
+          # end
         end
       end
     end
@@ -169,15 +171,15 @@ class QuestParser
     text.gsub("\r", '').gsub("\n", '').gsub("\t", '').gsub('&nbsp', ' ').strip
   end
 
-  def parse_questions(content, with_q_time)
+  def parse_questions(content, with_q_time, new_level = false)
     @question_texts_new = []
     question_texts_from_content = content.children # css('h3, h3 + p')
     question_texts_from_content.each do |el|
       question_text = parse_element(el)
       # puts question_text
       if question_text && question_text != '' && question_text != "\n" && !@question_texts.include?(question_text) &&
-          !(/^Бонус (\d+|\d+: \d+)$/ =~ question_text.strip) &&
-          /^(?!(Бонус .*\(осталось))/.match(question_text.strip)
+          (new_level || !(/^Бонус (\d+|\d+: \d+)$/ =~ question_text.strip) &&
+          /^(?!(Бонус .*\(осталось))/.match(question_text.strip))
         unless !with_q_time && (/Автопереход на следующий уровень через/ =~ question_text && @question_texts.grep(/Автопереход на следующий уровень через/).count >= 1 ||
             /Autopass to the next level in/ =~ question_text && @question_texts.grep(/Autopass to the next level in/).count >= 1 ||
             /^Подсказка 1  будет через/ =~ question_text && @question_texts.grep(/^Подсказка 1  будет через/).count >= 1 ||
