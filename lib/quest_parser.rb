@@ -181,8 +181,8 @@ class QuestParser
 
   def parse_finish_info(content)
     @question_texts_new = []
-    question_texts_from_content = content.children.css('div.t_center')
-    question_texts_from_content.each do |el|
+    question_texts_from_content = content.at_css('div.t_center')
+    question_texts_from_content.children.each do |el|
       question_text = parse_element(el)
       @question_texts_new.push(question_text)
     end
