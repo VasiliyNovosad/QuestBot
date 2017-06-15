@@ -113,7 +113,7 @@ class QuestParser
         # puts question_text
         if question_text && question_text != '' && question_text != "\n"
           if !/^Бонус (\d+|\d+: \d+)$/.match(question_text) &&
-              /^(?!(Бонус .* \(осталось))/.match(question_text)
+              /^(?!(Бонус .*\(осталось))/.match(question_text)
             # p question_text
             full_info.push(question_text)
           end
@@ -177,8 +177,7 @@ class QuestParser
       # puts question_text
       if question_text && question_text != '' && question_text != "\n" && !@question_texts.include?(question_text) &&
           !(/^Бонус (\d+|\d+: \d+)$/ =~ question_text.strip) &&
-          /^(?!(Бонус \d+: (\d*\s|\d+\.\d+\s|\w*\s)\(осталось))/.match(question_text.strip) &&
-              /^(?!(Бонус \d+ \(осталось))/.match(question_text.strip)
+          /^(?!(Бонус .*\(осталось))/.match(question_text.strip)
         unless !with_q_time && (/Автопереход на следующий уровень через/ =~ question_text && @question_texts.grep(/Автопереход на следующий уровень через/).count >= 1 ||
             /Autopass to the next level in/ =~ question_text && @question_texts.grep(/Autopass to the next level in/).count >= 1 ||
             /^Подсказка 1  будет через/ =~ question_text && @question_texts.grep(/^Подсказка 1  будет через/).count >= 1 ||
