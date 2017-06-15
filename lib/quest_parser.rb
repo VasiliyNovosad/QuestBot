@@ -113,8 +113,7 @@ class QuestParser
         # puts question_text
         if question_text && question_text != '' && question_text != "\n"
           if !/^Бонус (\d+|\d+: \d+)$/.match(question_text) &&
-              /^(?!(Бонус \d+: \d+ \(осталось))/.match(question_text) &&
-              /^(?!(Бонус \d+ \(осталось))/.match(question_text)
+              /^(?!(Бонус .* \(осталось))/.match(question_text)
             # p question_text
             full_info.push(question_text)
           end
