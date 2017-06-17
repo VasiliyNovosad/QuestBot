@@ -1,4 +1,3 @@
 .idea/*
 *.iml
 *.log
-config/secrets.yml

@@ -41,14 +41,14 @@ class QuestParser
   end
 
   def parse_content(with_q_time)
-    content = @page.search('.gameCongratulation')
-    if content
-      @question_texts = []
-      @level_name_new = 'Finish'
-      @level_name = @level_name_new
-      parse_finish_info(content)
-      return
-    end
+    # content = @page.search('.gameCongratulation')
+    # if content
+    #   @question_texts = []
+    #   @level_name_new = 'Finish'
+    #   @level_name = @level_name_new
+    #   parse_finish_info(content)
+    #   return
+    # end
     content = @page.search('.content')
     if content
       parse_level_name(content)
