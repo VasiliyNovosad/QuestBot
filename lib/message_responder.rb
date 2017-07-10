@@ -63,8 +63,8 @@ class MessageResponder
 /-
 /-+
 /. <answer1> <answer2> ... <answern>
-/.<answer>  /,<answer>
-.<answer>  ,<answer>"
+. <answer1> <answer2> ... <answern>
+/.<answer> or /,<answer> or .<answer> or ,<answer>"
       answer_with_message(text, chat || message.chat)
     end
 
