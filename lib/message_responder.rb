@@ -19,20 +19,24 @@ class MessageResponder
   def respond
 
     on /^\/start$/ do
+      logger.debug "@#{message.from.username}: #{message.text}"
       answer_with_greeting_message
     end
 
     on /^\/stop$/ do
+      logger.debug "@#{message.from.username}: #{message.text}"
       @parser = nil
       @chat = nil
     end
 
     on /^\/start / do
+      logger.debug "@#{message.from.username}: #{message.text}"
       @parser = QuestParser.new(message.text[7..-1].strip, 'link')
       @chat = message.chat
     end
 
     on /^\/restart$/ do
+      logger.debug "@#{message.from.username}: #{message.text}"
       if parser
         url = parser.url
         login = parser.login
@@ -45,6 +49,7 @@ class MessageResponder
     end
 
     on /^\.help$/ do
+      logger.debug "@#{message.from.username}: #{message.text}"
       text = "List of commands:
 /start <game_link>
 /stop
@@ -63,42 +68,52 @@ class MessageResponder
     end
 
     on /^\/\+$/ do
+      logger.debug "@#{message.from.username}: #{message.text}"
       send_updated_level(chat || message.chat) if parser
     end
 
     on /^\/\+\+$/ do
+      logger.debug "@#{message.from.username}: #{message.text}"
       send_updated_level(message.chat) if parser
     end
 
     on /^\/parse$/ do
+      logger.debug "@#{message.from.username}: #{message.text}"
       send_updated_level(chat || message.chat) if parser
     end
 
     on /^\/-$/ do
+      logger.debug "@#{message.from.username}: #{message.text}"
       send_needed_sectors(chat || message.chat) if parser
     end
 
     on /^\/--$/ do
+      logger.debug "@#{message.from.username}: #{message.text}"
       send_needed_sectors(message.chat) if parser
     end
 
     on /^\/-\+$/ do
+      logger.debug "@#{message.from.username}: #{message.text}"
       send_all_sectors(chat || message.chat) if parser
     end
 
     on /^\/--\+$/ do
+      logger.debug "@#{message.from.username}: #{message.text}"
       send_all_sectors(message.chat) if parser
     end
 
     on /^\/\*$/ do
+      logger.debug "@#{message.from.username}: #{message.text}"
       send_full_level(chat || message.chat) if parser
     end
 
     on /^\/\*\*$/ do
+      logger.debug "@#{message.from.username}: #{message.text}"
       send_full_level(message.chat) if parser
     end
 
     on /^(\/(\.|,)|\.|,) / do
+      logger.debug "@#{message.from.username}: #{message.text}"
       return if parser.nil?
       codes = message.text[3..-1].strip.downcase.split(' ')
       codes.each do |code|
@@ -127,6 +142,7 @@ class MessageResponder
     end
 
     on /^(\/(\.|,)|\.|,)/ do
+      logger.debug "@#{message.from.username}: #{message.text}"
       return if parser.nil?
       if parser.get_html_from_url
         code = message.text[2..-1]
@@ -147,14 +163,17 @@ class MessageResponder
     end
 
     on /^\.setlogin / do
+      logger.debug "@#{message.from.username}: #{message.text}"
       parser.login = message.text[10..-1].strip if parser
     end
 
     on /^\.setpassword / do
+      logger.debug "@#{message.from.username}: #{message.text}"
       parser.password = message.text[13..-1].strip if parser
     end
 
     on /^\.setuser / do
+      logger.debug "@#{message.from.username}: #{message.text}"
       if parser
         parser.login = message.text[9..-1].strip
         parser.password = AppConfigurator.new.get_user(parser.login)
@@ -164,19 +183,23 @@ class MessageResponder
     end
 
     on /^\/setchatcurrent$/ do
+      logger.debug "@#{message.from.username}: #{message.text}"
       @chat = message.chat
     end
 
     on /^\/stoptimer$/ do
+      logger.debug "@#{message.from.username}: #{message.text}"
       @start_timer = false
     end
 
     on /^\/starttimer / do
+      logger.debug "@#{message.from.username}: #{message.text}"
       @timer_interval = message.text[12..-1].strip.to_i
       @start_timer = true
     end
 
     on /^\/starttimer$/ do
+      logger.debug "@#{message.from.username}: #{message.text}"
       @timer_interval = 5
       @start_timer = true
     end
