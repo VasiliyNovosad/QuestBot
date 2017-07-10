@@ -65,7 +65,7 @@ class MessageResponder
 /. <answer1> <answer2> ... <answern>
 /.<answer>  /,<answer>
 .<answer>  ,<answer>"
-      answer_with_message(text)
+      answer_with_message(text, chat || message.chat)
     end
 
     on /^\/\+$/ do
