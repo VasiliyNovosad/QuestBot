@@ -55,8 +55,10 @@ class MessageResponder
 /+
 /*
 /-
+/-+
 /. <answer1> <answer2> ... <answern>
-/.<answer>  /,<answer>"
+/.<answer>  /,<answer>
+.<answer>  ,<answer>"
       answer_with_message(text)
     end
 
@@ -96,7 +98,7 @@ class MessageResponder
       send_full_level(message.chat) if parser
     end
 
-    on /^\/(\.|,) / do
+    on /^(\/(\.|,)|\.|,) / do
       return if parser.nil?
       codes = message.text[3..-1].strip.downcase.split(' ')
       codes.each do |code|
@@ -124,7 +126,7 @@ class MessageResponder
       end
     end
 
-    on /^\/(\.|,)/ do
+    on /^(\/(\.|,)|\.|,)/ do
       return if parser.nil?
       if parser.get_html_from_url
         code = message.text[2..-1]
@@ -239,7 +241,7 @@ class MessageResponder
   def send_needed_sectors(chat)
     if parser.get_html_from_url
       needed_sectors = parser.parse_needed_sectors
-      text = "Осталось закрити:\n#{needed_sectors.join("\n")}"
+      text = "Лишилось закрити:\n#{needed_sectors.join("\n")}"
       answer_with_message text, chat if needed_sectors.count > 0
     else
       send_errors(chat)
