@@ -4,12 +4,13 @@ require './lib/app_configurator'
 
 class MessageResponder
   attr_accessor :message
-  attr_reader :bot
+  attr_reader :bot, :logger
   attr_accessor :parser, :chat, :timer_interval, :start_timer
 
   def initialize(options)
     @bot = options[:bot]
     @message = options[:message]
+    @logger = options[:logger]
     @timer_interval = 5
     @start_timer = false
     @chat = @message.chat
