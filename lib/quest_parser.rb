@@ -2,7 +2,8 @@ require 'open-uri'
 require 'mechanize'
 
 class QuestParser
-  attr_accessor :page, :level_name, :level_name_new, :question_texts, :question_texts_new, :url, :type_url, :login, :password, :errors
+  attr_accessor :page, :level_name, :level_name_new, :question_texts,
+                :question_texts_new, :url, :type_url, :login, :password, :errors
 
   def initialize(page_url, url_type)
     @level_name = ''
@@ -149,20 +150,29 @@ class QuestParser
       when 'img'
         element.attributes['src']
       when 'a'
-        "#{element.children.count == 0 ? remove_tab_from_text(element.text) : element.children.map { |c| parse_element(c) }.join(' ')} ( #{element.attributes['href']} )"
+        "#{element.children.count.zero? ? remove_tab_from_text(element.text) : element.children.map { |c| parse_element(c) }.join(' ')} ( #{element.attributes['href']} )"
       when 'br'
         "\n"
-      when 'script', 'style', 'div'
+      when 'style', 'div'
         ''
+      when 'script'
+        element.text =~ /(-?\d+(\.\d+)?)(\.| )\s*(-?\d+(\.\d+)?)/ ? element.text.match(/(-?\d+(\.\d+)?)(\.| )\s*(-?\d+(\.\d+)?)/)[0] + "\n" : ''
       when 'table'
         element.attributes['class'].nil? ? parse_table(element) : ''
       when /^h\d/
-        "\n#{element.children.count == 0 ? remove_tab_from_text(element.text) : element.children.map { |c| parse_element(c) }.join(' ')}"
+        if element.children.count.zero?
+          "\n#{remove_tab_from_text(element.text)}"
+        else
+          text = element.children.map { |c| parse_element(c) }
+          "\n#{text.join(' ')}"
+        end
       else
         if element.class.name == 'Nokogiri::XML::Comment'
           ''
+        elsif element.children.count.zero?
+          remove_tab_from_text(element.text)
         else
-          element.children.count == 0 ? remove_tab_from_text(element.text) : element.children.map do |c|
+          element.children.map do |c|
             parse_element(c)
           end.join(' ')
         end
