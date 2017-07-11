@@ -113,7 +113,7 @@ class MessageResponder
       send_full_level(message.chat) if parser
     end
 
-    on /^(\/(\.|,)|\.|,) / do
+    on /^\/(\.|,) / do
       logger.debug "@#{message.from.username}: #{message.text}"
       return if parser.nil?
       codes = message.text[3..-1].strip.downcase.split(' ')
@@ -142,11 +142,61 @@ class MessageResponder
       end
     end
 
-    on /^(\/(\.|,)|\.|,)/ do
+    on /^(\.|,) / do
+      logger.debug "@#{message.from.username}: #{message.text}"
+      return if parser.nil?
+      codes = message.text[2..-1].strip.downcase.split(' ')
+      codes.each do |code|
+        if parser.get_html_from_url
+          parser.send_code(code)
+          # p code
+          sleep 0.1
+          # if parser.get_html_from_url
+          #   correct_codes = parser.get_correct_codes
+          #   text = correct_codes.include?(code.downcase) ? "+ #{code}" : "- #{code}"
+          #   # p text
+          #   answer_with_message text, chat || message.chat
+          # end
+        else
+          send_errors(chat || message.chat)
+        end
+      end
+      if parser.get_html_from_url
+        correct_codes = parser.get_correct_codes
+        text = ''
+        codes.each do |code|
+          text << (correct_codes.include?(code) ? "+ #{code}\n" : "- #{code}\n")
+        end
+        answer_with_message text, chat || message.chat
+      end
+    end
+
+    on /^\/(\.|,)/ do
       logger.debug "@#{message.from.username}: #{message.text}"
       return if parser.nil?
       if parser.get_html_from_url
         code = message.text[2..-1]
+        return if code.strip == '' || code[0] == ' '
+        code = code.strip.downcase
+        parser.send_code(code)
+        # p code
+        # sleep 0.2
+        if parser.get_html_from_url
+          correct_codes = parser.get_correct_codes
+          text = correct_codes.include?(code) ? "+ #{code}" : "- #{code}"
+          # p text
+          answer_with_message text, chat || message.chat
+        end
+      else
+        send_errors(chat || message.chat)
+      end
+    end
+
+    on /^(\.|,)/ do
+      logger.debug "@#{message.from.username}: #{message.text}"
+      return if parser.nil?
+      if parser.get_html_from_url
+        code = message.text[1..-1]
         return if code.strip == '' || code[0] == ' '
         code = code.strip.downcase
         parser.send_code(code)
