@@ -49,7 +49,7 @@ class MessageResponder
       end
     end
 
-    on /^\.help$/ do
+    on /^\/help$/ do
       logger.debug "@#{message.from.username}: #{message.text}"
       text = "List of commands:
 /start <game_link>
@@ -163,12 +163,12 @@ class MessageResponder
       end
     end
 
-    on /^\.setlogin / do
+    on /^\/setlogin / do
       logger.debug "@#{message.from.username}: #{message.text}"
       parser.login = message.text[10..-1].strip if parser
     end
 
-    on /^\.setpassword / do
+    on /^\/setpassword / do
       logger.debug "@#{message.from.username}: #{message.text}"
       parser.password = message.text[13..-1].strip if parser
     end
