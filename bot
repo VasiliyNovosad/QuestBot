@@ -18,7 +18,7 @@ logger.debug 'Starting telegram bot'
 message_responder = nil
 
 threads = []
-threads << Thread.new {
+threads << Thread.new do
   Telegram::Bot::Client.run(token) do |bot|
     bot.listen do |message|
       if message.text.lines.count == 1
@@ -30,13 +30,13 @@ threads << Thread.new {
       end
     end
   end
-}
-threads << Thread.new {
+end
+threads << Thread.new do
   loop do
-    if message_responder && message_responder.parser
+    if message_responder&.parser
       message_responder.send_message_by_timer
       sleep message_responder.timer_interval || 5
     end
   end
-}
+end
 threads.map(&:join)
