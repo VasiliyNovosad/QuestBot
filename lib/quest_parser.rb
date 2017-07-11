@@ -65,8 +65,12 @@ class QuestParser
   end
 
   def get_correct_codes
+    correct_codes = []
     content = @page.search('.history span.color_correct')
-    content.map { |el| el.text.strip.downcase }.uniq
+    correct_codes += content.map { |el| el.text.strip.downcase }.uniq
+    content = @page.search('.history span.color_bonus')
+    correct_codes += content.map { |el| el.text.strip.downcase }.uniq
+    correct_codes.uniq
   end
 
   def send_code(code)
