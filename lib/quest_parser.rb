@@ -22,21 +22,26 @@ class QuestParser
       @page = File.open(@url) { |f| Nokogiri::HTML(f) } # Nokogiri::HTML(html)
     else
       #@doc = Nokogiri::HTML(open(url))
-      @page = @agent.get(@url)
-      if need_log_in
-        if @login.nil? || @password.nil?
-          @errors.push('Login empty!!! Set login with command .setlogin "login" in private chat')  if @login.nil?
-          @errors.push('Password empty!!! Set password with command .setpassword "password" in private chat')  if @password.nil?
-          return false
+      begin
+        @page = @agent.get(@url)
+        return false if @page.nil?
+        if need_log_in
+          if @login.nil? || @password.nil?
+            @errors.push('Login empty!!! Set login with command .setlogin "login" in private chat')  if @login.nil?
+            @errors.push('Password empty!!! Set password with command .setpassword "password" in private chat')  if @password.nil?
+            return false
+          end
+          login_form = @page.form
+          if login_form
+            login_form.Login = @login
+            login_form.Password = @password
+            login_form.submit
+          end
         end
-        login_form = @page.form
-        if login_form
-          login_form.Login = @login
-          login_form.Password = @password
-          login_form.submit
-        end
+        @page = @agent.get(@url)
+      rescue
+        return false
       end
-      @page = @agent.get(@url)
     end
     true
   end
@@ -50,6 +55,7 @@ class QuestParser
     #   parse_finish_info(content)
     #   return
     # end
+    return if @page.nil?
     content = @page.search('.content')
     if content
       parse_level_name(content)
@@ -65,6 +71,7 @@ class QuestParser
   end
 
   def get_correct_codes
+    return if @page.nil?
     correct_codes = []
     content = @page.search('.history span.color_correct')
     correct_codes += content.map { |el| el.text.strip.downcase }.uniq
@@ -74,6 +81,7 @@ class QuestParser
   end
 
   def send_code(code)
+    return if @page.nil?
     code_form = @page.form
     if code_form && code_form['LevelAction.Answer']
       code_form['LevelAction.Answer'] = code
@@ -82,6 +90,7 @@ class QuestParser
   end
 
   def parse_needed_sectors
+    return if @page.nil?
     content = @page.search('.content')
     founded = []
     if content
@@ -100,6 +109,7 @@ class QuestParser
   end
 
   def parse_all_sectors
+    return if @page.nil?
     content = @page.search('.content')
     founded = []
     if content
@@ -120,6 +130,7 @@ class QuestParser
   end
 
   def parse_full_info
+    return if @page.nil?
     content = @page.search('.content')
     full_info = []
     if !content.nil? && !content.children.nil?
