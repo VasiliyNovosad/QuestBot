@@ -6,7 +6,7 @@ require './lib/message_responder'
 require './lib/app_configurator'
 require 'openssl'
 
-# OpenSSL::SSL::VERIFY_PEER = OpenSSL::SSL::VERIFY_NONE
+OpenSSL::SSL::VERIFY_PEER = OpenSSL::SSL::VERIFY_NONE
 
 config = AppConfigurator.new
 
@@ -21,7 +21,7 @@ threads = []
 threads << Thread.new do
   Telegram::Bot::Client.run(token) do |bot|
     bot.listen do |message|
-      if message.text.lines.count == 1
+      if message.text && message.text.lines.count == 1
         options = { bot: bot, message: message, logger: logger }
         # logger.debug "@#{message.from.username}: #{message.text}"
         message_responder ||= MessageResponder.new(options)
