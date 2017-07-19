@@ -263,7 +263,47 @@ class QuestParser
             /^Подсказка 37  будет через/ =~ question_text && @question_texts.grep(/^Подсказка 37  будет через/).count >= 1 ||
             /^Подсказка 38  будет через/ =~ question_text && @question_texts.grep(/^Подсказка 38  будет через/).count >= 1 ||
             /^Подсказка 39  будет через/ =~ question_text && @question_texts.grep(/^Подсказка 39  будет через/).count >= 1 ||
-            /^Подсказка 40  будет через/ =~ question_text && @question_texts.grep(/^Подсказка 40  будет через/).count >= 1)
+            /^Подсказка 40  будет через/ =~ question_text && @question_texts.grep(/^Подсказка 40  будет через/).count >= 1 ||
+            /^Штрафная подсказка 1  будет через/ =~ question_text && @question_texts.grep(/^Штрафная подсказка 1  будет через/).count >= 1 ||
+            /^Штрафная подсказка 2  будет через/ =~ question_text && @question_texts.grep(/^Штрафная подсказка 2  будет через/).count >= 1 ||
+            /^Штрафная подсказка 3  будет через/ =~ question_text && @question_texts.grep(/^Штрафная подсказка 3  будет через/).count >= 1 ||
+            /^Штрафная подсказка 4  будет через/ =~ question_text && @question_texts.grep(/^Штрафная подсказка 4  будет через/).count >= 1 ||
+            /^Штрафная подсказка 5  будет через/ =~ question_text && @question_texts.grep(/^Штрафная подсказка 5  будет через/).count >= 1 ||
+            /^Штрафная подсказка 6  будет через/ =~ question_text && @question_texts.grep(/^Штрафная подсказка 6  будет через/).count >= 1 ||
+            /^Штрафная подсказка 7  будет через/ =~ question_text && @question_texts.grep(/^Штрафная подсказка 7  будет через/).count >= 1 ||
+            /^Штрафная подсказка 8  будет через/ =~ question_text && @question_texts.grep(/^Штрафная подсказка 8  будет через/).count >= 1 ||
+            /^Штрафная подсказка 9  будет через/ =~ question_text && @question_texts.grep(/^Штрафная подсказка 9  будет через/).count >= 1 ||
+            /^Штрафная подсказка 10  будет через/ =~ question_text && @question_texts.grep(/^Штрафная подсказка 10  будет через/).count >= 1 ||
+            /^Штрафная подсказка 11  будет через/ =~ question_text && @question_texts.grep(/^Штрафная подсказка 11  будет через/).count >= 1 ||
+            /^Штрафная подсказка 12  будет через/ =~ question_text && @question_texts.grep(/^Штрафная подсказка 12  будет через/).count >= 1 ||
+            /^Штрафная подсказка 13  будет через/ =~ question_text && @question_texts.grep(/^Штрафная подсказка 13  будет через/).count >= 1 ||
+            /^Штрафная подсказка 14  будет через/ =~ question_text && @question_texts.grep(/^Штрафная подсказка 14  будет через/).count >= 1 ||
+            /^Штрафная подсказка 15  будет через/ =~ question_text && @question_texts.grep(/^Штрафная подсказка 15  будет через/).count >= 1 ||
+            /^Штрафная подсказка 16  будет через/ =~ question_text && @question_texts.grep(/^Штрафная подсказка 16  будет через/).count >= 1 ||
+            /^Штрафная подсказка 17  будет через/ =~ question_text && @question_texts.grep(/^Штрафная подсказка 17  будет через/).count >= 1 ||
+            /^Штрафная подсказка 18  будет через/ =~ question_text && @question_texts.grep(/^Штрафная подсказка 18  будет через/).count >= 1 ||
+            /^Штрафная подсказка 19  будет через/ =~ question_text && @question_texts.grep(/^Штрафная подсказка 19  будет через/).count >= 1 ||
+            /^Штрафная подсказка 20  будет через/ =~ question_text && @question_texts.grep(/^Штрафная подсказка 20  будет через/).count >= 1 ||
+            /^Штрафная подсказка 21  будет через/ =~ question_text && @question_texts.grep(/^Штрафная подсказка 21  будет через/).count >= 1 ||
+            /^Штрафная подсказка 22  будет через/ =~ question_text && @question_texts.grep(/^Штрафная подсказка 22  будет через/).count >= 1 ||
+            /^Штрафная подсказка 23  будет через/ =~ question_text && @question_texts.grep(/^Штрафная подсказка 23  будет через/).count >= 1 ||
+            /^Штрафная подсказка 24  будет через/ =~ question_text && @question_texts.grep(/^Штрафная подсказка 24  будет через/).count >= 1 ||
+            /^Штрафная подсказка 25  будет через/ =~ question_text && @question_texts.grep(/^Штрафная подсказка 25  будет через/).count >= 1 ||
+            /^Штрафная подсказка 26  будет через/ =~ question_text && @question_texts.grep(/^Штрафная подсказка 26  будет через/).count >= 1 ||
+            /^Штрафная подсказка 27  будет через/ =~ question_text && @question_texts.grep(/^Штрафная подсказка 27  будет через/).count >= 1 ||
+            /^Штрафная подсказка 28  будет через/ =~ question_text && @question_texts.grep(/^Штрафная подсказка 28  будет через/).count >= 1 ||
+            /^Штрафная подсказка 29  будет через/ =~ question_text && @question_texts.grep(/^Штрафная подсказка 29  будет через/).count >= 1 ||
+            /^Штрафная подсказка 30  будет через/ =~ question_text && @question_texts.grep(/^Штрафная подсказка 30  будет через/).count >= 1 ||
+            /^Штрафная подсказка 31  будет через/ =~ question_text && @question_texts.grep(/^Штрафная подсказка 31  будет через/).count >= 1 ||
+            /^Штрафная подсказка 32  будет через/ =~ question_text && @question_texts.grep(/^Штрафная подсказка 32  будет через/).count >= 1 ||
+            /^Штрафная подсказка 33  будет через/ =~ question_text && @question_texts.grep(/^Штрафная подсказка 33  будет через/).count >= 1 ||
+            /^Штрафная подсказка 34  будет через/ =~ question_text && @question_texts.grep(/^Штрафная подсказка 34  будет через/).count >= 1 ||
+            /^Штрафная подсказка 35  будет через/ =~ question_text && @question_texts.grep(/^Штрафная подсказка 35  будет через/).count >= 1 ||
+            /^Штрафная подсказка 36  будет через/ =~ question_text && @question_texts.grep(/^Штрафная подсказка 36  будет через/).count >= 1 ||
+            /^Штрафная подсказка 37  будет через/ =~ question_text && @question_texts.grep(/^Штрафная подсказка 37  будет через/).count >= 1 ||
+            /^Штрафная подсказка 38  будет через/ =~ question_text && @question_texts.grep(/^Штрафная подсказка 38  будет через/).count >= 1 ||
+            /^Штрафная подсказка 39  будет через/ =~ question_text && @question_texts.grep(/^Штрафная подсказка 39  будет через/).count >= 1 ||
+            /^Штрафная подсказка 40  будет через/ =~ question_text && @question_texts.grep(/^Штрафная подсказка 40  будет через/).count >= 1)
           @question_texts_new.push(question_text)
         end
       end
