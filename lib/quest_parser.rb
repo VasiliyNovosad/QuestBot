@@ -27,8 +27,8 @@ class QuestParser
         return false if @page.nil?
         if need_log_in
           if @login.nil? || @password.nil?
-            @errors.push('Login empty!!! Set login with command .setlogin "login" in private chat')  if @login.nil?
-            @errors.push('Password empty!!! Set password with command .setpassword "password" in private chat')  if @password.nil?
+            @errors.push('Login empty!!! Set login with command \setlogin "login" in private chat')  if @login.nil?
+            @errors.push('Password empty!!! Set password with command \setpassword "password" in private chat')  if @password.nil?
             return false
           end
           login_form = @page.form

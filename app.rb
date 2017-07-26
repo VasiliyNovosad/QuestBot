@@ -1,4 +1,6 @@
 # /start http://lutsk.quest.ua/gameengines/encounter/play/57921
+# http://quest.ua/gameengines/encounter/play/58438?json=1
+# http://quest.ua/login/signin?json=1 Content-Type: application/json body: {"Login": "login", "Password": "password"}
 # .setlogin login
 # .setpassword password
 # /setchatcurrent
