@@ -1,47 +1,73 @@
 require 'net/http'
 require 'uri'
 require 'json'
+require_relative '../lib/level'
 
 class QuestParserJson
   SIGNIN_URL = '/login/signin'.freeze
   ENGINE_URL = '/gameengines/encounter/play/'.freeze
   FORMAT_URL = '?json=1'.freeze
 
-  attr_accessor :domain_name, :game_id, :login, :password, :cookie, :errors, :level_json
+  attr_accessor :domain_name, :game_id, :login, :password, :cookie, :errors, :level
 
   def initialize(domain_name, game_id)
     @domain_name = domain_name
     @game_id = game_id
     @cookie = ''
-    @level_json = nil
+    @level = Level.new({})
     @login = nil
     @password = nil
-    @errors = []
+    @errors = nil
   end
 
-  def get_html_from_url
+  # Отримати повну інформацію про поточний рівень
+  def full_info
     begin
-      self.level_json = get_level
+      level_json = get_level
+      return nil if level_json.nil? || level_json['Level'].nil?
+      level.full_info(level_json)
     rescue
-      return false
+      return errors
     end
   end
 
-  def parse_content(with_q_time)
-    return if level_json.nil?
+  # Отримати оновлену інформацію про поточний рівень
+  def updated_info
+    begin
+      level_json = get_level
+      return nil if level_json.nil? || level_json['Level'].nil?
+      level.updated_info(level_json)
+    rescue
+      return errors
+    end
+  end
 
-    # content = @page.search('.content')
-    # if content
-    #   parse_level_name(content)
-    #   new_level = false
-    #   if @level_name != @level_name_new
-    #     @question_texts = []
-    #     @question_texts_new = []
-    #     @level_name = @level_name_new
-    #     new_level = true
-    #   end
-    #   parse_questions(content, with_q_time, new_level)
-    # end
+  # Надіслати код
+  def send_answer(code)
+    resp = send_code(level.id, level.number, code)
+    correct_answer?(resp)
+  end
+
+  # Отримати список незакритих секторів
+  def parse_needed_sectors
+    begin
+      level_json = get_level
+      return nil if level_json.nil? || level_json['Level'].nil?
+      level.needed_sectors(level_json)
+    rescue
+      return errors
+    end
+  end
+
+  # Отримати список секторів із кодами
+  def parse_all_sectors
+    begin
+      level_json = get_level
+      return nil if level_json.nil? || level_json['Level'].nil?
+      level.all_sectors(level_json)
+    rescue
+      return errors
+    end
   end
 
   private
@@ -73,10 +99,10 @@ class QuestParserJson
   def get_level
     response = get_level_response
     if response.code == '200'
-       JSON.parse response.body
+      JSON.parse response.body
     else
       sign_in
-      unless errors.nil?
+      if errors.nil?
         response = get_level_response
         if response.code == '200'
           JSON.parse response.body
@@ -96,4 +122,38 @@ class QuestParserJson
     request['Cookie'] = self.cookie
     http.request request
   end
+
+  def send_code(level_id, level_number, code)
+    response = send_code_response(level_id, level_number, code)
+    if response.code == '200'
+      JSON.parse response.body
+    else
+      sign_in
+      if errors.nil?
+        response = send_code_response(level_id, level_number, code)
+        if response.code == '200'
+          JSON.parse response.body
+        else
+          self.errors = 'Помилка отримання даних'
+          nil
+        end
+      end
+    end
+  end
+
+  def send_code_response(level_id, level_number, code)
+    uri = URI.parse("http://#{domain_name}#{ENGINE_URL}#{game_id}#{FORMAT_URL}")
+    http = Net::HTTP.new(uri.host, uri.port)
+    request = Net::HTTP::Post.new(uri.request_uri)
+    request['content-type'] = 'application/json'
+    request['Cookie'] = cookie
+    body = { 'LevelId' => level_id, 'LevelNumber' => level_number, 'LevelAction.Answer' => code }
+    request.body = body.to_json
+    http.request(request)
+  end
+
+  def correct_answer?(response)
+    response['EngineAction']['LevelAction']['IsCorrectAnswer'] unless response.nil?
+  end
+
 end
