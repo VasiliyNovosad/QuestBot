@@ -307,6 +307,46 @@ class Level
   end
 
   def parsed(text)
-    text
+    result = text
+
+    ire = /<img.+?src="\s*(https?:\/\/.+?)\s*".*?>/
+    ireA = /<a.+?href=?"(https?:\/\/.+?.(jpg|png|bmp))?".*?>(.*?)<\/a>/
+
+    reBr = /<brs*\/?>/
+    reHr = /<hr.*?\/?>/
+    reP = /<p>([^ ]+?)<\/p>/
+    reBold = /<b.*?\/?>(.+?)<\/b>/
+    reStrong = /<strong.*?>(.*?)<\/strong>/
+    reItalic = /<i>(.+?)<\/i>/
+    reSpan = /<span.*?>(.*?)<\/span>/
+    reCenter = /<center>(.+?)<\/center>/
+    reFont = /<font.+?colors*=?["«]?#?(w+)?["»]?.*?>(.+?)<\/font>/
+    reA = /<a.+?href=?"(.+?)?".*?>(.+?)<\/a>/
+
+    mrBr = result.to_enum(:scan, reBr).map { Regexp.last_match }
+    mrBr.each { |match| result.gsub!(match[0], '\n') }
+    mrHr = result.to_enum(:scan, reHr).map { Regexp.last_match }
+    mrHr.each { |match| result.gsub!(match[0], '\n') }
+    mrP = result.to_enum(:scan, reP).map { Regexp.last_match }
+    mrP.each { |match| result.gsub!(match[0], "\n#{match[1]}") }
+    mrFont = result.to_enum(:scan, reFont).map { Regexp.last_match }
+    mrFont.each { |match| result.gsub!(match[0], match[2]) }
+    mrBold = result.to_enum(:scan, reBold).map { Regexp.last_match }
+    mrBold.each { |match| result.gsub!(match[0], "*#{match[1]}*") }
+    mrStrong = result.to_enum(:scan, reStrong).map { Regexp.last_match }
+    mrStrong.each { |match| result.gsub!(match[0], "*#{match[1]}*") }
+    mrItalic = result.to_enum(:scan, reItalic).map { Regexp.last_match }
+    mrItalic.each { |match| result.gsub!(match[0], "_#{match[1]}_") }
+    mrSpan = result.to_enum(:scan, reSpan).map { Regexp.last_match }
+    mrSpan.each { |match| result.gsub!(match[0], match[1]) }
+    mrCenter = result.to_enum(:scan, reCenter).map { Regexp.last_match }
+    mrCenter.each { |match| result.gsub!(match[0], match[1]) }
+    mre = result.to_enum(:scan, ire).map { Regexp.last_match }
+    mre.each { |match| result.gsub!(match[0], match[1]) }
+    # mreA = result.to_enum(:scan, ireA).map { Regexp.last_match }
+    # mreA.each { |match| result.gsub!(match[0], "[#{match[2]}](#{match[1]})") }
+    mrA = result.to_enum(:scan, reA).map { Regexp.last_match }
+    mrA.each { |match| result.gsub!(match[0], "[#{match[2]}](#{match[1]})") }
+    result
   end
 end
