@@ -347,6 +347,7 @@ class Level
     # mreA.each { |match| result.gsub!(match[0], "[#{match[2]}](#{match[1]})") }
     mrA = result.to_enum(:scan, reA).map { Regexp.last_match }
     mrA.each { |match| result.gsub!(match[0], "[#{match[2]}](#{match[1]})") }
+    result.gsub!('&nbsp;', ' ')
     result
   end
 end
