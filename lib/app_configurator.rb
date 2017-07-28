@@ -1,4 +1,5 @@
 require 'logger'
+require 'yaml'
 
 class AppConfigurator
   def get_token

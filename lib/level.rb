@@ -1,4 +1,5 @@
 class Level
+  attr_reader :id, :number
   def initialize(level_json)
     load_level_from_json(level_json)
   end
@@ -8,11 +9,11 @@ class Level
     full_level_info
   end
 
-  def updated_info(level_json)
+  def updated_info(level_json, with_q_time = false)
     if level_json['Level']['LevelId'] != @id
       full_info(level_json)
     else
-      result = load_updated_info(level_json['Level'])
+      result = load_updated_info(level_json['Level'], with_q_time)
       load_level_from_json(level_json)
       result
     end
@@ -21,7 +22,7 @@ class Level
   def needed_sectors(level_json)
     load_level_from_json(level_json)
     result = "Лишилось закрити #{@sectors_left_to_close} секторів.\nНезакриті сектори:\n"
-    sectors.each do |sector|
+    @sectors.each do |sector|
       result << "#{sector[:name]}\n" unless sector[:answered]
     end
     result
@@ -30,7 +31,7 @@ class Level
   def all_sectors(level_json)
     load_level_from_json(level_json)
     result = "Лишилось закрити #{@sectors_left_to_close} секторів.\nCектори:\n"
-    sectors.each do |sector|
+    @sectors.each do |sector|
       result << "#{sector[:name]}: #{sector[:answered] ? sector[:answer][:answer] : '-'}\n"
     end
     result
@@ -39,8 +40,9 @@ class Level
   private
 
   def load_level_from_json(level_json)
-    @levels_count = level_json['Levels'].count
-    level_json = level_json['Level']
+    levels = level_json['Levels']
+    @levels_count = levels.nil? ? 0 : levels.count
+    level_json = level_json['Level'] || {}
     @id = level_json['LevelId']
     @name = level_json['Name']
     @number = level_json['Number']
@@ -53,15 +55,15 @@ class Level
     @required_sectors_count = level_json['RequiredSectorsCount']
     @passed_sectors_count = level_json['PassedSectorsCount']
     @sectors_left_to_close = level_json['SectorsLeftToClose']
-    @task = level_json['Tasks'][0]['TaskText']
-    @messages = level_json['Messages'].map do |rec|
+    @task = level_json['Tasks'].nil? ? '' : level_json['Tasks'][0]['TaskText']
+    @messages = level_json['Messages'].nil? ? [] : level_json['Messages'].map do |rec|
       {
         id: rec['MessageId'],
         owner: rec['OwnerLogin'],
         text: rec['MessageText']
       }
     end
-    @sectors = level_json['Sectors'].map do |rec|
+    @sectors = level_json['Sectors'].nil? ? [] : level_json['Sectors'].map do |rec|
       {
         id: rec['SectorId'],
         number: rec['Order'],
@@ -70,7 +72,7 @@ class Level
         answered: rec['IsAnswered']
       }
     end
-    @helps = level_json['Helps'].map do |rec|
+    @helps = level_json['Helps'].nil? ? [] : level_json['Helps'].map do |rec|
       {
         id: rec['HelpId'],
         number: rec['Number'],
@@ -78,7 +80,7 @@ class Level
         remains: rec['RemainSeconds']
       }
     end
-    @penalty_helps = level_json['PenaltyHelps'].map do |rec|
+    @penalty_helps = level_json['PenaltyHelps'].nil? ? [] : level_json['PenaltyHelps'].map do |rec|
       {
         number: rec['Number'],
         text: rec['HelpText'],
@@ -88,7 +90,7 @@ class Level
         comment: rec['PenaltyComment']
       }
     end
-    @bonuses = level_json['Bonuses'].map do |rec|
+    @bonuses = level_json['Bonuses'].nil? ? [] : level_json['Bonuses'].map do |rec|
       {
         id: rec['BonusId'],
         name: rec['Name'],
@@ -111,41 +113,44 @@ class Level
 
   def full_level_info
     result = "Рівень #{@number} із #{@levels_count}"
-    result << '\n\n'
+    result << "\n\n"
+    result << "Автоперехід через #{seconds_to_string(@timeout_seconds_remain)}"
+    result << "\n\n"
     result << block_rule if @has_answer_block_rule
     result << parsed(@task)
-    result << '\n'
-    result << "Треба закрити #{@sectors_left_to_close} секторів із #{sectors.count}\n\n" if sectors.count > 0
+    result << "\n"
+    result << "Треба закрити #{@sectors_left_to_close} секторів із #{@sectors.count}\n\n" if @sectors.count > 0
     @helps.each { |help| result << help_to_text(help) }
-    result << '\n' if @helps.count > 0
+    result << "\n" if @helps.count > 0
     @penalty_helps.each { |help| result << penalty_help_to_text(help) }
-    result << '\n' if @penalty_helps.count > 0
+    result << "\n" if @penalty_helps.count > 0
     @bonuses.each { |bonus| result << bonus_to_text(bonus) }
-    result << '\n' if @bonuses.count > 0
-    @messages.each { |message| result << "#{message(:text)}\n\n" }
+    result << "\n" if @bonuses.count > 0
+    @messages.each { |el| result << "#{el[:text]}\n\n" }
+    result
   end
 
   def help_to_text(help)
     result = "Підказка #{help[:number]}: "
-    result << help[:remains].zero? ? parsed(help[:text]) : "буде через #{seconds_to_string(help[:remains])}\n\n"
+    result << (help[:remains].zero? ? "\n#{parsed(help[:text])}\n\n" : "буде через #{seconds_to_string(help[:remains])}\n\n")
     result
   end
 
   def penalty_help_to_text(help)
     result = "Штрафна підказка #{help[:number]}: "
-    result << help[:remains].zero? ? parsed(help[:text]) : "буде через #{seconds_to_string(help[:remains])}\n\n"
+    result << (help[:remains].zero? ? parsed(help[:text]) : "буде через #{seconds_to_string(help[:remains])}\n\n")
     result
   end
 
   def bonus_to_text(bonus)
     result = "Бонус #{bonus[:number]}#{bonus[:name].nil? ? '' : " #{bonus[:name]}"}: "
-    result << "буде доступний через #{seconds_to_string(bonus[:seconds_to_start])}\n" unless bonus[:seconds_to_start].nil?
-    result << "закриється через #{seconds_to_string(bonus[:seconds_left])}\n" unless bonus[:seconds_left].nil?
+    result << "буде доступний через #{seconds_to_string(bonus[:seconds_to_start])}\n" if bonus[:seconds_to_start] > 0
+    result << "закриється через #{seconds_to_string(bonus[:seconds_left])}\n" if bonus[:seconds_left] > 0
     result << "виконано кодом #{bonus[:answer][:answer]}\n" if bonus[:answered]
     result << "не закрито\n" if bonus[:expired]
     result << "#{parsed(bonus[:task])}\n" unless bonus[:task].nil? || bonus[:task].empty?
     result << "#{parsed(bonus[:help])}\n" unless bonus[:help].nil? || bonus[:help].empty?
-    result << '\n\n'
+    result << "\n\n"
     result
   end
 
@@ -201,8 +206,9 @@ class Level
     result << "#{@attemts_number} спроб на #{@block_target_id == 0 || @block_target_id == 1 ? 'гравця' : 'команду'} за #{seconds_to_string(attemts_period)}\n\n"
   end
 
-  def load_updated_info(level_json)
+  def load_updated_info(level_json, with_q_time = false)
     result = ''
+    result << "Автоперехід через #{seconds_to_string(@timeout_seconds_remain)}\n\n" if with_q_time
     result << task_updated(level_json['Tasks'])
     result << helps_updated(level_json['Helps'])
     result << bonuses_updated(level_json['Bonuses'])
@@ -224,7 +230,7 @@ class Level
         result << help_to_text(help)
       else
         help = help[0]
-        if help.text != help_json['HelpText']
+        if help[:text] != help_json['HelpText']
           help = {
               id: help_json['HelpId'],
               number: help_json['Number'],
@@ -287,6 +293,10 @@ class Level
     result
   end
 
+  def sector_to_text(sector)
+    "Сектор #{sector[:name]} закрито кодом #{sector[:answer][:answer]}\n"
+  end
+
   def messages_updated(messages_json)
     result = ''
     messages_json.each do |message_json|
@@ -300,8 +310,8 @@ class Level
 
   def task_updated(tasks_json)
     result = ''
-    if @task != tasks_json['Tasks'][0]['TaskText']
-      result << "#{parsed(tasks_json['Tasks'][0]['TaskText'])}\n\n"
+    if @task != tasks_json[0]['TaskText']
+      result << "#{parsed(tasks_json[0]['TaskText'])}\n\n"
     end
     result
   end
@@ -324,30 +334,30 @@ class Level
     reA = /<a.+?href=?"(.+?)?".*?>(.+?)<\/a>/
 
     mrBr = result.to_enum(:scan, reBr).map { Regexp.last_match }
-    mrBr.each { |match| result.gsub!(match[0], '\n') }
+    mrBr.each { |match| result = result.gsub(match[0], "\n") }
     mrHr = result.to_enum(:scan, reHr).map { Regexp.last_match }
-    mrHr.each { |match| result.gsub!(match[0], '\n') }
+    mrHr.each { |match| result = result.gsub(match[0], "\n") }
     mrP = result.to_enum(:scan, reP).map { Regexp.last_match }
-    mrP.each { |match| result.gsub!(match[0], "\n#{match[1]}") }
+    mrP.each { |match| result = result.gsub(match[0], "\n#{match[1]}") }
     mrFont = result.to_enum(:scan, reFont).map { Regexp.last_match }
-    mrFont.each { |match| result.gsub!(match[0], match[2]) }
+    mrFont.each { |match| result = result.gsub(match[0], match[2]) }
     mrBold = result.to_enum(:scan, reBold).map { Regexp.last_match }
-    mrBold.each { |match| result.gsub!(match[0], "*#{match[1]}*") }
+    mrBold.each { |match| result = result.gsub(match[0], "*#{match[1]}*") }
     mrStrong = result.to_enum(:scan, reStrong).map { Regexp.last_match }
-    mrStrong.each { |match| result.gsub!(match[0], "*#{match[1]}*") }
+    mrStrong.each { |match| result = result.gsub(match[0], "*#{match[1]}*") }
     mrItalic = result.to_enum(:scan, reItalic).map { Regexp.last_match }
-    mrItalic.each { |match| result.gsub!(match[0], "_#{match[1]}_") }
+    mrItalic.each { |match| result = result.gsub(match[0], "_#{match[1]}_") }
     mrSpan = result.to_enum(:scan, reSpan).map { Regexp.last_match }
-    mrSpan.each { |match| result.gsub!(match[0], match[1]) }
+    mrSpan.each { |match| result = result.gsub(match[0], match[1]) }
     mrCenter = result.to_enum(:scan, reCenter).map { Regexp.last_match }
-    mrCenter.each { |match| result.gsub!(match[0], match[1]) }
+    mrCenter.each { |match| result = result.gsub(match[0], match[1]) }
     mre = result.to_enum(:scan, ire).map { Regexp.last_match }
-    mre.each { |match| result.gsub!(match[0], match[1]) }
+    mre.each { |match| result = result.gsub(match[0], match[1]) }
     # mreA = result.to_enum(:scan, ireA).map { Regexp.last_match }
     # mreA.each { |match| result.gsub!(match[0], "[#{match[2]}](#{match[1]})") }
     mrA = result.to_enum(:scan, reA).map { Regexp.last_match }
-    mrA.each { |match| result.gsub!(match[0], "[#{match[2]}](#{match[1]})") }
-    result.gsub!('&nbsp;', ' ')
+    mrA.each { |match| result = result.gsub(match[0], "[#{match[2]}](#{match[1]})") }
+    result = result.gsub('&nbsp;', ' ')
     result
   end
 end

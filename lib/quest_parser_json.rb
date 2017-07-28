@@ -27,18 +27,18 @@ class QuestParserJson
       return nil if level_json.nil? || level_json['Level'].nil?
       level.full_info(level_json)
     rescue
-      return errors
+      return nil
     end
   end
 
   # Отримати оновлену інформацію про поточний рівень
-  def updated_info
+  def updated_info(with_q_time)
     begin
       level_json = get_level
       return nil if level_json.nil? || level_json['Level'].nil?
-      level.updated_info(level_json)
+      level.updated_info(level_json, with_q_time)
     rescue
-      return errors
+      return nil
     end
   end
 
@@ -55,7 +55,7 @@ class QuestParserJson
       return nil if level_json.nil? || level_json['Level'].nil?
       level.needed_sectors(level_json)
     rescue
-      return errors
+      return nil
     end
   end
 
@@ -66,7 +66,7 @@ class QuestParserJson
       return nil if level_json.nil? || level_json['Level'].nil?
       level.all_sectors(level_json)
     rescue
-      return errors
+      return nil
     end
   end
 
@@ -97,19 +97,14 @@ class QuestParserJson
   end
 
   def get_level
-    response = get_level_response
-    if response.code == '200'
-      JSON.parse response.body
-    else
-      sign_in
-      if errors.nil?
-        response = get_level_response
-        if response.code == '200'
-          JSON.parse response.body
-        else
-          self.errors = 'Помилка отримання даних'
-          nil
-        end
+    sign_in
+    if errors.nil?
+      response = get_level_response
+      if response.code == '200'
+        JSON.parse response.body
+      else
+        self.errors = 'Помилка отримання даних'
+        nil
       end
     end
   end
@@ -124,19 +119,14 @@ class QuestParserJson
   end
 
   def send_code(level_id, level_number, code)
-    response = send_code_response(level_id, level_number, code)
-    if response.code == '200'
-      JSON.parse response.body
-    else
-      sign_in
-      if errors.nil?
-        response = send_code_response(level_id, level_number, code)
-        if response.code == '200'
-          JSON.parse response.body
-        else
-          self.errors = 'Помилка отримання даних'
-          nil
-        end
+    sign_in
+    if errors.nil?
+      response = send_code_response(level_id, level_number, code)
+      if response.code == '200'
+        JSON.parse response.body
+      else
+        self.errors = 'Помилка отримання даних'
+        nil
       end
     end
   end
