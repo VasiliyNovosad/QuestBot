@@ -1,5 +1,5 @@
 require './lib/message_sender'
-require './lib/quest_parser'
+require './lib/quest_parser_json'
 require './lib/app_configurator'
 
 class MessageResponder
@@ -32,7 +32,7 @@ class MessageResponder
 
     on /^\/start / do
       logger.debug "@#{message.from.username}: #{message.text}"
-      @parser = QuestParser.new(message.text[7..-1].strip, 'link')
+      @parser = QuestParserJson.new(message.text[7..-1].strip.split(';')[0], message.text[7..-1].strip.split(';')[1])
       @chat = message.chat
     end
 
@@ -40,10 +40,12 @@ class MessageResponder
       logger.debug "@#{message.from.username}: #{message.text}"
       if parser
         url = parser.url
+        domain_name = parser.domain_name
+        game_id = parser.game_id
         login = parser.login
         password = parser.password
         @parser = nil
-        @parser = QuestParser.new(url, 'link')
+        @parser = QuestParserJson.new(domain_name, game_id)
         @parser.login = login
         @parser.password = password
       end
@@ -52,7 +54,7 @@ class MessageResponder
     on /^\/help$/ do
       logger.debug "@#{message.from.username}: #{message.text}"
       text = "List of commands:
-/start <game_link>
+/start <domain_name>;<game_id>
 /stop
 /restart
 /starttimer
@@ -117,99 +119,69 @@ class MessageResponder
       logger.debug "@#{message.from.username}: #{message.text}"
       return if parser.nil?
       codes = message.text[3..-1].strip.downcase.split(' ')
+      text = ''
       codes.each do |code|
-        if parser.get_html_from_url
-          parser.send_code(code)
-          # p code
-          sleep 0.1
-          # if parser.get_html_from_url
-          #   correct_codes = parser.get_correct_codes
-          #   text = correct_codes.include?(code.downcase) ? "+ #{code}" : "- #{code}"
-          #   # p text
-          #   answer_with_message text, chat || message.chat
-          # end
+        result = parser.send_answer(code)
+        if result.nil?
+          text << "send answer error: #{code}\n"
         else
-          send_errors(chat || message.chat)
+          text << result ? "+ #{code}\n" : "- #{code}\n"
         end
+        sleep 0.1
       end
-      if parser.get_html_from_url
-        correct_codes = parser.get_correct_codes
-        text = ''
-        codes.each do |code|
-          text << (correct_codes.include?(code) ? "+ #{code}\n" : "- #{code}\n")
-        end
-        answer_with_message text, chat || message.chat
-      end
+      answer_with_message text, chat || message.chat
     end
 
     on /^(\.|,) / do
       logger.debug "@#{message.from.username}: #{message.text}"
       return if parser.nil?
       codes = message.text[2..-1].strip.downcase.split(' ')
+      text = ''
       codes.each do |code|
-        if parser.get_html_from_url
-          parser.send_code(code)
-          # p code
-          sleep 0.1
-          # if parser.get_html_from_url
-          #   correct_codes = parser.get_correct_codes
-          #   text = correct_codes.include?(code.downcase) ? "+ #{code}" : "- #{code}"
-          #   # p text
-          #   answer_with_message text, chat || message.chat
-          # end
+        result = parser.send_answer(code)
+        if result.nil?
+          text << "send answer error: #{code}\n"
         else
-          send_errors(chat || message.chat)
+          text << result ? "+ #{code}\n" : "- #{code}\n"
         end
+        sleep 0.1
       end
-      if parser.get_html_from_url
-        correct_codes = parser.get_correct_codes
-        text = ''
-        codes.each do |code|
-          text << (correct_codes.include?(code) ? "+ #{code}\n" : "- #{code}\n")
-        end
-        answer_with_message text, chat || message.chat
-      end
+      answer_with_message text, chat || message.chat
     end
 
     on /^\/(\.|,)/ do
       logger.debug "@#{message.from.username}: #{message.text}"
       return if parser.nil?
-      if parser.get_html_from_url
-        code = message.text[2..-1]
-        return if code.strip == '' || code[0] == ' '
-        code = code.strip.downcase
-        parser.send_code(code)
-        # p code
-        # sleep 0.2
-        if parser.get_html_from_url
-          correct_codes = parser.get_correct_codes
-          text = correct_codes.include?(code) ? "+ #{code}" : "- #{code}"
-          # p text
-          answer_with_message text, chat || message.chat
-        end
+      code = message.text[2..-1]
+      return if code.strip == '' || code[0] == ' '
+      code = code.strip.downcase
+      parser.answer(code)
+      # p code
+      # sleep 0.2
+      if result.nil?
+        answer_with_message 'send answer error', chat || message.chat
       else
-        send_errors(chat || message.chat)
+        text = result ? "+ #{code}" : "- #{code}"
+        # p text
+        answer_with_message text, chat || message.chat
       end
     end
 
     on /^(\.|,)/ do
       logger.debug "@#{message.from.username}: #{message.text}"
       return if parser.nil?
-      if parser.get_html_from_url
-        code = message.text[1..-1]
-        return if code.strip == '' || code[0] == ' '
-        code = code.strip.downcase
-        parser.send_code(code)
-        # p code
-        # sleep 0.2
-        if parser.get_html_from_url
-          correct_codes = parser.get_correct_codes
-          text = correct_codes.include?(code) ? "+ #{code}" : "- #{code}"
-          # p text
-          answer_with_message text, chat || message.chat
-        end
+      code = message.text[1..-1]
+      return if code.strip == '' || code[0] == ' '
+      code = code.strip.downcase
+      result = parser.send_answer(code)
+      # p code
+      # sleep 0.2
+      if result.nil?
+        answer_with_message 'send answer error', chat || message.chat
       else
-        send_errors(chat || message.chat)
+        text = result ? "+ #{code}" : "- #{code}"
+        # p text
+        answer_with_message text, chat || message.chat
       end
     end
 
@@ -223,15 +195,15 @@ class MessageResponder
       parser.password = message.text[13..-1].strip if parser
     end
 
-    on /^\.setuser / do
-      logger.debug "@#{message.from.username}: #{message.text}"
-      if parser
-        parser.login = message.text[9..-1].strip
-        parser.password = AppConfigurator.new.get_user(parser.login)
-        # p parser.login
-        # p parser.password
-      end
-    end
+    # on /^\.setuser / do
+    #   logger.debug "@#{message.from.username}: #{message.text}"
+    #   if parser
+    #     parser.login = message.text[9..-1].strip
+    #     parser.password = AppConfigurator.new.get_user(parser.login)
+    #     # p parser.login
+    #     # p parser.password
+    #   end
+    # end
 
     on /^\/setchatcurrent$/ do
       logger.debug "@#{message.from.username}: #{message.text}"
@@ -287,49 +259,23 @@ class MessageResponder
   end
 
   def send_updated_level(chat, with_q_time = true)
-    if parser.get_html_from_url
-      parser.parse_content(with_q_time)
-      updated_info = parser.question_texts_new
-      if updated_info.count > 0
-        updated_info.each do |mess|
-          parser.question_texts.push(mess)
-        end
-        send_level_text(updated_info, chat)
-        parser.question_texts_new = []
-        @parser = nil if parser.level_name == 'Finish'
-      end
-    else
-      send_errors(chat)
-    end
+    updated_info = parser.updated_info
+    parser.question_texts.push(updated_info) unless updated_info.nil?
   end
 
   def send_full_level(chat)
-    if parser.get_html_from_url
-      full_info = parser.parse_full_info
-      send_level_text(full_info, chat) if full_info.count > 0
-    else
-      send_errors(chat)
-    end
+    full_info = parser.full_info
+    send_level_text(full_info, chat) unless full_info.nil?
   end
 
   def send_needed_sectors(chat)
-    if parser.get_html_from_url
-      needed_sectors = parser.parse_needed_sectors
-      text = "Лишилось закрити:\n#{needed_sectors.join("\n")}"
-      answer_with_message text, chat if needed_sectors.count > 0
-    else
-      send_errors(chat)
-    end
+    needed_sectors = parser.parse_needed_sectors
+    answer_with_message needed_sectors, chat unless needed_sectors.nil?
   end
 
   def send_all_sectors(chat)
-    if parser.get_html_from_url
-      all_sectors = parser.parse_all_sectors
-      text = "Сектори:\n#{all_sectors.join("\n")}"
-      answer_with_message text, chat if all_sectors.count > 0
-    else
-      send_errors(chat)
-    end
+    all_sectors = parser.parse_all_sectors
+    answer_with_message all_sectors, chat unless all_sectors.nil?
   end
 
   def send_errors(chat)

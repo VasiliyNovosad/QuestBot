@@ -39,8 +39,9 @@ class Level
   private
 
   def load_level_from_json(level_json)
-    @levels_count = level_json['Levels'].count
-    level_json = level_json['Level']
+    levels = level_json['Levels']
+    @levels_count = levels.nil? ? 0 : levels.count
+    level_json = level_json['Level'] || {}
     @id = level_json['LevelId']
     @name = level_json['Name']
     @number = level_json['Number']
@@ -53,15 +54,15 @@ class Level
     @required_sectors_count = level_json['RequiredSectorsCount']
     @passed_sectors_count = level_json['PassedSectorsCount']
     @sectors_left_to_close = level_json['SectorsLeftToClose']
-    @task = level_json['Tasks'][0]['TaskText']
-    @messages = level_json['Messages'].map do |rec|
+    @task = level_json['Tasks'].nil? ? '' : level_json['Tasks'][0]['TaskText']
+    @messages = level_json['Messages'].nil? ? [] : level_json['Messages'].map do |rec|
       {
         id: rec['MessageId'],
         owner: rec['OwnerLogin'],
         text: rec['MessageText']
       }
     end
-    @sectors = level_json['Sectors'].map do |rec|
+    @sectors = level_json['Sectors'].nil? ? [] : level_json['Sectors'].map do |rec|
       {
         id: rec['SectorId'],
         number: rec['Order'],
@@ -70,7 +71,7 @@ class Level
         answered: rec['IsAnswered']
       }
     end
-    @helps = level_json['Helps'].map do |rec|
+    @helps = level_json['Helps'].nil? ? [] : level_json['Helps'].map do |rec|
       {
         id: rec['HelpId'],
         number: rec['Number'],
@@ -78,7 +79,7 @@ class Level
         remains: rec['RemainSeconds']
       }
     end
-    @penalty_helps = level_json['PenaltyHelps'].map do |rec|
+    @penalty_helps = level_json['PenaltyHelps'].nil? ? [] : level_json['PenaltyHelps'].map do |rec|
       {
         number: rec['Number'],
         text: rec['HelpText'],
@@ -88,7 +89,7 @@ class Level
         comment: rec['PenaltyComment']
       }
     end
-    @bonuses = level_json['Bonuses'].map do |rec|
+    @bonuses = level_json['Bonuses'].nil? ? [] : level_json['Bonuses'].map do |rec|
       {
         id: rec['BonusId'],
         name: rec['Name'],
@@ -115,7 +116,7 @@ class Level
     result << block_rule if @has_answer_block_rule
     result << parsed(@task)
     result << '\n'
-    result << "Треба закрити #{@sectors_left_to_close} секторів із #{sectors.count}\n\n" if sectors.count > 0
+    result << "Треба закрити #{@sectors_left_to_close} секторів із #{@sectors.count}\n\n" if @sectors.count > 0
     @helps.each { |help| result << help_to_text(help) }
     result << '\n' if @helps.count > 0
     @penalty_helps.each { |help| result << penalty_help_to_text(help) }
