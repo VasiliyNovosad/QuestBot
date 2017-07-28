@@ -72,12 +72,12 @@ class MessageResponder
 
     on /^\/\+$/ do
       logger.debug "@#{message.from.username}: #{message.text}"
-      send_updated_level(chat || message.chat) if parser
+      send_updated_level(chat || message.chat, true) if parser
     end
 
     on /^\/\+\+$/ do
       logger.debug "@#{message.from.username}: #{message.text}"
-      send_updated_level(message.chat) if parser
+      send_updated_level(message.chat, true) if parser
     end
 
     on /^\/parse$/ do
@@ -142,7 +142,7 @@ class MessageResponder
         if result.nil?
           text << "send answer error: #{code}\n"
         else
-          text << result ? "+ #{code}\n" : "- #{code}\n"
+          text << (result ? "+ #{code}\n" : "- #{code}\n")
         end
         sleep 0.1
       end
@@ -259,8 +259,8 @@ class MessageResponder
   end
 
   def send_updated_level(chat, with_q_time = true)
-    updated_info = parser.updated_info
-    parser.question_texts.push(updated_info) unless updated_info.nil?
+    updated_info = parser.updated_info(with_q_time)
+    send_level_text(updated_info, chat) unless updated_info.nil?
   end
 
   def send_full_level(chat)
@@ -285,7 +285,8 @@ class MessageResponder
   end
 
   def send_level_text(text, chat)
-    message_str = text.join("\n")
+    message_str = text
+    return if message_str.empty?
     if message_str.length < 4000
       answer_with_message message_str, chat
     else

@@ -32,11 +32,11 @@ class QuestParserJson
   end
 
   # Отримати оновлену інформацію про поточний рівень
-  def updated_info
+  def updated_info(with_q_time)
     begin
       level_json = get_level
       return nil if level_json.nil? || level_json['Level'].nil?
-      level.updated_info(level_json)
+      level.updated_info(level_json, with_q_time)
     rescue
       return nil
     end
@@ -119,19 +119,14 @@ class QuestParserJson
   end
 
   def send_code(level_id, level_number, code)
-    response = send_code_response(level_id, level_number, code)
-    if response.code == '200'
-      JSON.parse response.body
-    else
-      sign_in
-      if errors.nil?
-        response = send_code_response(level_id, level_number, code)
-        if response.code == '200'
-          JSON.parse response.body
-        else
-          self.errors = 'Помилка отримання даних'
-          nil
-        end
+    sign_in
+    if errors.nil?
+      response = send_code_response(level_id, level_number, code)
+      if response.code == '200'
+        JSON.parse response.body
+      else
+        self.errors = 'Помилка отримання даних'
+        nil
       end
     end
   end
