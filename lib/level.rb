@@ -143,13 +143,13 @@ class Level
   end
 
   def bonus_to_text(bonus)
-    result = "Бонус #{bonus[:number]}#{bonus[:name].nil? ? '' : " #{bonus[:name]}"}: "
+    result = "Бонус #{bonus[:number]}#{(bonus[:name].nil? || (bonus[:number].to_s == bonus[:name])) ? '' : " #{bonus[:name]}"}: "
     result << "буде доступний через #{seconds_to_string(bonus[:seconds_to_start])}\n" if bonus[:seconds_to_start] > 0
     result << "закриється через #{seconds_to_string(bonus[:seconds_left])}\n" if bonus[:seconds_left] > 0
     result << "виконано кодом #{bonus[:answer][:answer]}\n" if bonus[:answered]
     result << "не закрито\n" if bonus[:expired]
-    result << "#{parsed(bonus[:task])}\n" unless bonus[:task].nil? || bonus[:task].empty?
-    result << "#{parsed(bonus[:help])}\n" unless bonus[:help].nil? || bonus[:help].empty?
+    result << "Завдання: #{parsed(bonus[:task])}\n" unless bonus[:task].nil? || bonus[:task].empty?
+    result << "Підказка: #{parsed(bonus[:help])}\n" unless bonus[:help].nil? || bonus[:help].empty?
     result << "\n\n"
     result
   end

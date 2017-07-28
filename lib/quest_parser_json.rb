@@ -44,8 +44,12 @@ class QuestParserJson
 
   # Надіслати код
   def send_answer(code)
-    resp = send_code(level.id, level.number, code)
-    correct_answer?(resp)
+    begin
+      resp = send_code(level.id, level.number, code)
+      correct_answer?(resp)
+    rescue
+      return nil
+    end
   end
 
   # Отримати список незакритих секторів
