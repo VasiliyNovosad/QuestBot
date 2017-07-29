@@ -131,7 +131,7 @@ class Level
     result << "\n" if @penalty_helps.count > 0
     @bonuses.each { |bonus| result << bonus_to_text(bonus) }
     result << "\n" if @bonuses.count > 0
-    @messages.each { |el| result << "#{el[:text]}\n\n" }
+    @messages.each { |el| result << "Повідомлення від '#{el[:owner]}': #{el[:text]}\n\n" }
     result
   end
 
@@ -307,7 +307,7 @@ class Level
     messages_json.each do |message_json|
       message = @messages.select { |h| h[:id] == message_json['MessageId'] }
       if message.count.zero? || message[0][:text] != message_json['MessageText']
-        result << "#{message_json['MessageText']}\n\n"
+        result << "Повідомлення від '#{message_json['OwnerLogin']}': #{message_json['MessageText']}\n\n"
       end
     end
     result
