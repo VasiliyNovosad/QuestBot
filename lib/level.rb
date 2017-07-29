@@ -155,7 +155,7 @@ class Level
     result << "не закрито\n" if bonus[:expired]
     result << "Завдання: #{parsed(bonus[:task])}\n" unless bonus[:task].nil? || bonus[:task].empty? || bonus[:answered]
     result << "Підказка: #{parsed(bonus[:help])}\n" unless bonus[:help].nil? || bonus[:help].empty?
-    result << "\n\n"
+    result << "\n"
     result
   end
 
