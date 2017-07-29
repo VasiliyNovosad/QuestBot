@@ -119,13 +119,11 @@ class Level
   end
 
   def full_level_info
-    result = "Рівень #{@number} із #{@levels_count}"
-    result << "\n\n"
-    result << "Автоперехід через #{seconds_to_string(@timeout_seconds_remain)}"
-    result << "\n\n"
+    result = "Рівень #{@number} із #{@levels_count}\n\n"
+    result << "Автоперехід через #{seconds_to_string(@timeout_seconds_remain)}\n\n" if @timeout_seconds_remain > 0
     result << block_rule if @has_answer_block_rule
     result << parsed(@task)
-    result << "\n"
+    result << "\n\n"
     result << "Треба закрити #{@sectors_left_to_close} секторів із #{@sectors.count}\n\n" if @sectors.count > 0
     @helps.each { |help| result << help_to_text(help) }
     result << "\n" if @helps.count > 0
