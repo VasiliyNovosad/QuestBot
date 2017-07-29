@@ -37,6 +37,13 @@ class Level
     result
   end
 
+  def all_bonuses(level_json)
+    load_level_from_json(level_json)
+    result = ''
+    @bonuses.each { |bonus| result << bonus_to_text(bonus) }
+    result
+  end
+
   private
 
   def load_level_from_json(level_json)
@@ -55,7 +62,7 @@ class Level
     @required_sectors_count = level_json['RequiredSectorsCount']
     @passed_sectors_count = level_json['PassedSectorsCount']
     @sectors_left_to_close = level_json['SectorsLeftToClose']
-    @task = level_json['Tasks'].nil? ? '' : level_json['Tasks'][0]['TaskText']
+    @task = level_json['Tasks'].nil? || level_json['Tasks'].count.zero? ? '' : level_json['Tasks'][0]['TaskText']
     @messages = level_json['Messages'].nil? ? [] : level_json['Messages'].map do |rec|
       {
         id: rec['MessageId'],
@@ -146,9 +153,9 @@ class Level
     result = "Бонус #{bonus[:number]}#{(bonus[:name].nil? || (bonus[:number].to_s == bonus[:name])) ? '' : " #{bonus[:name]}"}: "
     result << "буде доступний через #{seconds_to_string(bonus[:seconds_to_start])}\n" if bonus[:seconds_to_start] > 0
     result << "закриється через #{seconds_to_string(bonus[:seconds_left])}\n" if bonus[:seconds_left] > 0
-    result << "виконано кодом #{bonus[:answer][:answer]}\n" if bonus[:answered]
+    result << "виконано кодом '#{bonus[:answer][:answer]}'\n" if bonus[:answered]
     result << "не закрито\n" if bonus[:expired]
-    result << "Завдання: #{parsed(bonus[:task])}\n" unless bonus[:task].nil? || bonus[:task].empty?
+    result << "Завдання: #{parsed(bonus[:task])}\n" unless bonus[:task].nil? || bonus[:task].empty? || bonus[:answered]
     result << "Підказка: #{parsed(bonus[:help])}\n" unless bonus[:help].nil? || bonus[:help].empty?
     result << "\n\n"
     result
@@ -294,7 +301,7 @@ class Level
   end
 
   def sector_to_text(sector)
-    "Сектор #{sector[:name]} закрито кодом #{sector[:answer][:answer]}\n"
+    "Сектор #{sector[:name]} закрито кодом '#{sector[:answer][:answer]}'\n"
   end
 
   def messages_updated(messages_json)
@@ -330,15 +337,9 @@ class Level
     reItalic = /<i>(.+?)<\/i>/
     reSpan = /<span.*?>(.*?)<\/span>/
     reCenter = /<center>(.+?)<\/center>/
-    reFont = /<font.+?colors*=?["«]?#?(w+)?["»]?.*?>(.+?)<\/font>/
+    reFont = /<font.+?colors*=?["«]?#?(w+)?["»]?.*?>([\s\S.]+?)<\/font>/
     reA = /<a.+?href=?"(.+?)?".*?>(.+?)<\/a>/
 
-    mrBr = result.to_enum(:scan, reBr).map { Regexp.last_match }
-    mrBr.each { |match| result = result.gsub(match[0], "\n") }
-    mrHr = result.to_enum(:scan, reHr).map { Regexp.last_match }
-    mrHr.each { |match| result = result.gsub(match[0], "\n") }
-    mrP = result.to_enum(:scan, reP).map { Regexp.last_match }
-    mrP.each { |match| result = result.gsub(match[0], "\n#{match[1]}") }
     mrFont = result.to_enum(:scan, reFont).map { Regexp.last_match }
     mrFont.each { |match| result = result.gsub(match[0], match[2]) }
     mrBold = result.to_enum(:scan, reBold).map { Regexp.last_match }
@@ -357,6 +358,12 @@ class Level
     # mreA.each { |match| result.gsub!(match[0], "[#{match[2]}](#{match[1]})") }
     mrA = result.to_enum(:scan, reA).map { Regexp.last_match }
     mrA.each { |match| result = result.gsub(match[0], "[#{match[2]}](#{match[1]})") }
+    mrP = result.to_enum(:scan, reP).map { Regexp.last_match }
+    mrP.each { |match| result = result.gsub(match[0], "\n#{match[1]}") }
+    mrBr = result.to_enum(:scan, reBr).map { Regexp.last_match }
+    mrBr.each { |match| result = result.gsub(match[0], "\n") }
+    mrHr = result.to_enum(:scan, reHr).map { Regexp.last_match }
+    mrHr.each { |match| result = result.gsub(match[0], "\n") }
     result = result.gsub('&nbsp;', ' ')
     result
   end

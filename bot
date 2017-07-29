@@ -33,7 +33,7 @@ threads << Thread.new do
 end
 threads << Thread.new do
   loop do
-    if message_responder&.parser
+    if message_responder&.parser && message_responder&.start_timer
       message_responder.send_message_by_timer
       sleep message_responder.timer_interval || 5
     end

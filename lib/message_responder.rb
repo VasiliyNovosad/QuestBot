@@ -95,6 +95,11 @@ class MessageResponder
       send_needed_sectors(message.chat) if parser
     end
 
+    on /^\/[:;]$/ do
+      logger.debug "@#{message.from.username}: #{message.text}"
+      send_bonuses(chat || message.chat) if parser
+    end
+
     on /^\/-\+$/ do
       logger.debug "@#{message.from.username}: #{message.text}"
       send_all_sectors(chat || message.chat) if parser
@@ -122,8 +127,9 @@ class MessageResponder
       text = ''
       codes.each do |code|
         result = parser.send_answer(code)
+        result = parser.send_answer(code) if result.nil?
         if result.nil?
-          text << "send answer error: #{code}\n"
+          text << "помилка надсилання: #{code}"
         else
           text << result ? "+ #{code}\n" : "- #{code}\n"
         end
@@ -139,8 +145,9 @@ class MessageResponder
       text = ''
       codes.each do |code|
         result = parser.send_answer(code)
+        result = parser.send_answer(code) if result.nil?
         if result.nil?
-          text << "send answer error: #{code}\n"
+          text << "помилка надсилання: #{code}"
         else
           text << (result ? "+ #{code}\n" : "- #{code}\n")
         end
@@ -155,11 +162,12 @@ class MessageResponder
       code = message.text[2..-1]
       return if code.strip == '' || code[0] == ' '
       code = code.strip.downcase
-      parser.answer(code)
+      result = parser.send_answer(code)
+      result = parser.send_answer(code) if result.nil?
       # p code
       # sleep 0.2
       if result.nil?
-        answer_with_message 'send answer error', chat || message.chat
+        answer_with_message "помилка надсилання: #{code}", chat || message.chat
       else
         text = result ? "+ #{code}" : "- #{code}"
         # p text
@@ -174,10 +182,11 @@ class MessageResponder
       return if code.strip == '' || code[0] == ' '
       code = code.strip.downcase
       result = parser.send_answer(code)
+      result = parser.send_answer(code) if result.nil?
       # p code
       # sleep 0.2
       if result.nil?
-        answer_with_message 'send answer error', chat || message.chat
+        answer_with_message "помилка надсилання: #{code}", chat || message.chat
       else
         text = result ? "+ #{code}" : "- #{code}"
         # p text
@@ -271,6 +280,11 @@ class MessageResponder
   def send_needed_sectors(chat)
     needed_sectors = parser.parse_needed_sectors
     answer_with_message needed_sectors, chat unless needed_sectors.nil?
+  end
+
+  def send_bonuses(chat)
+    bonuses = parser.parse_bonuses
+    answer_with_message bonuses, chat unless bonuses.nil?
   end
 
   def send_all_sectors(chat)

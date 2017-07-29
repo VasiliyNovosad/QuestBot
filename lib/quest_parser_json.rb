@@ -63,6 +63,16 @@ class QuestParserJson
     end
   end
 
+  def parse_bonuses
+    begin
+      level_json = get_level
+      return nil if level_json.nil? || level_json['Level'].nil?
+      level.all_bonuses(level_json)
+    rescue
+      return nil
+    end
+  end
+
   # Отримати список секторів із кодами
   def parse_all_sectors
     begin
