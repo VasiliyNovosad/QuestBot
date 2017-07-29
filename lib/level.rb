@@ -210,7 +210,7 @@ class Level
 
   def block_rule
     result = 'УВАГА!!! Обмеження на ввід: '
-    result << "#{@attemts_number} спроб на #{@block_target_id == 0 || @block_target_id == 1 ? 'гравця' : 'команду'} за #{seconds_to_string(attemts_period)}\n\n"
+    result << "#{@attemts_number} спроб на #{((@block_target_id == 0) || (@block_target_id == 1)) ? 'гравця' : 'команду'} за #{seconds_to_string(@attemts_period)}\n\n"
   end
 
   def load_updated_info(level_json, with_q_time = false)
