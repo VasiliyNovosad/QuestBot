@@ -188,7 +188,7 @@ class MessageResponder
       if result.nil?
         answer_with_message "помилка надсилання: #{code}", chat || message.chat
       else
-        text = result ? "+ #{code}" : "- #{code}"
+        text = result ? "*+* #{code}" : "*-* #{code}"
         # p text
         answer_with_message text, chat || message.chat
       end

@@ -21,7 +21,7 @@ class Level
 
   def needed_sectors(level_json)
     load_level_from_json(level_json)
-    result = "Лишилось закрити #{@sectors_left_to_close} секторів.\nНезакриті сектори:\n"
+    result = "Лишилось закрити *#{@sectors_left_to_close}* секторів.\nНезакриті сектори:\n"
     @sectors.each do |sector|
       result << "#{sector[:name]}\n" unless sector[:answered]
     end
@@ -30,7 +30,7 @@ class Level
 
   def all_sectors(level_json)
     load_level_from_json(level_json)
-    result = "Лишилось закрити #{@sectors_left_to_close} секторів.\nCектори:\n"
+    result = "Лишилось закрити *#{@sectors_left_to_close}* секторів.\nCектори:\n"
     @sectors.each do |sector|
       result << "#{sector[:name]}: #{sector[:answered] ? sector[:answer][:answer] : '-'}\n"
     end
@@ -119,42 +119,42 @@ class Level
   end
 
   def full_level_info
-    result = "Рівень #{@number} із #{@levels_count}\n\n"
-    result << "Автоперехід через #{seconds_to_string(@timeout_seconds_remain)}\n\n" if @timeout_seconds_remain > 0
+    result = "*Рівень #{@number} із #{@levels_count}*\n\n"
+    result << "*Автоперехід* через #{seconds_to_string(@timeout_seconds_remain)}\n\n" if @timeout_seconds_remain > 0
     result << block_rule if @has_answer_block_rule
     result << parsed(@task)
     result << "\n\n"
-    result << "Треба закрити #{@sectors_left_to_close} секторів із #{@sectors.count}\n\n" if @sectors.count > 0
+    result << "Треба закрити *#{@sectors_left_to_close}* секторів із *#{@sectors.count}*\n\n" if @sectors.count > 0
     @helps.each { |help| result << help_to_text(help) }
     result << "\n" if @helps.count > 0
     @penalty_helps.each { |help| result << penalty_help_to_text(help) }
     result << "\n" if @penalty_helps.count > 0
     @bonuses.each { |bonus| result << bonus_to_text(bonus) }
     result << "\n" if @bonuses.count > 0
-    @messages.each { |el| result << "Повідомлення від '#{el[:owner]}': #{el[:text]}\n\n" }
+    @messages.each { |el| result << "*Повідомлення* від '#{el[:owner]}': #{el[:text]}\n\n" }
     result
   end
 
   def help_to_text(help)
-    result = "Підказка #{help[:number]}: "
+    result = "*Підказка #{help[:number]}*: "
     result << (help[:remains].zero? ? "\n#{parsed(help[:text])}\n\n" : "буде через #{seconds_to_string(help[:remains])}\n\n")
     result
   end
 
   def penalty_help_to_text(help)
-    result = "Штрафна підказка #{help[:number]}: "
+    result = "*Штрафна підказка #{help[:number]}*: "
     result << (help[:remains].zero? ? parsed(help[:text]) : "буде через #{seconds_to_string(help[:remains])}\n\n")
     result
   end
 
   def bonus_to_text(bonus)
-    result = "Бонус #{bonus[:number]}#{(bonus[:name].nil? || (bonus[:number].to_s == bonus[:name])) ? '' : " #{bonus[:name]}"}: "
+    result = "*Бонус #{bonus[:number]}#{(bonus[:name].nil? || (bonus[:number].to_s == bonus[:name])) ? '' : " #{bonus[:name]}"}*: "
     result << "буде доступний через #{seconds_to_string(bonus[:seconds_to_start])}\n" if bonus[:seconds_to_start] > 0
     result << "закриється через #{seconds_to_string(bonus[:seconds_left])}\n" if bonus[:seconds_left] > 0
-    result << "виконано кодом '#{bonus[:answer][:answer]}'\n" if bonus[:answered]
+    result << "закрито кодом *#{bonus[:answer][:answer]}*\n" if bonus[:answered]
     result << "не закрито\n" if bonus[:expired]
-    result << "Завдання: #{parsed(bonus[:task])}\n" unless bonus[:task].nil? || bonus[:task].empty? || bonus[:answered]
-    result << "Підказка: #{parsed(bonus[:help])}\n" unless bonus[:help].nil? || bonus[:help].empty?
+    result << "*Завдання*: #{parsed(bonus[:task])}\n" unless bonus[:task].nil? || bonus[:task].empty? || bonus[:answered]
+    result << "*Підказка*: #{parsed(bonus[:help])}\n" unless bonus[:help].nil? || bonus[:help].empty?
     result << "\n"
     result
   end
@@ -207,13 +207,13 @@ class Level
   end
 
   def block_rule
-    result = 'УВАГА!!! Обмеження на ввід: '
-    result << "#{@attemts_number} спроб на #{((@block_target_id == 0) || (@block_target_id == 1)) ? 'гравця' : 'команду'} за #{seconds_to_string(@attemts_period)}\n\n"
+    result = '*УВАГА!!! Обмеження на ввід*: '
+    result << "*#{@attemts_number}* спроб на *#{((@block_target_id == 0) || (@block_target_id == 1)) ? 'гравця' : 'команду'}* за *#{seconds_to_string(@attemts_period)}*\n\n"
   end
 
   def load_updated_info(level_json, with_q_time = false)
     result = ''
-    result << "Автоперехід через #{seconds_to_string(@timeout_seconds_remain)}\n\n" if with_q_time
+    result << "*Автоперехід* через #{seconds_to_string(@timeout_seconds_remain)}\n\n" if with_q_time
     result << task_updated(level_json['Tasks'])
     result << helps_updated(level_json['Helps'])
     result << bonuses_updated(level_json['Bonuses'])
@@ -299,7 +299,7 @@ class Level
   end
 
   def sector_to_text(sector)
-    "Сектор #{sector[:name]} закрито кодом '#{sector[:answer][:answer]}'\n"
+    "Сектор *#{sector[:name]}* закрито кодом *#{sector[:answer][:answer]}*\n"
   end
 
   def messages_updated(messages_json)
@@ -307,7 +307,7 @@ class Level
     messages_json.each do |message_json|
       message = @messages.select { |h| h[:id] == message_json['MessageId'] }
       if message.count.zero? || message[0][:text] != message_json['MessageText']
-        result << "Повідомлення від '#{message_json['OwnerLogin']}': #{message_json['MessageText']}\n\n"
+        result << "*Повідомлення* від '#{message_json['OwnerLogin']}': #{message_json['MessageText']}\n\n"
       end
     end
     result
@@ -338,6 +338,14 @@ class Level
     reFont = /<font.+?colors*=?["«]?#?(w+)?["»]?.*?>([\s\S.]+?)<\/font>/
     reA = /<a.+?href=?"(.+?)?".*?>(.+?)<\/a>/
 
+    # <a href="geo:49.976136, 36.267256">49.976136, 36.267256</a>
+    geoHrefRe = /<a.+?href="geo:(\d{2}[.,]\d{3,}),?\s*(\d{2}[.,]\d{3,})">(.+?)<\/a>/
+    # <a href="https://www.google.com.ua/maps/@50.0363257,36.2120039,19z" target="blank">50.036435 36.211914</a>
+		hrefRe = /<a.+?href="https?:\/\/.+?(\d{2}[.,]\d{3,}),?\s*(\d{2}[.,]\d{3,}).*?">(.+?)<\/a>/
+    # 49.976136, 36.267256
+    numbersRe = /(\d{2}[.,]\d{3,}),?\s*(\d{2}[.,]\d{3,})/
+
+
     mrFont = result.to_enum(:scan, reFont).map { Regexp.last_match }
     mrFont.each { |match| result = result.gsub(match[0], match[2]) }
     mrBold = result.to_enum(:scan, reBold).map { Regexp.last_match }
@@ -362,7 +370,15 @@ class Level
     mrBr.each { |match| result = result.gsub(match[0], "\n") }
     mrHr = result.to_enum(:scan, reHr).map { Regexp.last_match }
     mrHr.each { |match| result = result.gsub(match[0], "\n") }
+    mrGeoHrefRe = result.to_enum(:scan, geoHrefRe).map { Regexp.last_match }
+    mrGeoHrefRe.each { |match| result = result.gsub(match[0], match[3]) }
+    mrHrefRe = result.to_enum(:scan, hrefRe).map { Regexp.last_match }
+    mrHrefRe.each { |match| result = result.gsub(match[0], match[3]) }
+    mrNumbersRe = result.to_enum(:scan, numbersRe).map { Regexp.last_match }
+    mrNumbersRe.each { |match| result = result.gsub(match[0], "[#{match[0]}] (http://maps.google.com/maps?daddr=#{match[1]},#{match[2]}&saddr=My+Location)") }
     result = result.gsub('&nbsp;', ' ')
+    result = result.gsub("\r", '')
+    result = result.gsub("\n\n\n", "\n\n")
     result
   end
 end
