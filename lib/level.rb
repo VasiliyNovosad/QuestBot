@@ -327,7 +327,7 @@ class Level
     ire = /<img.+?src="\s*(https?:\/\/.+?)\s*".*?>/
     ireA = /<a.+?href=?"(https?:\/\/.+?.(jpg|png|bmp))?".*?>(.*?)<\/a>/
 
-    reBr = /<brs*\/?>/
+    reBr = /<br\s*\/?>/
     reHr = /<hr.*?\/?>/
     reP = /<p>([^ ]+?)<\/p>/
     reBold = /<b.*?\/?>(.+?)<\/b>/
@@ -346,6 +346,7 @@ class Level
     numbersRe = /(\d{2}[.,]\d{3,}),?\s*(\d{2}[.,]\d{3,})/
 
 
+    result = result.gsub('_', "\_")
     mrFont = result.to_enum(:scan, reFont).map { Regexp.last_match }
     mrFont.each { |match| result = result.gsub(match[0], match[2]) }
     mrBold = result.to_enum(:scan, reBold).map { Regexp.last_match }
