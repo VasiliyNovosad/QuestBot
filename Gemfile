@@ -1,3 +1,3 @@
 source 'https://rubygems.org'
-gem 'mechanize'
+# gem 'mechanize'
 gem 'telegram-bot-ruby'
