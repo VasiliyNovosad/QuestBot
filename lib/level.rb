@@ -163,7 +163,7 @@ class Level
     result = ''
     if seconds / 3600 > 0
       case seconds / 3600
-      when 1, 21, 31, 41, 5
+      when 1, 21, 31, 41, 51
         if nominative
           result << "#{seconds / 3600} година "
         else
@@ -177,7 +177,7 @@ class Level
     end
     if (seconds / 60) % 60 > 0
       case (seconds / 60) % 60
-        when 1, 21, 31, 41, 5
+        when 1, 21, 31, 41, 51
           if nominative
             result << "#{(seconds / 60) % 60} хвилина "
           else
@@ -191,7 +191,7 @@ class Level
     end
     if seconds % 60 > 0
       case seconds % 60
-        when 1, 21, 31, 41, 5
+        when 1, 21, 31, 41, 51
           if nominative
             result << "#{seconds % 60} секунда"
           else
