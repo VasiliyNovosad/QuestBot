@@ -375,7 +375,7 @@ class Level
     mrHrefRe = result.to_enum(:scan, hrefRe).map { Regexp.last_match }
     mrHrefRe.each { |match| result = result.gsub(match[0], match[3]) }
     mrNumbersRe = result.to_enum(:scan, numbersRe).map { Regexp.last_match }
-    mrNumbersRe.each { |match| result = result.gsub(match[0], "[#{match[0]}] (http://maps.google.com/maps?daddr=#{match[1]},#{match[2]}&saddr=My+Location)") }
+    mrNumbersRe.each { |match| result = result.gsub(match[0], "[#{match[1]} #{match[2]}] (http://maps.google.com/maps?daddr=#{match[1]},#{match[2]}&saddr=My+Location)") }
     result = result.gsub('&nbsp;', ' ')
     result = result.gsub("\r", '')
     result = result.gsub("\n\n\n", "\n\n")
