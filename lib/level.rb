@@ -21,7 +21,7 @@ class Level
 
   def needed_sectors(level_json)
     load_level_from_json(level_json)
-    result = "Лишилось закрити *#{@sectors_left_to_close}* секторів.\nНезакриті сектори:\n"
+    result = "Лишилось закрити *#{@sectors_left_to_close}*.\nНезакриті сектори:\n"
     @sectors.each do |sector|
       result << "#{sector[:name]}\n" unless sector[:answered]
     end
@@ -30,7 +30,7 @@ class Level
 
   def all_sectors(level_json)
     load_level_from_json(level_json)
-    result = "Лишилось закрити *#{@sectors_left_to_close}* секторів.\nCектори:\n"
+    result = "Лишилось закрити *#{@sectors_left_to_close}*.\nCектори:\n"
     @sectors.each do |sector|
       result << "#{sector[:name]}: #{sector[:answered] ? sector[:answer][:answer] : '-'}\n"
     end
