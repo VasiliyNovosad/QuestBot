@@ -315,7 +315,7 @@ class Level
     ire = /<img.+?src="\s*(https?:\/\/.+?)\s*".*?>/
     # ireA = /<a.+?href=?"(https?:\/\/.+?.(jpg|png|bmp))?".*?>(.*?)<\/a>/
 
-    reBr = /<br\s*\/?>/
+    reBr = /<\/*br\s*\/?>/
     reHr = /<hr.*?\/?>/
     reP = /<p>([^ ]+?)<\/p>/
     reBold = /<b.*?\/?>(.+?)<\/b>/
