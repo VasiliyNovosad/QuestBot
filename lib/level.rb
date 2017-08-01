@@ -327,6 +327,9 @@ class Level
     reCenter = /<center>(.+?)<\/center>/
     reFont = /<font.+?colors*=?["«]?#?(w+)?["»]?.*?>([\s\S.]+?)<\/font>/
     reA = /<a.+?href=?"(.+?)?".*?>(.+?)<\/a>/
+    reTable = /<table.*?>([\s\S.]*?)<\/table>/
+    reTr = /<tr.*?>([\s\S.]*?)<\/tr>/
+    reTd = /<td.*?>([\s\S.]*?)<\/td>/
 
     # <a href="geo:49.976136, 36.267256">49.976136, 36.267256</a>
     geoHrefRe = /<a.+?href="geo:(\d{2}[.,]\d{3,}),?\s*(\d{2}[.,]\d{3,})">(.+?)<\/a>/
@@ -376,6 +379,12 @@ class Level
           "[#{match[1]} #{match[2]}] (#{google_link(match[1], match[2])})"
       )
     end
+    mrTd = result.to_enum(:scan, reTd).map { Regexp.last_match }
+    mrTd.each { |match| result = result.gsub(match[0], "#{match[1]} : ") }
+    mrTr = result.to_enum(:scan, reTr).map { Regexp.last_match }
+    mrTr.each { |match| result = result.gsub(match[0], "#{match[1]}\n") }
+    mrTable = result.to_enum(:scan, reTable).map { Regexp.last_match }
+    mrTable.each { |match| result = result.gsub(match[0], match[1]) }
     result = result.gsub('&nbsp;', ' ')
     result = result.gsub("\r", '')
     result = result.gsub("\n\n\n", "\n\n")
