@@ -95,7 +95,7 @@ class Level
   end
 
   def full_level_info
-    result = "*Рівень #{@number} із #{@levels_count}*#{": #{@name}" unless @name.nil? || @name.empty?}\n\n"
+    result = "*Рівень #{@number} із #{@levels_count}*#{": #{parsed(@name)}" unless @name.nil? || @name.empty?}\n\n"
     result << "*Автоперехід* через *#{seconds_to_string(@timeout_seconds_remain)}*\n\n" if @timeout_seconds_remain > 0
     result << block_rule if @has_answer_block_rule
     result << parsed(@task)
@@ -107,7 +107,7 @@ class Level
     result << "\n" if @penalty_helps.count > 0
     @bonuses.each { |bonus| result << bonus_to_text(bonus) }
     result << "\n" if @bonuses.count > 0
-    @messages.each { |el| result << "*Повідомлення* від *#{el[:owner]}*: #{el[:text]}\n\n" }
+    @messages.each { |el| result << "*Повідомлення* від *#{parsed(el[:owner])}*: #{parsed(el[:text])}\n\n" }
     result
   end
 
@@ -124,10 +124,10 @@ class Level
   end
 
   def bonus_to_text(bonus)
-    result = "*Бонус #{bonus[:number]}#{bonus[:name].nil? || (bonus[:number].to_s == bonus[:name]) ? '' : " #{bonus[:name]}"}*: "
+    result = "*Бонус #{bonus[:number]}#{bonus[:name].nil? || (bonus[:number].to_s == bonus[:name]) ? '' : " #{parsed(bonus[:name])}"}*: "
     result << "буде доступний через *#{seconds_to_string(bonus[:seconds_to_start])}*\n" if bonus[:seconds_to_start] > 0
     result << "закриється через *#{seconds_to_string(bonus[:seconds_left])}*\n" if bonus[:seconds_left] > 0
-    result << "закрито кодом *#{bonus[:answer][:answer]}*\n" if bonus[:answered]
+    result << "закрито кодом *#{parsed(bonus[:answer][:answer])}*\n" if bonus[:answered]
     result << "не закрито\n" if bonus[:expired]
     result << "*Завдання*: #{parsed(bonus[:task])}\n" unless bonus[:task].nil? || bonus[:task].empty? || bonus[:answered]
     result << "*Підказка*: #{parsed(bonus[:help])}\n" unless bonus[:help].nil? || bonus[:help].empty?
@@ -287,7 +287,7 @@ class Level
   end
 
   def sector_to_text(sector)
-    "Сектор *#{sector[:name]}* закрито кодом *#{sector[:answer][:answer]}*\n"
+    "Сектор *#{parsed(sector[:name])}* закрито кодом *#{parsed(sector[:answer][:answer])}*\n"
   end
 
   def messages_updated(messages_json)
@@ -295,7 +295,7 @@ class Level
     messages_json.each do |message_json|
       message = @messages.select { |h| h[:id] == message_json['MessageId'] }
       if message.count.zero? || message[0][:text] != message_json['MessageText']
-        result << "*Повідомлення* від *#{message_json['OwnerLogin']}*: #{message_json['MessageText']}\n\n"
+        result << "*Повідомлення* від *#{parsed(message_json['OwnerLogin'])}*: #{parser(message_json['MessageText'])}\n\n"
       end
     end
     result
