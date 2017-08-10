@@ -63,31 +63,16 @@ class Level
     @passed_sectors_count = level_json['PassedSectorsCount']
     @sectors_left_to_close = level_json['SectorsLeftToClose']
     @task = ''
-    if level_json['Tasks'] && level_json['Tasks'].count > 0
+    unless Array(level_json['Tasks']).empty?
       @task = level_json['Tasks'][0]['TaskText']
     end
-    @messages = []
-    unless level_json['Messages'].nil?
-      @messages = level_json['Messages'].map { |rec| json_to_message(rec) }
+    @messages = Array(level_json['Messages']).map { |rec| json_to_message(rec) }
+    @sectors = Array(level_json['Sectors']).map { |rec| json_to_sector(rec) }
+    @helps = Array(level_json['Helps']).map { |rec| json_to_help(rec) }
+    @penalty_helps = Array(level_json['PenaltyHelps']).map do |rec|
+      json_to_penalty_help(rec)
     end
-    @sectors = []
-    unless level_json['Sectors'].nil?
-      @sectors = level_json['Sectors'].map { |rec| json_to_sector(rec) }
-    end
-    @helps = []
-    unless level_json['Helps'].nil?
-      @helps = level_json['Helps'].map { |rec| json_to_help(rec) }
-    end
-    @penalty_helps = []
-    unless level_json['PenaltyHelps'].nil?
-      @penalty_helps = level_json['PenaltyHelps'].map do |rec|
-        json_to_penalty_help(rec)
-      end
-    end
-    @bonuses = []
-    unless level_json['Bonuses'].nil?
-      @bonuses = level_json['Bonuses'].map { |rec| json_to_bonus(rec) }
-    end
+    @bonuses = Array(level_json['Bonuses']).map { |rec| json_to_bonus(rec) }
   end
 
   def answer(rec)
@@ -95,42 +80,71 @@ class Level
   end
 
   def full_level_info
-    result = "*Рівень #{@number} із #{@levels_count}*#{": #{parsed(@name)}" unless @name.nil? || @name.empty?}\n\n"
-    result << "*Автоперехід* через *#{seconds_to_string(@timeout_seconds_remain)}*\n\n" if @timeout_seconds_remain > 0
+    result = "*Рівень #{@number} із #{@levels_count}*"
+    result << "#{": #{parsed(@name)}" unless @name.nil? || @name.empty?}\n\n"
+    if @timeout_seconds_remain > 0
+      result << "*Автоперехід* через *#{seconds_to_string(@timeout_seconds_remain)}*\n\n"
+    end
     result << block_rule if @has_answer_block_rule
     result << parsed(@task)
     result << "\n\n"
-    result << "Треба закрити *#{@sectors_left_to_close}* секторів із *#{@sectors.count}*\n\n" if @sectors.count > 0
+    unless @sectors.empty?
+      result << "Треба закрити *#{@sectors_left_to_close}* секторів із *#{@sectors.count}*\n\n"
+    end
     @helps.each { |help| result << help_to_text(help) }
-    result << "\n" if @helps.count > 0
+    result << "\n" unless @helps.empty?
     @penalty_helps.each { |help| result << penalty_help_to_text(help) }
-    result << "\n" if @penalty_helps.count > 0
+    result << "\n" unless @penalty_helps.empty?
     @bonuses.each { |bonus| result << bonus_to_text(bonus) }
-    result << "\n" if @bonuses.count > 0
-    @messages.each { |el| result << "*Повідомлення* від *#{parsed(el[:owner])}*: #{parsed(el[:text])}\n\n" }
+    result << "\n" unless @bonuses.empty?
+    @messages.each do |el|
+      result << "*Повідомлення* від *#{parsed(el[:owner])}*: #{parsed(el[:text])}\n\n"
+    end
     result
   end
 
   def help_to_text(help)
     result = "*Підказка #{help[:number]}*: "
-    result << (help[:remains].zero? ? "\n#{parsed(help[:text])}\n\n" : "буде через *#{seconds_to_string(help[:remains])}*\n\n")
+    if help[:remains].zero?
+      result << "\n#{parsed(help[:text])}\n\n"
+    else
+      result << "буде через *#{seconds_to_string(help[:remains])}*\n\n"
+    end
     result
   end
 
   def penalty_help_to_text(help)
     result = "*Штрафна підказка #{help[:number]}*: "
-    result << (help[:remains].zero? ? parsed(help[:text]) : "буде через *#{seconds_to_string(help[:remains])}*\n\n")
+    if help[:remains].zero?
+      result << "\n#{parsed(help[:text])}\n\n"
+    else
+      result << "буде через *#{seconds_to_string(help[:remains])}*\n\n"
+    end
     result
   end
 
   def bonus_to_text(bonus)
-    result = "*Бонус #{bonus[:number]}#{bonus[:name].nil? || (bonus[:number].to_s == bonus[:name]) ? '' : " #{parsed(bonus[:name])}"}*: "
-    result << "буде доступний через *#{seconds_to_string(bonus[:seconds_to_start])}*\n" if bonus[:seconds_to_start] > 0
-    result << "закриється через *#{seconds_to_string(bonus[:seconds_left])}*\n" if bonus[:seconds_left] > 0
-    result << "закрито кодом *#{parsed(bonus[:answer][:answer])}*\n" if bonus[:answered]
+    result = "*Бонус #{bonus[:number]}*"
+    unless bonus[:name].nil? || bonus[:name].empty? || (bonus[:number].to_s == bonus[:name])
+      result << " *#{parsed(bonus[:name])}*"
+    end
+    result << ':'
+    if bonus[:seconds_to_start] > 0
+      result << "буде доступний через *#{seconds_to_string(bonus[:seconds_to_start])}*\n"
+    end
+    if bonus[:seconds_left] > 0
+      result << "закриється через *#{seconds_to_string(bonus[:seconds_left])}*\n"
+    end
+    if bonus[:answered]
+      result << "закрито кодом *#{parsed(bonus[:answer][:answer])}*\n"
+    end
     result << "не закрито\n" if bonus[:expired]
-    result << "*Завдання*: #{parsed(bonus[:task])}\n" unless bonus[:task].nil? || bonus[:task].empty? || bonus[:answered]
-    result << "*Підказка*: #{parsed(bonus[:help])}\n" unless bonus[:help].nil? || bonus[:help].empty?
+    unless bonus[:task].nil? || bonus[:task].empty? || bonus[:answered]
+      result << "*Завдання*: #{parsed(bonus[:task])}\n"
+    end
+    unless bonus[:help].nil? || bonus[:help].empty?
+      result << "*Підказка*: #{parsed(bonus[:help])}\n"
+    end
     result << "\n"
     result
   end
@@ -187,7 +201,7 @@ class Level
     result = ''
     helps_json.each do |help_json|
       help = @helps.select { |h| h[:id] == help_json['HelpId'] }
-      if help.count.zero?
+      if help.empty?
         help = json_to_help(help_json)
         result << help_to_text(help)
       else
@@ -205,17 +219,20 @@ class Level
     result = ''
     bonuses_json.each do |rec|
       bonuses = @bonuses.select { |h| h[:id] == rec['BonusId'] }
-      continue if bonuses.count.zero?
+      continue if bonuses.empty?
       bonus = bonuses[0]
       new_bonus = json_to_bonus(rec)
-      if bonus[:answered] != new_bonus[:answered] ||
-          bonus[:expired] != new_bonus[:expired] ||
-          bonus[:task] != new_bonus[:task] ||
-          bonus[:help] != new_bonus[:help]
-        result << bonus_to_text(new_bonus)
-      end
+      continue if bonuses_identical?(bonus, new_bonus)
+      result << bonus_to_text(new_bonus)
     end
     result
+  end
+
+  def bonuses_identical?(bonus1, bonus2)
+    bonus1[:answered] == bonus2[:answered] &&
+      bonus1[:expired] == bonus2[:expired] &&
+      bonus1[:task] == bonus2[:task] &&
+      bonus1[:help] == bonus2[:help]
   end
 
   def json_to_bonus(bonus_json)
@@ -276,7 +293,7 @@ class Level
     result = ''
     sectors_json.each do |rec|
       sectors = @sectors.select { |h| h[:id] == rec['SectorId'] }
-      continue if sectors.count.zero?
+      continue if sectors.empty?
       sector = sectors[0]
       new_sector = json_to_sector(rec)
       if sector[:answered] != new_sector[:answered]
@@ -294,8 +311,9 @@ class Level
     result = ''
     messages_json.each do |message_json|
       message = @messages.select { |h| h[:id] == message_json['MessageId'] }
-      if message.count.zero? || message[0][:text] != message_json['MessageText']
-        result << "*Повідомлення* від *#{parsed(message_json['OwnerLogin'])}*: #{parser(message_json['MessageText'])}\n\n"
+      if message.empty? || message[0][:text] != message_json['MessageText']
+        result << "*Повідомлення* від *#{parsed(message_json['OwnerLogin'])}*: "
+        result << "#{parser(message_json['MessageText'])}\n\n"
       end
     end
     result

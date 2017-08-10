@@ -8,7 +8,8 @@ class QuestParserJson
   ENGINE_URL = '/gameengines/encounter/play/'.freeze
   FORMAT_URL = '?json=1'.freeze
 
-  attr_accessor :domain_name, :game_id, :login, :password, :cookie, :errors, :level
+  attr_accessor :domain_name, :game_id, :login,
+                :password, :cookie, :errors, :level
 
   def initialize(domain_name, game_id)
     @domain_name = domain_name
@@ -20,68 +21,57 @@ class QuestParserJson
     @errors = nil
   end
 
-  # Отримати повну інформацію про поточний рівень
+  # Get full info for current level
   def full_info
-    begin
-      level_json = get_level
-      return nil if level_json.nil? || level_json['Level'].nil?
-      level.full_info(level_json)
-    rescue
-      return nil
-    end
+    level_json = get_level
+    return nil if level_json.nil? || level_json['Level'].nil?
+    level.full_info(level_json)
+  rescue
+    return nil
   end
 
-  # Отримати оновлену інформацію про поточний рівень
+  # Get updated info for current level
   def updated_info(with_q_time)
-    begin
-      level_json = get_level
-      return nil if level_json.nil? || level_json['Level'].nil?
-      level.updated_info(level_json, with_q_time)
-    rescue
-      return nil
-    end
+    level_json = get_level
+    return nil if level_json.nil? || level_json['Level'].nil?
+    level.updated_info(level_json, with_q_time)
+  rescue
+    return nil
   end
 
-  # Надіслати код
+  # Send answer
   def send_answer(code)
-    begin
-      resp = send_code(level.id, level.number, code)
-      correct_answer?(resp)
-    rescue
-      return nil
-    end
+    resp = send_code(level.id, level.number, code)
+    correct_answer?(resp)
+  rescue
+    return nil
   end
 
-  # Отримати список незакритих секторів
+  # Get list of unclosed sectors
   def parse_needed_sectors
-    begin
-      level_json = get_level
-      return nil if level_json.nil? || level_json['Level'].nil?
-      level.needed_sectors(level_json)
-    rescue
-      return nil
-    end
+    level_json = get_level
+    return nil if level_json.nil? || level_json['Level'].nil?
+    level.needed_sectors(level_json)
+  rescue
+    return nil
   end
 
+  # Get full list of bonuses
   def parse_bonuses
-    begin
-      level_json = get_level
-      return nil if level_json.nil? || level_json['Level'].nil?
-      level.all_bonuses(level_json)
-    rescue
-      return nil
-    end
+    level_json = get_level
+    return nil if level_json.nil? || level_json['Level'].nil?
+    level.all_bonuses(level_json)
+  rescue
+    return nil
   end
 
-  # Отримати список секторів із кодами
+  # Get full list of sectors with codes
   def parse_all_sectors
-    begin
-      level_json = get_level
-      return nil if level_json.nil? || level_json['Level'].nil?
-      level.all_sectors(level_json)
-    rescue
-      return nil
-    end
+    level_json = get_level
+    return nil if level_json.nil? || level_json['Level'].nil?
+    level.all_sectors(level_json)
+  rescue
+    return nil
   end
 
   private
@@ -96,6 +86,7 @@ class QuestParserJson
     data = JSON.parse response.body
     if data['Error'].zero?
       set_cookies(response)
+      self.errors = nil
     else
       self.errors = data['Message']
     end
@@ -112,14 +103,14 @@ class QuestParserJson
 
   def get_level
     sign_in
-    if errors.nil?
-      response = get_level_response
-      if response.code == '200'
-        JSON.parse response.body
-      else
-        self.errors = 'Помилка отримання даних'
-        nil
-      end
+    return nil unless errors.nil?
+    response = get_level_response
+    if response.code == '200'
+      self.errors = nil
+      JSON.parse response.body
+    else
+      self.errors = 'Помилка отримання даних'
+      nil
     end
   end
 
@@ -128,20 +119,20 @@ class QuestParserJson
     http = Net::HTTP.new(uri.host, uri.port)
     request = Net::HTTP::Get.new(uri.request_uri)
     request['content-type'] = 'application/json'
-    request['Cookie'] = self.cookie
+    request['Cookie'] = cookie
     http.request request
   end
 
   def send_code(level_id, level_number, code)
     sign_in
-    if errors.nil?
-      response = send_code_response(level_id, level_number, code)
-      if response.code == '200'
-        JSON.parse response.body
-      else
-        self.errors = 'Помилка отримання даних'
-        nil
-      end
+    return nil unless errors.nil?
+    response = send_code_response(level_id, level_number, code)
+    if response.code == '200'
+      self.errors = nil
+      JSON.parse response.body
+    else
+      self.errors = 'Помилка отримання даних'
+      nil
     end
   end
 
@@ -151,7 +142,11 @@ class QuestParserJson
     request = Net::HTTP::Post.new(uri.request_uri)
     request['content-type'] = 'application/json'
     request['Cookie'] = cookie
-    body = { 'LevelId' => level_id, 'LevelNumber' => level_number, 'LevelAction.Answer' => code }
+    body = {
+      'LevelId' => level_id,
+      'LevelNumber' => level_number,
+      'LevelAction.Answer' => code
+    }
     request.body = body.to_json
     http.request(request)
   end
