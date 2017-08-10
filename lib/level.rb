@@ -125,7 +125,7 @@ class Level
 
   def bonus_to_text(bonus)
     result = "*Бонус #{bonus[:number]}*"
-    if bonus[:name].nil? || (bonus[:number].to_s == bonus[:name])
+    unless bonus[:name].nil? || bonus[:name].empty? || (bonus[:number].to_s == bonus[:name])
       result << " *#{parsed(bonus[:name])}*"
     end
     result << ':'
