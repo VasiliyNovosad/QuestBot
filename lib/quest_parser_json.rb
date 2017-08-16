@@ -27,6 +27,7 @@ class QuestParserJson
     return nil if level_json.nil? || level_json['Level'].nil?
     level.full_info(level_json)
   rescue => detail
+    print detail.message
     print detail.backtrace.join("\n")
     return nil
   end
@@ -37,6 +38,7 @@ class QuestParserJson
     return nil if level_json.nil? || level_json['Level'].nil?
     level.updated_info(level_json, with_q_time)
   rescue => detail
+    print detail.message
     print detail.backtrace.join("\n")
     return nil
   end
@@ -45,7 +47,9 @@ class QuestParserJson
   def send_answer(code)
     resp = send_code(level.id, level.number, code)
     correct_answer?(resp)
-  rescue
+  rescue => detail
+    print detail.message
+    print detail.backtrace.join("\n")
     return nil
   end
 
@@ -55,6 +59,7 @@ class QuestParserJson
     return nil if level_json.nil? || level_json['Level'].nil?
     level.needed_sectors(level_json)
   rescue => detail
+    print detail.message
     print detail.backtrace.join("\n")
     return nil
   end
@@ -65,6 +70,7 @@ class QuestParserJson
     return nil if level_json.nil? || level_json['Level'].nil?
     level.all_bonuses(level_json)
   rescue => detail
+    print detail.message
     print detail.backtrace.join("\n")
     return nil
   end
@@ -75,6 +81,7 @@ class QuestParserJson
     return nil if level_json.nil? || level_json['Level'].nil?
     level.all_sectors(level_json)
   rescue => detail
+    print detail.message
     print detail.backtrace.join("\n")
     return nil
   end
