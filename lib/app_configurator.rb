@@ -10,8 +10,12 @@ class AppConfigurator
     Logger.new(STDOUT, Logger::DEBUG)
   end
 
-  def get_user(name)
-    YAML::load(IO.read('config/secrets.yml'))['users'][name]
+  def get_personal_chat_id
+    YAML::load(IO.read('config/secrets.yml'))['personal_chat_id']
+  end
+
+  def get_admin_id
+    YAML::load(IO.read('config/secrets.yml'))['admin_id']
   end
 
 end
