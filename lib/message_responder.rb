@@ -247,15 +247,16 @@ class MessageResponder
   def on regex, &block
     regex =~ message.text
 
-    if $~
-      case block.arity
-      when 0
-        yield
-      when 1
-        yield $1
-      when 2
-        yield $1, $2
-      end
+    return unless $LAST_MATCH_INFO
+    case block.arity
+    when 0
+      yield
+    when 1
+      yield $1
+    when 2
+      yield $1, $2
+    else
+      nil
     end
   end
 

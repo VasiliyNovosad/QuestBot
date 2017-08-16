@@ -330,29 +330,29 @@ class Level
   def parsed(text)
     result = text
 
-    ire = /<img.+?src="\s*(https?:\/\/.+?)\s*".*?>/
+    ire = %r{<img.+?src="\s*(https?://.+?)\s*".*?>}
     # ireA = /<a.+?href=?"(https?:\/\/.+?.(jpg|png|bmp))?".*?>(.*?)<\/a>/
 
-    reBr = /<\/*br\s*\/?>/
-    reHr = /<hr.*?\/?>/
-    reP = /<p>([^ ]+?)<\/p>/
-    reBold = /<b.*?\/?>(.+?)<\/b>/
-    reStrong = /<strong.*?>(.*?)<\/strong>/
-    reItalic = /<i>(.+?)<\/i>/
-    reStyle = /<style.*?>([\s\S.]*?)<\/style>/
-    reScript = /<script.*?>([\s\S.]*?)<\/script>/
-    reSpan = /<span.*?>([\s\S.]*?)<\/span>/
-    reCenter = /<center>(.+?)<\/center>/
-    reFont = /<font.+?colors*=?["«]?#?(w+)?["»]?.*?>([\s\S.]+?)<\/font>/
-    reA = /<a.+?href=?"(.+?)?".*?>(.+?)<\/a>/
-    reTable = /<table.*?>([\s\S.]*?)<\/table>/
-    reTr = /<tr.*?>([\s\S.]*?)<\/tr>/
-    reTd = /<td.*?>([\s\S.]*?)<\/td>/
+    reBr = %r{</*br\s*/?>}
+    reHr = %r{<hr.*?/?>}
+    reP = %r{<p>([^ ]+?)</p>}
+    reBold = %r{<b.*?/?>(.+?)</b>}
+    reStrong = %r{<strong.*?>(.*?)</strong>}
+    reItalic = %r{<i>(.+?)</i>}
+    reStyle = %r{<style.*?>([\s\S.]*?)</style>}
+    reScript = %r{<script.*?>([\s\S.]*?)</script>}
+    reSpan = %r{<span.*?>([\s\S.]*?)</span>}
+    reCenter = %r{<center>(.+?)</center>}
+    reFont = %r{<font.+?colors*=?["«]?#?(w+)?["»]?.*?>([\s\S.]+?)</font>}
+    reA = %r{<a.+?href=?"(.+?)?".*?>(.+?)</a>}
+    reTable = %r{<table.*?>([\s\S.]*?)</table>}
+    reTr = %r{<tr.*?>([\s\S.]*?)</tr>}
+    reTd = %r{<td.*?>([\s\S.]*?)</td>}
 
     # <a href="geo:49.976136, 36.267256">49.976136, 36.267256</a>
-    geoHrefRe = /<a.+?href="geo:(\d{2}[.,]\d{3,}),?\s*(\d{2}[.,]\d{3,})">(.+?)<\/a>/
+    geoHrefRe = %r{<a.+?href="geo:(\d{2}[.,]\d{3,}),?\s*(\d{2}[.,]\d{3,})">(.+?)</a>}
     # <a href="https://www.google.com.ua/maps/@50.0363257,36.2120039,19z" target="blank">50.036435 36.211914</a>
-		hrefRe = /<a.+?href="https?:\/\/.+?(\d{2}[.,]\d{3,}),?\s*(\d{2}[.,]\d{3,}).*?">(.+?)<\/a>/
+		hrefRe = %r{<a.+?href="https?://.+?(\d{2}[.,]\d{3,}),?\s*(\d{2}[.,]\d{3,}).*?">(.+?)</a>}
     # 49.976136, 36.267256
     numbersRe = /(\d{2}[.,]\d{3,}),?\s*(\d{2}[.,]\d{3,})/
 
