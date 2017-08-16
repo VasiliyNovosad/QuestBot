@@ -52,24 +52,24 @@ class MessageResponder
       end
     end
 
-    on %r{^\/help$} do
-      logger.debug "@#{message.from.username}: #{message.text}"
-      text = 'List of commands:
-/start <domain_name>;<game_id>
-/stop
-/restart
-/starttimer
-/starttimer <secs>
-/stoptimer
-/+
-/*
-/-
-/-+
-/. <answer1> <answer2> ... <answern>
-. <answer1> <answer2> ... <answern>
-/.<answer> or /,<answer> or .<answer> or ,<answer>'
-      answer_with_message(text, chat || message.chat)
-    end
+#     on %r{^\/help$} do
+#       logger.debug "@#{message.from.username}: #{message.text}"
+#       text = 'List of commands:
+# /start <domain_name>;<game_id>
+# /stop
+# /restart
+# /starttimer
+# /starttimer <secs>
+# /stoptimer
+# /+
+# /\\*
+# /-
+# /-+
+# /. <answer1> <answer2> ... <answern>
+# . <answer1> <answer2> ... <answern>
+# /.<answer> or /,<answer> or .<answer> or ,<answer>'
+#       answer_with_message(text, chat || message.chat)
+#     end
 
     on %r{^\/\+$} do
       logger.debug "@#{message.from.username}: #{message.text}"

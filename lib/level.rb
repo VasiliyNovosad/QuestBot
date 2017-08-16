@@ -185,7 +185,7 @@ class Level
 
   def load_updated_info(level_json, with_q_time = false)
     result = ''
-    if with_q_time
+    if with_q_time && level_json['TimeoutSecondsRemain'] > 0
       result << '*Автоперехід* через '
       result << "*#{seconds_to_string(level_json['TimeoutSecondsRemain'])}*\n\n"
     end
@@ -219,10 +219,10 @@ class Level
     result = ''
     bonuses_json.each do |rec|
       bonuses = @bonuses.select { |h| h[:id] == rec['BonusId'] }
-      continue if bonuses.empty?
+      next if bonuses.empty?
       bonus = bonuses[0]
       new_bonus = json_to_bonus(rec)
-      continue if bonuses_identical?(bonus, new_bonus)
+      next if bonuses_identical?(bonus, new_bonus)
       result << bonus_to_text(new_bonus)
     end
     result
@@ -293,7 +293,7 @@ class Level
     result = ''
     sectors_json.each do |rec|
       sectors = @sectors.select { |h| h[:id] == rec['SectorId'] }
-      continue if sectors.empty?
+      next if sectors.empty?
       sector = sectors[0]
       new_sector = json_to_sector(rec)
       if sector[:answered] != new_sector[:answered]
