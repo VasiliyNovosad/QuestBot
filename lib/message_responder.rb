@@ -269,7 +269,7 @@ class MessageResponder
   def on regex, &block
     regex =~ message.text
 
-    return unless $LAST_MATCH_INFO
+    return unless $~
     case block.arity
     when 0
       yield
