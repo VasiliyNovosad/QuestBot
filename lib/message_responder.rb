@@ -25,6 +25,7 @@ class MessageResponder
 
     on %r{^\/stop$} do
       logger.debug "@#{message.from.username}: #{message.text}"
+      return if message.from.id != AppConfigurator.get_admin_id
       return if message.chat.id != AppConfigurator.get_personal_chat_id
       @parser = nil
       @chat = nil
@@ -32,6 +33,7 @@ class MessageResponder
 
     on %r{^\/start } do
       logger.debug "@#{message.from.username}: #{message.text}"
+      return if message.from.id != AppConfigurator.get_admin_id
       return if message.chat.id != AppConfigurator.get_personal_chat_id
       @parser = QuestParserJson.new(
         message.text[7..-1].strip.split(';')[0],
@@ -42,6 +44,7 @@ class MessageResponder
 
     on %r{^\/restart$} do
       logger.debug "@#{message.from.username}: #{message.text}"
+      return if message.from.id != AppConfigurator.get_admin_id
       return if message.chat.id != AppConfigurator.get_personal_chat_id
       if parser
         domain_name = parser.domain_name
@@ -214,30 +217,35 @@ class MessageResponder
 
     on %r{^\/setlogin } do
       logger.debug "@#{message.from.username}: #{message.text}"
+      return if message.from.id != AppConfigurator.get_admin_id
       return if message.chat.id != AppConfigurator.get_personal_chat_id
       parser.login = message.text[10..-1].strip if parser
     end
 
     on %r{^\/setpassword } do
       logger.debug "@#{message.from.username}: #{message.text}"
+      return if message.from.id != AppConfigurator.get_admin_id
       return if message.chat.id != AppConfigurator.get_personal_chat_id
       parser.password = message.text[13..-1].strip if parser
     end
 
     on %r{^\/setchatcurrent$} do
       logger.debug "@#{message.from.username}: #{message.text}"
+      return if message.from.id != AppConfigurator.get_admin_id
       return if chat.id != message.chat.id && message.chat.id != AppConfigurator.get_personal_chat_id
       @chat = message.chat
     end
 
     on %r{^\/stoptimer$} do
       logger.debug "@#{message.from.username}: #{message.text}"
+      return if message.from.id != AppConfigurator.get_admin_id
       return if message.chat.id != AppConfigurator.get_personal_chat_id
       @start_timer = false
     end
 
     on %r{^\/starttimer } do
       logger.debug "@#{message.from.username}: #{message.text}"
+      return if message.from.id != AppConfigurator.get_admin_id
       return if message.chat.id != AppConfigurator.get_personal_chat_id
       @timer_interval = message.text[12..-1].strip.to_i
       @start_timer = true
@@ -245,6 +253,7 @@ class MessageResponder
 
     on %r{^\/starttimer$} do
       logger.debug "@#{message.from.username}: #{message.text}"
+      return if message.from.id != AppConfigurator.get_admin_id
       return if message.chat.id != AppConfigurator.get_personal_chat_id
       @timer_interval = 5
       @start_timer = true
@@ -273,7 +282,7 @@ class MessageResponder
   end
 
   def answer_with_greeting_message
-    answer_with_message "Hello, #{message.from.first_name}", message.chat
+    answer_with_message "Hello, #{message.from.first_name} (id: #{message.from.id}, chat\\_id: #{message.chat.id})", message.chat
   end
 
   def answer_with_farewell_message
