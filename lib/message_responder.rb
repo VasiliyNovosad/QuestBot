@@ -147,9 +147,9 @@ class MessageResponder
         result = parser.send_answer(code)
         result = parser.send_answer(code) if result.nil?
         if result.nil?
-          text << "помилка надсилання: #{code}"
+          text << "помилка надсилання: #{code.gsub("_", "\\_").gsub("*", "\\*")}"
         else
-          text << result ? "+ #{code}\n" : "- #{code}\n"
+          text << result ? "+ #{code.gsub("_", "\\_").gsub("*", "\\*")}\n" : "- #{code.gsub("_", "\\_").gsub("*", "\\*")}\n"
         end
         sleep 0.1
       end
@@ -166,9 +166,9 @@ class MessageResponder
         result = parser.send_answer(code)
         result = parser.send_answer(code) if result.nil?
         if result.nil?
-          text << "помилка надсилання: #{code}"
+          text << "помилка надсилання: #{code.gsub("_", "\\_").gsub("*", "\\*")}"
         else
-          text << (result ? "+ #{code}\n" : "- #{code}\n")
+          text << (result ? "+ #{code.gsub("_", "\\_").gsub("*", "\\*")}\n" : "- #{code.gsub("_", "\\_").gsub("*", "\\*")}\n")
         end
         sleep 0.1
       end
@@ -187,9 +187,9 @@ class MessageResponder
       # p code
       # sleep 0.2
       if result.nil?
-        answer_with_message "помилка надсилання: #{code}", chat || message.chat
+        answer_with_message "помилка надсилання: #{code.gsub("_", "\\_").gsub("*", "\\*")}", chat || message.chat
       else
-        text = result ? "+ #{code}" : "- #{code}"
+        text = result ? "+ #{code.gsub("_", "\\_").gsub("*", "\\*")}" : "- #{code.gsub("_", "\\_").gsub("*", "\\*")}"
         # p text
         answer_with_message text, chat || message.chat
       end
@@ -207,9 +207,9 @@ class MessageResponder
       # p code
       # sleep 0.2
       if result.nil?
-        answer_with_message "помилка надсилання: #{code}", chat || message.chat
+        answer_with_message "помилка надсилання: #{code.gsub("_", "\\_").gsub("*", "\\*")}", chat || message.chat
       else
-        text = result ? "*+* #{code}" : "*-* #{code}"
+        text = result ? "*+* #{code.gsub("_", "\\_").gsub("*", "\\*")}" : "*-* #{code.gsub("_", "\\_").gsub("*", "\\*")}"
         # p text
         answer_with_message text, chat || message.chat
       end
@@ -232,7 +232,7 @@ class MessageResponder
     on %r{^\/setchatcurrent$} do
       logger.debug "@#{message.from.username}: #{message.text}"
       return if message.from.id != AppConfigurator.get_admin_id
-      return if chat.id != message.chat.id && message.chat.id != AppConfigurator.get_personal_chat_id
+      # return if chat.id != message.chat.id && message.chat.id != AppConfigurator.get_personal_chat_id
       @chat = message.chat
     end
 

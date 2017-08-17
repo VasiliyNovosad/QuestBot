@@ -116,7 +116,7 @@ class Level
   def penalty_help_to_text(help)
     result = "*Штрафна підказка #{help[:number]}*: "
     if help[:remains].zero?
-      result << "\n#{parsed(help[:text])}\n\n"
+      result << "\n#{parsed(help[:text])}\n\n" unless help[:text].nil?
     else
       result << "буде через *#{seconds_to_string(help[:remains])}*\n\n"
     end
