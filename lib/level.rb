@@ -384,7 +384,7 @@ class Level
     mrStyle.each { |match| result = result.gsub(match[0], '') }
     mrScript = result.to_enum(:scan, reScript).map { Regexp.last_match }
     mrScript.each { |match| result = result.gsub(match[0], '') }
-    result = result.gsub("_", "\\_")
+    result = result.gsub("_", "\\_").gsub("*", "\\*")
     mrFont = result.to_enum(:scan, reFont).map { Regexp.last_match }
     mrFont.each { |match| result = result.gsub(match[0], match[2]) }
     mrBold = result.to_enum(:scan, reBold).map { Regexp.last_match }
