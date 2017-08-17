@@ -1,5 +1,5 @@
 class Level
-  attr_reader :id, :number
+  attr_reader :id, :number, :has_answer_block_rule
   def initialize(level_json)
     load_level_from_json(level_json)
   end
