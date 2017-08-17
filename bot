@@ -23,7 +23,7 @@ threads << Thread.new do
     bot.listen do |message|
       if message.text && message.text.lines.count == 1
         options = { bot: bot, message: message, logger: logger }
-        logger.debug "@#{message.from.username}: #{message.text}"
+        # logger.debug "@#{message.from.username}: #{message.text}"
         message_responder ||= MessageResponder.new(options)
         message_responder.message = message
         message_responder.respond
