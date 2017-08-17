@@ -5,7 +5,7 @@ require './lib/app_configurator'
 class MessageResponder
   attr_accessor :message
   attr_reader :bot, :logger
-  attr_accessor :parser, :chat, :timer_interval, :start_timer
+  attr_accessor :parser, :chat, :timer_interval, :start_timer, :block_answer
 
   def initialize(options)
     @bot = options[:bot]
@@ -15,6 +15,7 @@ class MessageResponder
     @start_timer = false
     @chat = @message.chat
     @parser = nil
+    @block_answer = false
   end
 
   def respond
@@ -142,7 +143,7 @@ class MessageResponder
       return if parser.nil?
       return if chat.id != message.chat.id && message.chat.id != AppConfigurator.get_personal_chat_id
       text = ''
-      if parser.level.has_answer_block_rule
+      if block_answer || parser.level.has_answer_block_rule
         text = '*Обмеження на ввід*. Ввід через бот не працює.'
       else
         codes = message.text[3..-1].strip.downcase.split(' ')
@@ -166,7 +167,7 @@ class MessageResponder
       return if chat.id != message.chat.id && message.chat.id != AppConfigurator.get_personal_chat_id
       codes = message.text[2..-1].strip.downcase.split(' ')
       text = ''
-      if parser.level.has_answer_block_rule
+      if block_answer || parser.level.has_answer_block_rule
         text = '*Обмеження на ввід*. Ввід через бот не працює.'
       else
         codes.each do |code|
@@ -187,7 +188,7 @@ class MessageResponder
       logger.debug "@#{message.from.username}: #{message.text}"
       return if parser.nil?
       return if chat.id != message.chat.id && message.chat.id != AppConfigurator.get_personal_chat_id
-      if parser.level.has_answer_block_rule
+      if block_answer || parser.level.has_answer_block_rule
         text = '*Обмеження на ввід*. Ввід через бот не працює.'
         answer_with_message text, chat || message.chat
         return
@@ -212,7 +213,7 @@ class MessageResponder
       logger.debug "@#{message.from.username}: #{message.text}"
       return if parser.nil?
       return if chat.id != message.chat.id && message.chat.id != AppConfigurator.get_personal_chat_id
-      if parser.level.has_answer_block_rule
+      if block_answer || parser.level.has_answer_block_rule
         text = '*Обмеження на ввід*. Ввід через бот не працює.'
         answer_with_message text, chat || message.chat
         return
@@ -238,6 +239,20 @@ class MessageResponder
       return if message.from.id != AppConfigurator.get_admin_id
       return if message.chat.id != AppConfigurator.get_personal_chat_id
       parser.login = message.text[10..-1].strip if parser
+    end
+
+    on %r{^\/off$} do
+      logger.debug "@#{message.from.username}: #{message.text}"
+      return if message.from.id != AppConfigurator.get_admin_id
+      return if message.chat.id != AppConfigurator.get_personal_chat_id
+      @block_answer = true
+    end
+
+    on %r{^\/on$} do
+      logger.debug "@#{message.from.username}: #{message.text}"
+      return if message.from.id != AppConfigurator.get_admin_id
+      return if message.chat.id != AppConfigurator.get_personal_chat_id
+      @block_answer = false
     end
 
     on %r{^\/setpassword } do
