@@ -116,7 +116,9 @@ class Level
   def penalty_help_to_text(help)
     result = "*Штрафна підказка #{help[:number]}*: "
     if help[:remains].zero?
-      result << "\n#{parsed(help[:text])}\n\n" unless help[:text].nil?
+      result << "\n*Опис*: #{parsed(help[:comment])}" unless help[:comment].nil?
+      result << "\n*Підказка*: #{parsed(help[:text])}" unless help[:text].nil?
+      result << "\n*Штраф*: #{seconds_to_string(help[:penalty])}\n\n"
     else
       result << "буде через *#{seconds_to_string(help[:remains])}*\n\n"
     end
@@ -191,6 +193,7 @@ class Level
     end
     result << task_updated(level_json['Tasks'])
     result << helps_updated(level_json['Helps'])
+    result << penalty_helps_updated(level_json['PenaltyHelps'])
     result << bonuses_updated(level_json['Bonuses'])
     result << sectors_updated(level_json['Sectors'])
     result << messages_updated(level_json['Messages'])
@@ -209,6 +212,24 @@ class Level
         if help[:text] != help_json['HelpText']
           help = json_to_help(help_json)
           result << help_to_text(help)
+        end
+      end
+    end
+    result
+  end
+
+  def penalty_helps_updated(helps_json)
+    result = ''
+    helps_json.each do |help_json|
+      help = @helps.select { |h| h[:id] == help_json['HelpId'] }
+      if help.empty?
+        help = json_to_penalty_help(help_json)
+        result << penalty_help_to_text(help)
+      else
+        help = help[0]
+        if help[:comment] != help_json['PenaltyComment'] || help[:message] != help_json['PenaltyMessage']
+          help = json_to_penalty_help(help_json)
+          result << penalty_help_to_text(help)
         end
       end
     end
@@ -262,12 +283,14 @@ class Level
 
   def json_to_penalty_help(help_json)
     {
+      id: help_json['HelpId'],
       number: help_json['Number'],
       text: help_json['HelpText'],
       message: help_json['PenaltyMessage'],
       remains: help_json['RemainSeconds'],
       penalty: help_json['Penalty'],
-      comment: help_json['PenaltyComment']
+      comment: help_json['PenaltyComment'],
+      state: help_json['PenaltyHelpState']
     }
   end
 
