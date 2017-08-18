@@ -358,14 +358,14 @@ class Level
 
     reBr = %r{</*br\s*/?>}
     reHr = %r{<hr.*?/?>}
-    reP = %r{<p>([^ ]+?)</p>}
+    reP = %r{<p>([^ \s\S]+?)</p>}
     reBold = %r{<b.*?/?>(.+?)</b>}
-    reStrong = %r{<strong.*?>(.*?)</strong>}
-    reItalic = %r{<i>(.+?)</i>}
+    reStrong = %r{<strong.*?>([\s\S.]*?)</strong>}
+    reItalic = %r{<i>([\s\S.]+?)</i>}
     reStyle = %r{<style.*?>([\s\S.]*?)</style>}
     reScript = %r{<script.*?>([\s\S.]*?)</script>}
     reSpan = %r{<span.*?>([\s\S.]*?)</span>}
-    reCenter = %r{<center>(.+?)</center>}
+    reCenter = %r{<center>([\s\S.]+?)</center>}
     reFont = %r{<font.+?colors*=?["«]?#?(w+)?["»]?.*?>([\s\S.]+?)</font>}
     reA = %r{<a.+?href=?"(.+?)?".*?>(.+?)</a>}
     reTable = %r{<table.*?>([\s\S.]*?)</table>}
