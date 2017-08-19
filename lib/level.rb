@@ -221,7 +221,7 @@ class Level
   def penalty_helps_updated(helps_json)
     result = ''
     helps_json.each do |help_json|
-      help = @helps.select { |h| h[:id] == help_json['HelpId'] }
+      help = @penalty_helps.select { |h| h[:id] == help_json['HelpId'] }
       if help.empty?
         help = json_to_penalty_help(help_json)
         result << penalty_help_to_text(help)
