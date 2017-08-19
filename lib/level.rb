@@ -227,7 +227,7 @@ class Level
         result << penalty_help_to_text(help)
       else
         help = help[0]
-        if help[:comment] != help_json['PenaltyComment'] || help[:message] != help_json['PenaltyMessage']
+        if help_json['RemainSeconds'].zero? && (help[:comment] != help_json['PenaltyComment'] || help[:message] != help_json['PenaltyMessage'])
           help = json_to_penalty_help(help_json)
           result << penalty_help_to_text(help)
         end
