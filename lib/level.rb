@@ -336,7 +336,7 @@ class Level
       message = @messages.select { |h| h[:id] == message_json['MessageId'] }
       if message.empty? || message[0][:text] != message_json['MessageText']
         result << "*Повідомлення* від *#{parsed(message_json['OwnerLogin'])}*: "
-        result << "#{parser(message_json['MessageText'])}\n\n"
+        result << "#{parsed(message_json['MessageText'])}\n\n"
       end
     end
     result
