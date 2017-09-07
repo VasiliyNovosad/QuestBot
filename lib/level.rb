@@ -354,7 +354,7 @@ class Level
     result = text
 
     ire = %r{<img.+?src="\s*(https?://.+?)\s*".*?>}
-    # ireA = /<a.+?href=?"(https?:\/\/.+?.(jpg|png|bmp))?".*?>(.*?)<\/a>/
+    ireA = /<a.+?href=?"(https?:\/\/.+?.(jpg|png|bmp))?".*?>(.*?)<\/a>/
 
     reBr = %r{</*br\s*/?>}
     reHr = %r{<hr.*?/?>}
@@ -401,8 +401,8 @@ class Level
     mrCenter.each { |match| result = result.gsub(match[0], match[1]) }
     mre = result.to_enum(:scan, ire).map { Regexp.last_match }
     mre.each { |match| result = result.gsub(match[0], match[1]) }
-    # mreA = result.to_enum(:scan, ireA).map { Regexp.last_match }
-    # mreA.each { |match| result.gsub!(match[0], "[#{match[2]}](#{match[1]})") }
+    mreA = result.to_enum(:scan, ireA).map { Regexp.last_match }
+    mreA.each { |match| result.gsub!(match[0], "[#{match[1]}](#{match[1]})") }
     mrA = result.to_enum(:scan, reA).map { Regexp.last_match }
     mrA.each { |match| result = result.gsub(match[0], "[#{match[2]}](#{match[1]})") }
     mrP = result.to_enum(:scan, reP).map { Regexp.last_match }
