@@ -372,6 +372,8 @@ class Level
     reTr = %r{<tr.*?>([\s\S.]*?)</tr>}
     reTd = %r{<td.*?>([\s\S.]*?)</td>}
 
+
+    # <a href="https://www.google.com.ua/maps/place/50%C2%B044'33.4%22N+25%C2%B028'26.2%22E/@50.7407788,25.4743992,378m/data=!3m1!1e3!4m5!3m4!1s0x0:0x0!8m2!3d50.7426!4d25.473939?hl=uk" target="blank">50.742600,25.473939</a>
     # <a href="geo:49.976136, 36.267256">49.976136, 36.267256</a>
     geoHrefRe = %r{<a.+?href="geo:(\d{2}[.,]\d{3,}),?\s*(\d{2}[.,]\d{3,})">(.+?)</a>}
     # <a href="https://www.google.com.ua/maps/@50.0363257,36.2120039,19z" target="blank">50.036435 36.211914</a>
