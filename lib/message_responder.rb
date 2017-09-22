@@ -5,7 +5,7 @@ require './lib/app_configurator'
 class MessageResponder
   attr_accessor :message
   attr_reader :bot, :logger
-  attr_accessor :parser, :chat, :timer_interval, :start_timer, :block_answer
+  attr_accessor :parser, :chat, :timer_interval, :start_timer, :block_answer, :blocked_answer
 
   def initialize(options)
     @bot = options[:bot]
@@ -16,6 +16,7 @@ class MessageResponder
     @chat = @message.chat
     @parser = nil
     @block_answer = false
+    @blocked_answer = true
   end
 
   def respond
@@ -143,20 +144,26 @@ class MessageResponder
       return if parser.nil?
       return if chat.id != message.chat.id && message.chat.id != AppConfigurator.get_personal_chat_id
       text = ''
-      if block_answer || parser.level.has_answer_block_rule
-        text = '*Обмеження на ввід*. Ввід через бот не працює.'
-      else
-        codes = message.text[3..-1].strip.downcase.split(' ')
-        codes.each do |code|
-          result = parser.send_answer(code)
-          result = parser.send_answer(code) if result.nil?
-          if result.nil?
-            text << "помилка надсилання: #{code.gsub("_", "\\_").gsub("*", "\\*")}"
-          else
-            text << result ? "+ #{code.gsub("_", "\\_").gsub("*", "\\*")}\n" : "- #{code.gsub("_", "\\_").gsub("*", "\\*")}\n"
-          end
-          sleep 0.1
+      if block_answer
+        text = '*Ввід через бот відключено*'
+        answer_with_message text, chat || message.chat
+        return
+      end
+      if parser.level.has_answer_block_rule && blocked_answer
+        text = '*Обмеження на ввід*. Ввід через бот відключено'
+        answer_with_message text, chat || message.chat
+        return
+      end
+      codes = message.text[3..-1].strip.downcase.split(' ')
+      codes.each do |code|
+        result = parser.send_answer(code)
+        result = parser.send_answer(code) if result.nil?
+        if result.nil?
+          text << "помилка надсилання: #{code.gsub("_", "\\_").gsub("*", "\\*")}"
+        else
+          text << result ? "+ #{code.gsub("_", "\\_").gsub("*", "\\*")}\n" : "- #{code.gsub("_", "\\_").gsub("*", "\\*")}\n"
         end
+        sleep 0.1
       end
       answer_with_message text, chat || message.chat
     end
@@ -167,19 +174,25 @@ class MessageResponder
       return if chat.id != message.chat.id && message.chat.id != AppConfigurator.get_personal_chat_id
       codes = message.text[2..-1].strip.downcase.split(' ')
       text = ''
-      if block_answer || parser.level.has_answer_block_rule
-        text = '*Обмеження на ввід*. Ввід через бот не працює.'
-      else
-        codes.each do |code|
-          result = parser.send_answer(code)
-          result = parser.send_answer(code) if result.nil?
-          if result.nil?
-            text << "помилка надсилання: #{code.gsub("_", "\\_").gsub("*", "\\*")}"
-          else
-            text << (result ? "+ #{code.gsub("_", "\\_").gsub("*", "\\*")}\n" : "- #{code.gsub("_", "\\_").gsub("*", "\\*")}\n")
-          end
-          sleep 0.1
+      if block_answer
+        text = '*Ввід через бот відключено*'
+        answer_with_message text, chat || message.chat
+        return
+      end
+      if parser.level.has_answer_block_rule && blocked_answer
+        text = '*Обмеження на ввід*. Ввід через бот відключено'
+        answer_with_message text, chat || message.chat
+        return
+      end
+      codes.each do |code|
+        result = parser.send_answer(code)
+        result = parser.send_answer(code) if result.nil?
+        if result.nil?
+          text << "помилка надсилання: #{code.gsub("_", "\\_").gsub("*", "\\*")}"
+        else
+          text << (result ? "+ #{code.gsub("_", "\\_").gsub("*", "\\*")}\n" : "- #{code.gsub("_", "\\_").gsub("*", "\\*")}\n")
         end
+        sleep 0.1
       end
       answer_with_message text, chat || message.chat
     end
@@ -188,8 +201,13 @@ class MessageResponder
       logger.debug "@#{message.from.username}: #{message.text}"
       return if parser.nil?
       return if chat.id != message.chat.id && message.chat.id != AppConfigurator.get_personal_chat_id
-      if block_answer || parser.level.has_answer_block_rule
-        text = '*Обмеження на ввід*. Ввід через бот не працює.'
+      if block_answer
+        text = '*Ввід через бот відключено*'
+        answer_with_message text, chat || message.chat
+        return
+      end
+      if parser.level.has_answer_block_rule && blocked_answer
+        text = '*Обмеження на ввід*. Ввід через бот відключено'
         answer_with_message text, chat || message.chat
         return
       end
@@ -213,8 +231,13 @@ class MessageResponder
       logger.debug "@#{message.from.username}: #{message.text}"
       return if parser.nil?
       return if chat.id != message.chat.id && message.chat.id != AppConfigurator.get_personal_chat_id
-      if block_answer || parser.level.has_answer_block_rule
-        text = '*Обмеження на ввід*. Ввід через бот не працює.'
+      if block_answer
+        text = '*Ввід через бот відключено*'
+        answer_with_message text, chat || message.chat
+        return
+      end
+      if parser.level.has_answer_block_rule && blocked_answer
+        text = '*Обмеження на ввід*. Ввід через бот відключено'
         answer_with_message text, chat || message.chat
         return
       end
@@ -253,6 +276,20 @@ class MessageResponder
       return if message.from.id != AppConfigurator.get_admin_id
       return if message.chat.id != AppConfigurator.get_personal_chat_id
       @block_answer = false
+    end
+
+    on %r{^\/bloff$} do
+      logger.debug "@#{message.from.username}: #{message.text}"
+      return if message.from.id != AppConfigurator.get_admin_id
+      return if message.chat.id != AppConfigurator.get_personal_chat_id
+      @blocked_answer = true
+    end
+
+    on %r{^\/blon$} do
+      logger.debug "@#{message.from.username}: #{message.text}"
+      return if message.from.id != AppConfigurator.get_admin_id
+      return if message.chat.id != AppConfigurator.get_personal_chat_id
+      @blocked_answer = false
     end
 
     on %r{^\/setpassword } do

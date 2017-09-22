@@ -4,14 +4,14 @@ class Level
     load_level_from_json(level_json)
   end
 
-  def full_info(level_json)
+  def full_info(level_json, by_timer = false)
     load_level_from_json(level_json)
-    full_level_info
+    full_level_info(by_timer)
   end
 
   def updated_info(level_json, with_q_time = false)
     if level_json['Level']['LevelId'] != @id
-      full_info(level_json)
+      full_info(level_json, !with_q_time)
     else
       result = load_updated_info(level_json['Level'], with_q_time)
       load_level_from_json(level_json)
@@ -21,6 +21,7 @@ class Level
 
   def needed_sectors(level_json)
     load_level_from_json(level_json)
+    return nil if @sectors.count < 2
     result = "Лишилось закрити *#{@sectors_left_to_close}*.\nНезакриті сектори:\n"
     @sectors.each do |sector|
       result << "#{sector[:name]}\n" unless sector[:answered]
@@ -30,6 +31,7 @@ class Level
 
   def all_sectors(level_json)
     load_level_from_json(level_json)
+    return nil if @sectors.count < 2
     result = "Лишилось закрити *#{@sectors_left_to_close}*.\nCектори:\n"
     @sectors.each do |sector|
       result << "#{sector[:name]}: #{sector[:answered] ? sector[:answer][:answer] : '-'}\n"
@@ -39,6 +41,7 @@ class Level
 
   def all_bonuses(level_json)
     load_level_from_json(level_json)
+    return nil if @sectors.count.zero?
     result = ''
     @bonuses.each { |bonus| result << bonus_to_text(bonus) }
     result
@@ -79,8 +82,10 @@ class Level
     { answer: rec['Answer'], user: rec['Login'] }
   end
 
-  def full_level_info
-    result = "*Рівень #{@number} із #{@levels_count}*"
+  def full_level_info(by_timer = false)
+    result = ''
+    result << "\xE2\x80\xBC *UP* \xE2\x80\xBC\n\n" if by_timer
+    result << "*Рівень #{@number} із #{@levels_count}*"
     result << "#{": #{parsed(@name)}" unless @name.nil? || @name.empty?}\n\n"
     if @timeout_seconds_remain > 0
       result << "*Автоперехід* через *#{seconds_to_string(@timeout_seconds_remain)}*\n\n"
