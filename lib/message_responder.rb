@@ -338,8 +338,8 @@ class MessageResponder
       text = message.text[7..-1].strip
       return if text == '' or text.nil?
       answer = "Морзе\n"
-      answer << "En: #{Morze.code_to_text_en(text)}"
-      answer << "Ukr: #{Morze.code_to_text_ukr(text)}"
+      answer << "En: #{Morze.code_to_text_en(text)}\n"
+      answer << "Ukr: #{Morze.code_to_text_ukr(text)}\n"
       answer << "Rus: #{Morze.code_to_text_rus(text)}"
       answer_with_message text, chat || message.chat
     end
@@ -349,8 +349,8 @@ class MessageResponder
       text = message.text[7..-1].strip
       return if text == '' or text.nil?
       answer = "Брайль\n"
-      answer << "En: #{Braille.code_to_text_en(text)}"
-      answer << "Ukr: #{Braille.code_to_text_ukr(text)}"
+      answer << "En: #{Braille.code_to_text_en(text)}\n"
+      answer << "Ukr: #{Braille.code_to_text_ukr(text)}\n"
       answer << "Rus: #{Braille.code_to_text_rus(text)}"
       answer_with_message answer, chat || message.chat
     end
