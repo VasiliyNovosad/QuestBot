@@ -1,6 +1,8 @@
 require './lib/message_sender'
 require './lib/quest_parser_json'
 require './lib/app_configurator'
+require './lib/morze'
+require './lib/braille'
 
 class MessageResponder
   attr_accessor :message
@@ -329,6 +331,28 @@ class MessageResponder
       return if message.chat.id != personal_chat_id
       @timer_interval = 5
       @start_timer = true
+    end
+
+    on %r{^\/morze } do
+      # logger.debug "@#{message.from.username}: #{message.text}"
+      text = message.text[7..-1].strip
+      return if text == '' or text.nil?
+      answer = "Морзе\n"
+      answer << "En: #{Morze.code_to_text_en(text)}"
+      answer << "Ukr: #{Morze.code_to_text_ukr(text)}"
+      answer << "Rus: #{Morze.code_to_text_rus(text)}"
+      answer_with_message text, chat || message.chat
+    end
+
+    on %r{^\/brail } do
+      # logger.debug "@#{message.from.username}: #{message.text}"
+      text = message.text[7..-1].strip
+      return if text == '' or text.nil?
+      answer = "Брайль\n"
+      answer << "En: #{Braille.code_to_text_en(text)}"
+      answer << "Ukr: #{Braille.code_to_text_ukr(text)}"
+      answer << "Rus: #{Braille.code_to_text_rus(text)}"
+      answer_with_message answer, chat || message.chat
     end
   end
 
