@@ -341,7 +341,7 @@ class MessageResponder
       answer << "En: #{Morze.code_to_text_en(text)}\n"
       answer << "Ukr: #{Morze.code_to_text_ukr(text)}\n"
       answer << "Rus: #{Morze.code_to_text_rus(text)}"
-      answer_with_message text, chat || message.chat
+      answer_with_message answer, chat || message.chat
     end
 
     on %r{^\/brail } do
