@@ -352,7 +352,11 @@ class MessageResponder
       answer << "En: #{Braille.code_to_text_en(text)}\n"
       answer << "Ukr: #{Braille.code_to_text_ukr(text)}\n"
       answer << "Rus: #{Braille.code_to_text_rus(text)}"
-      answer_with_message answer, chat || message.chat
+      answer_with_message answer, message.chat
+    end
+
+    on %r{^\/mend$} do
+      answer_with_photo('../images/mendeleev.jpg', message.chat)
     end
   end
 
@@ -433,5 +437,9 @@ class MessageResponder
 
   def answer_with_message(text, chat)
     MessageSender.new(bot: bot, chat: chat, text: text).send
+  end
+
+  def answer_with_photo(file_name, chat)
+    MessageSender.new(bot: bot, chat: chat, text: file_name).send
   end
 end
