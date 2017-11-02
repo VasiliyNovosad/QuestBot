@@ -443,6 +443,6 @@ class MessageResponder
   end
 
   def answer_with_photo(file_name, chat)
-    MessageSender.new(bot: bot, chat: chat, text: file_name).send
+    MessageSender.new(bot: bot, chat: chat, text: file_name).send_photo
   end
 end
