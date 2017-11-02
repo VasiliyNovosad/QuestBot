@@ -359,7 +359,7 @@ class MessageResponder
     end
 
     on %r{^\/mend$} do
-      answer_with_photo('../images/mendeleev.jpg', message.chat)
+      answer_with_photo('/images/mendeleev.jpg', message.chat)
     end
   end
 
