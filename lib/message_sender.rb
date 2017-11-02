@@ -28,7 +28,7 @@ class MessageSender
   end
 
   def send_photo
-    bot.api.send_photo(chat_id: chat.id, photo: Faraday::UploadIO.new(File.expand_path(File.dirname(__FILE__)) + '/' + text, 'image/jpeg'))
+    bot.api.send_photo(chat_id: chat.id, photo: Faraday::UploadIO.new(text, 'image/jpeg'))
   end
 
   private
