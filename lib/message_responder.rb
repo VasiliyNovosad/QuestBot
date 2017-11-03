@@ -359,15 +359,51 @@ class MessageResponder
     end
 
     on %r{^\/mend$} do
-      answer_with_photo('/images/mendeleev.jpeg', message.chat)
+      answer_with_photo('/images/mendeleev.jpg', message.chat)
     end
 
-    on %r{^\/brru$} do
-      answer_with_photo('/images/braille-ru.jpeg', message.chat)
+    on %r{^\/flagen$} do
+      answer_with_photo('/images/flags-en.jpg', message.chat)
     end
 
-    on %r{^\/bren$} do
-      answer_with_photo('/images/braille-en.jpeg', message.chat)
+    on %r{^\/flagru$} do
+      answer_with_photo('/images/flags-ru.jpg', message.chat)
+    end
+
+    on %r{^\/dance$} do
+      answer_with_photo('/images/dancing.jpg', message.chat)
+    end
+
+    on %r{^\/masson$} do
+      answer_with_photo('/images/masson.jpg', message.chat)
+    end
+
+    on %r{^\/moon$} do
+      answer_with_photo('/images/moon-en.jpg', message.chat)
+    end
+
+    on %r{^\/shadow$} do
+      answer_with_photo('/images/shadow.jpg', message.chat)
+    end
+
+    on %r{^\/semafor$} do
+      answer_with_photo('/images/semafor.jpg', message.chat)
+    end
+
+    on %r{^\/brailru$} do
+      answer_with_photo('/images/braille-ru.jpg', message.chat)
+    end
+
+    on %r{^\/brailen$} do
+      answer_with_photo('/images/braille-en.jpg', message.chat)
+    end
+
+    on %r{^\/morzeru$} do
+      answer_with_photo('/images/morze-ru.jpg', message.chat)
+    end
+
+    on %r{^\/morzeen$} do
+      answer_with_photo('/images/morze-en.jpg', message.chat)
     end
   end
 
