@@ -361,6 +361,14 @@ class MessageResponder
     on %r{^\/mend$} do
       answer_with_photo('/images/mendeleev.jpeg', message.chat)
     end
+
+    on %r{^\/brru$} do
+      answer_with_photo('/images/braille-ru.jpeg', message.chat)
+    end
+
+    on %r{^\/bren$} do
+      answer_with_photo('/images/braille-en.jpeg', message.chat)
+    end
   end
 
   def send_message_by_timer
