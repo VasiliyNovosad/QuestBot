@@ -409,6 +409,10 @@ class MessageResponder
     on %r{^\/alph$} do
       answer_with_photo('/images/alphabets.jpg', message.chat)
     end
+
+    on %r{^\/ascii$} do
+      answer_with_photo('/images/ascii.jpg', message.chat)
+    end
   end
 
   def send_message_by_timer
