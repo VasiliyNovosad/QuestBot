@@ -370,6 +370,10 @@ class MessageResponder
       answer_with_photo('/images/flags-ru.jpg', message.chat)
     end
 
+    on %r{^\/flags$} do
+      answer_with_photo('/images/flags.jpg', message.chat)
+    end
+
     on %r{^\/dance$} do
       answer_with_photo('/images/dancing.jpg', message.chat)
     end
