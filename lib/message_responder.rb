@@ -439,7 +439,7 @@ class MessageResponder
   end
 
   def send_message_by_timer
-    send_updated_level(chat, false, block_sector_update) if start_timer && parser
+    send_updated_level(chat, false) if start_timer && parser
   end
 
   private
@@ -468,8 +468,8 @@ class MessageResponder
     answer_with_message 'farewell_message', message.chat
   end
 
-  def send_updated_level(chat, with_q_time = true, block_sector = false)
-    updated_info = parser.updated_info(with_q_time, block_sector)
+  def send_updated_level(chat, with_q_time = true)
+    updated_info = parser.updated_info(with_q_time)
     send_level_text(updated_info, chat) unless updated_info.nil?
   end
 

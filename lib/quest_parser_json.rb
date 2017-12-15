@@ -33,10 +33,10 @@ class QuestParserJson
   end
 
   # Get updated info for current level
-  def updated_info(with_q_time, block_sector = false)
+  def updated_info(with_q_time)
     level_json = get_level
     return nil if level_json.nil? || level_json['Level'].nil?
-    level.updated_info(level_json, with_q_time, block_sector)
+    level.updated_info(level_json, with_q_time, block_sector_update)
   rescue => detail
     print detail.message
     print detail.backtrace.join("\n")
