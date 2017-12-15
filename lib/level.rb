@@ -121,8 +121,8 @@ class Level
   def penalty_help_to_text(help)
     result = "*Штрафна підказка #{help[:number]}*: "
     if help[:remains].zero?
-      result << "\n*Опис*: #{parsed(help[:comment])}" unless help[:comment].nil?
-      result << "\n*Підказка*: #{parsed(help[:text])}" unless help[:text].nil?
+      result << "\n*Опис*: #{parsed(help[:comment])}" unless help[:comment].nil? || help[:comment] == ''
+      result << "\n*Підказка*: #{parsed(help[:text])}" unless help[:text].nil? || help[:text] == ''
       result << "\n*Штраф*: #{seconds_to_string(help[:penalty])}\n\n"
     else
       result << "буде через *#{seconds_to_string(help[:remains])}*\n\n"
@@ -146,10 +146,10 @@ class Level
       result << "закрито кодом *#{parsed(bonus[:answer][:answer])}*\n"
     end
     result << "не закрито\n" if bonus[:expired]
-    unless bonus[:task].nil? || bonus[:task].empty? || bonus[:answered]
+    unless bonus[:task].nil? || parsed(bonus[:task]).empty? || bonus[:answered]
       result << "*Завдання*: #{parsed(bonus[:task])}\n"
     end
-    unless bonus[:help].nil? || bonus[:help].empty?
+    unless bonus[:help].nil? || parsed(bonus[:help]).strip.empty?
       result << "*Підказка*: #{parsed(bonus[:help])}\n"
     end
     result << "\n"
@@ -363,8 +363,8 @@ class Level
 
     reBr = %r{</*br\s*/?>}
     reHr = %r{<hr.*?/?>}
-    reP = %r{<p>([^ \s\S]+?)</p>}
-    reBold = %r{<b.*?/?>(.+?)</b>}
+    reP = %r{<p>([\s\S.]+?)</p>}
+    reBold = %r{<b.*?/?>([\s\S.]+?)</b>}
     reStrong = %r{<strong.*?>([\s\S.]*?)</strong>}
     reItalic = %r{<i>([\s\S.]+?)</i>}
     reStyle = %r{<style.*?>([\s\S.]*?)</style>}

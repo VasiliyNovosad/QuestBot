@@ -19,8 +19,8 @@ class MessageResponder
     @parser = nil
     @block_answer = false
     @blocked_answer = true
-    @admin_id = ENV['ADMIN_ID'].to_i || AppConfigurator.get_admin_id
-    @personal_chat_id = ENV['PERSONAL_CHAT_ID'].to_i || AppConfigurator.get_personal_chat_id
+    @admin_id = (ENV['ADMIN_ID']).to_i
+    @personal_chat_id = (ENV['PERSONAL_CHAT_ID']).to_i
   end
 
   def respond
