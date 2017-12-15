@@ -9,7 +9,7 @@ class QuestParserJson
   FORMAT_URL = '?json=1'.freeze
 
   attr_accessor :domain_name, :game_id, :login,
-                :password, :cookie, :errors, :level
+                :password, :cookie, :errors, :level, :block_sector_update
 
   def initialize(domain_name, game_id)
     @domain_name = domain_name
@@ -19,6 +19,7 @@ class QuestParserJson
     @login = nil
     @password = nil
     @errors = nil
+    @block_sector_update = false
   end
 
   # Get full info for current level

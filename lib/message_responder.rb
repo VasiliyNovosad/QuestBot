@@ -5,7 +5,7 @@ require './lib/morze'
 require './lib/braille'
 
 class MessageResponder
-  attr_accessor :message, :block_sector_update, :blocked_answer
+  attr_accessor :message, :blocked_answer
   attr_reader :bot, :logger, :admin_id, :personal_chat_id
   attr_accessor :parser, :chat, :timer_interval, :start_timer, :block_answer
 
@@ -21,7 +21,6 @@ class MessageResponder
     @blocked_answer = true
     @admin_id = ENV['ADMIN_ID'].to_i || AppConfigurator.get_admin_id
     @personal_chat_id = ENV['PERSONAL_CHAT_ID'].to_i || AppConfigurator.get_personal_chat_id
-    @block_sector_update = false
   end
 
   def respond
