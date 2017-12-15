@@ -9,11 +9,11 @@ class Level
     full_level_info(by_timer)
   end
 
-  def updated_info(level_json, with_q_time = false)
+  def updated_info(level_json, with_q_time = false, block_sector = false)
     if level_json['Level']['LevelId'] != @id
       full_info(level_json, !with_q_time)
     else
-      result = load_updated_info(level_json['Level'], with_q_time)
+      result = load_updated_info(level_json['Level'], with_q_time, block_sector)
       load_level_from_json(level_json)
       result
     end
@@ -190,7 +190,7 @@ class Level
     result << "* за *#{seconds_to_string(@attemts_period)}*\n\n"
   end
 
-  def load_updated_info(level_json, with_q_time = false)
+  def load_updated_info(level_json, with_q_time = false, block_sector = false)
     result = ''
     if with_q_time && level_json['TimeoutSecondsRemain'] > 0
       result << '*Автоперехід* через '
@@ -199,8 +199,8 @@ class Level
     result << task_updated(level_json['Tasks'])
     result << helps_updated(level_json['Helps'])
     result << penalty_helps_updated(level_json['PenaltyHelps'])
-    result << bonuses_updated(level_json['Bonuses'])
-    result << sectors_updated(level_json['Sectors'])
+    result << bonuses_updated(level_json['Bonuses']) unless block_sector
+    result << sectors_updated(level_json['Sectors']) unless block_sector
     result << messages_updated(level_json['Messages'])
     result
   end

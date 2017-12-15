@@ -5,9 +5,9 @@ require './lib/morze'
 require './lib/braille'
 
 class MessageResponder
-  attr_accessor :message
+  attr_accessor :message, :block_sector_update, :blocked_answer
   attr_reader :bot, :logger, :admin_id, :personal_chat_id
-  attr_accessor :parser, :chat, :timer_interval, :start_timer, :block_answer, :blocked_answer
+  attr_accessor :parser, :chat, :timer_interval, :start_timer, :block_answer
 
   def initialize(options)
     @bot = options[:bot]
@@ -19,8 +19,9 @@ class MessageResponder
     @parser = nil
     @block_answer = false
     @blocked_answer = true
-    @admin_id = ENV['ADMIN_ID'].to_i #  || AppConfigurator.get_admin_id
-    @personal_chat_id = ENV['PERSONAL_CHAT_ID'].to_i # || AppConfigurator.get_personal_chat_id
+    @admin_id = ENV['ADMIN_ID'].to_i || AppConfigurator.get_admin_id
+    @personal_chat_id = ENV['PERSONAL_CHAT_ID'].to_i || AppConfigurator.get_personal_chat_id
+    @block_sector_update = false
   end
 
   def respond
@@ -173,34 +174,34 @@ class MessageResponder
       answer_with_message text, chat || message.chat
     end
 
-    on %r{^[.,] } do
-      logger.debug "@#{message.from.username}: #{message.text}"
-      return if parser.nil?
-      return if chat.id != message.chat.id && message.chat.id != personal_chat_id
-      codes = message.text[2..-1].strip.downcase.split(' ')
-      text = ''
-      if block_answer
-        text = '*Ввід через бот відключено*'
-        answer_with_message text, chat || message.chat
-        return
-      end
-      if parser.level.has_answer_block_rule && blocked_answer
-        text = '*Обмеження на ввід*. Ввід через бот відключено'
-        answer_with_message text, chat || message.chat
-        return
-      end
-      codes.each do |code|
-        result = parser.send_answer(code)
-        result = parser.send_answer(code) if result.nil?
-        if result.nil?
-          text << "помилка надсилання: #{code.gsub("_", "\\_").gsub("*", "\\*")}"
-        else
-          text << (result ? "+ #{code.gsub("_", "\\_").gsub("*", "\\*")}\n" : "- #{code.gsub("_", "\\_").gsub("*", "\\*")}\n")
-        end
-        sleep 0.3
-      end
-      answer_with_message text, chat || message.chat
-    end
+    # on %r{^[.,] } do
+    #   logger.debug "@#{message.from.username}: #{message.text}"
+    #   return if parser.nil?
+    #   return if chat.id != message.chat.id && message.chat.id != personal_chat_id
+    #   codes = message.text[2..-1].strip.downcase.split(' ')
+    #   text = ''
+    #   if block_answer
+    #     text = '*Ввід через бот відключено*'
+    #     answer_with_message text, chat || message.chat
+    #     return
+    #   end
+    #   if parser.level.has_answer_block_rule && blocked_answer
+    #     text = '*Обмеження на ввід*. Ввід через бот відключено'
+    #     answer_with_message text, chat || message.chat
+    #     return
+    #   end
+    #   codes.each do |code|
+    #     result = parser.send_answer(code)
+    #     result = parser.send_answer(code) if result.nil?
+    #     if result.nil?
+    #       text << "помилка надсилання: #{code.gsub("_", "\\_").gsub("*", "\\*")}"
+    #     else
+    #       text << (result ? "+ #{code.gsub("_", "\\_").gsub("*", "\\*")}\n" : "- #{code.gsub("_", "\\_").gsub("*", "\\*")}\n")
+    #     end
+    #     sleep 0.3
+    #   end
+    #   answer_with_message text, chat || message.chat
+    # end
 
     on %r{^\/[.,]} do
       logger.debug "@#{message.from.username}: #{message.text}"
@@ -296,6 +297,20 @@ class MessageResponder
       return if message.from.id != admin_id
       return if message.chat.id != personal_chat_id
       @blocked_answer = false
+    end
+
+    on %r{^\/updoff$} do
+      logger.debug "@#{message.from.username}: #{message.text}"
+      return if message.from.id != admin_id
+      return if message.chat.id != personal_chat_id
+      parser.block_sector_update = true if parser
+    end
+
+    on %r{^\/updon$} do
+      logger.debug "@#{message.from.username}: #{message.text}"
+      return if message.from.id != admin_id
+      return if message.chat.id != personal_chat_id
+      parser.block_sector_update = false if parser
     end
 
     on %r{^\/setpassword } do
@@ -424,7 +439,7 @@ class MessageResponder
   end
 
   def send_message_by_timer
-    send_updated_level(chat, false) if start_timer && parser
+    send_updated_level(chat, false, block_sector_update) if start_timer && parser
   end
 
   private
@@ -453,8 +468,8 @@ class MessageResponder
     answer_with_message 'farewell_message', message.chat
   end
 
-  def send_updated_level(chat, with_q_time = true)
-    updated_info = parser.updated_info(with_q_time)
+  def send_updated_level(chat, with_q_time = true, block_sector = false)
+    updated_info = parser.updated_info(with_q_time, block_sector)
     send_level_text(updated_info, chat) unless updated_info.nil?
   end
 
