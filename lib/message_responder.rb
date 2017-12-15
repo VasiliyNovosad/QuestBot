@@ -21,6 +21,8 @@ class MessageResponder
     @blocked_answer = true
     @admin_id = ENV['ADMIN_ID'].to_i
     @personal_chat_id = ENV['PERSONAL_CHAT_ID'].to_i
+    logger.debug "@admin_id: #{@admin_id}"
+    logger.debug "@personal_chat_id: #{@personal_chat_id}"
   end
 
   def respond
