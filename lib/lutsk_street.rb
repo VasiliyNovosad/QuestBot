@@ -496,7 +496,7 @@ class LutskStreet
   ].freeze
 
   def self.like_name(name)
-    STREETS.select { |street| street[:name].downcase_utf8_cyr.include?(name.downcase_utf8_cyr) }.map { |street| street[:name] }
+    STREETS.select { |street|  Regexp.new(name.downcase_utf8_cyr) =~ street[:name].downcase_utf8_cyr }.map { |street| street[:name] }
   end
 
   # private
