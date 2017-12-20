@@ -20,8 +20,8 @@ class MessageResponder
     @parser = nil
     @block_answer = false
     @blocked_answer = true
-    @admin_id = ENV['ADMIN_ID'].to_i
-    @personal_chat_id = ENV['PERSONAL_CHAT_ID'].to_i
+    @admin_id = (ENV['ADMIN_ID'] || AppConfigurator.get_admin_id).to_i
+    @personal_chat_id = (ENV['PERSONAL_CHAT_ID'] || AppConfigurator.get_personal_chat_id).to_i
     logger.debug "@admin_id: #{@admin_id}"
     logger.debug "@personal_chat_id: #{@personal_chat_id}"
   end
@@ -169,7 +169,7 @@ class MessageResponder
         if result.nil?
           text << "помилка надсилання: #{code.gsub("_", "\\_").gsub("*", "\\*")}"
         else
-          text << result ? "+ #{code.gsub("_", "\\_").gsub("*", "\\*")}\n" : "- #{code.gsub("_", "\\_").gsub("*", "\\*")}\n"
+          text << (result ? "+ #{code.gsub("_", "\\_").gsub("*", "\\*")}\n" : "- #{code.gsub("_", "\\_").gsub("*", "\\*")}\n")
         end
         sleep 0.1
       end
@@ -446,6 +446,20 @@ class MessageResponder
       answer = LutskStreet.like_name(text).join("\n")
       send_level_text answer, message.chat
     end
+
+    on %r{^(\d{2}[.,]\d{3,}),?\s*(\d{2}[.,]\d{3,})$} do
+      p message.text
+      p message.location
+      if message.location.nil?
+        numbersRe = /(\d{2}[.,]\d{3,}),?\s*(\d{2}[.,]\d{3,})/
+        mrNumbersRe = message.text.to_enum(:scan, numbersRe).map { Regexp.last_match }
+        mrNumbersRe.each do |match|
+          answer_with_location({ latitude: match[1], longitude: match[2]}, message.chat)
+        end
+      else
+        answer_with_location({ latitude: message.location.latitude, longitude: message.location.longitude }, message.chat)
+      end
+    end
   end
 
   def send_message_by_timer
@@ -455,7 +469,9 @@ class MessageResponder
   private
 
   def on regex, &block
-    regex =~ message.text
+    text = message.text
+    text = "#{message.location.latitude}, #{message.location.longitude}" unless message.location.nil?
+    regex =~ text
 
     return unless $~
     case block.arity
@@ -480,27 +496,52 @@ class MessageResponder
 
   def send_updated_level(chat, with_q_time = true)
     updated_info = parser.updated_info(with_q_time)
-    send_level_text(updated_info, chat) unless updated_info.nil?
+    unless updated_info.nil?
+      send_level_text(updated_info[:text], chat)
+      updated_info[:coords].each do |coord|
+        answer_with_location(coord, chat)
+      end
+    end
   end
 
   def send_full_level(chat)
     full_info = parser.full_info
-    send_level_text(full_info, chat) unless full_info.nil?
+    unless full_info.nil?
+      send_level_text(full_info[:text], chat)
+      full_info[:coords].each do |coord|
+        answer_with_location(coord, chat)
+      end
+    end
   end
 
   def send_needed_sectors(chat)
     needed_sectors = parser.parse_needed_sectors
-    answer_with_message needed_sectors, chat unless needed_sectors.nil?
+    unless needed_sectors.nil?
+      answer_with_message needed_sectors[:text], chat
+      needed_sectors[:coords].each do |coord|
+        answer_with_location(coord, chat)
+      end
+    end
   end
 
   def send_bonuses(chat)
     bonuses = parser.parse_bonuses
-    answer_with_message bonuses, chat unless bonuses.nil?
+    unless bonuses.nil?
+      answer_with_message bonuses[:text], chat
+      bonuses[:coords].each do |coord|
+        answer_with_location(coord, chat)
+      end
+    end
   end
 
   def send_all_sectors(chat)
     all_sectors = parser.parse_all_sectors
-    answer_with_message all_sectors, chat unless all_sectors.nil?
+    unless all_sectors.nil?
+      answer_with_message all_sectors[:text], chat
+      all_sectors[:coords].each do |coord|
+        answer_with_location(coord, chat)
+      end
+    end
   end
 
   def send_errors(chat)
@@ -529,5 +570,9 @@ class MessageResponder
 
   def answer_with_photo(file_name, chat)
     MessageSender.new(bot: bot, chat: chat, text: file_name).send_photo
+  end
+
+  def answer_with_location(coord, chat)
+    MessageSender.new(bot: bot, chat: chat, latitude: coord[:latitude], longitude: coord[:longitude], name: coord[:name]).send_location
   end
 end

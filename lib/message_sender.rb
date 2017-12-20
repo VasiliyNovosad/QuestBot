@@ -7,12 +7,17 @@ class MessageSender
   attr_reader :chat
   attr_reader :answers
   attr_reader :logger
+  attr_reader :latitude
+  attr_reader :longitude
 
   def initialize(options)
     @bot = options[:bot]
     @text = options[:text]
     @chat = options[:chat]
     @answers = options[:answers]
+    @latitude = options[:latitude]
+    @longitude = options[:longitude]
+    @name = options[:name]
     @logger = AppConfigurator.new.get_logger
   end
 
@@ -29,6 +34,10 @@ class MessageSender
 
   def send_photo
     bot.api.send_photo(chat_id: chat.id, photo: Faraday::UploadIO.new(File.dirname(__FILE__) + text, 'image/jpeg'))
+  end
+
+  def send_location
+    bot.api.send_location(chat_id: chat.id, latitude: latitude, longitude: longitude)
   end
 
   private

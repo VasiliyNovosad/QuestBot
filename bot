@@ -10,7 +10,7 @@ OpenSSL::SSL::VERIFY_PEER = OpenSSL::SSL::VERIFY_NONE
 
 config = AppConfigurator.new
 
-token = ENV['TELEGRAM_BOT_TOKEN']
+token = ENV['TELEGRAM_BOT_TOKEN'] || config.get_token
 logger = config.get_logger
 
 logger.debug 'Starting telegram bot'
@@ -21,9 +21,9 @@ threads = []
 threads << Thread.new do
   Telegram::Bot::Client.run(token) do |bot|
     bot.listen do |message|
-      if message.text && message.text.lines.count == 1
+      p "@#{message.from.username}: #{message.text}"
+      if message.text && message.text.lines.count == 1 || !message.location.nil?
         options = { bot: bot, message: message, logger: logger }
-        # logger.debug "@#{message.from.username}: #{message.text}"
         message_responder ||= MessageResponder.new(options)
         message_responder.message = message
         message_responder.respond
