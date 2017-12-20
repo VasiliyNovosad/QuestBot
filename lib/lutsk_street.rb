@@ -1,4 +1,4 @@
-require 'ee_strings'
+require_relative 'ee_strings'
 
 class LutskStreet
   STREETS = [
