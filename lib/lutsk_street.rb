@@ -21,7 +21,7 @@ class LutskStreet
     { name: "7-й Малоомелянівський провулок", latitude: 50.000000, longitude: 25.000000 },
     { name: "8-го Березня", latitude: 50.000000, longitude: 25.000000 },
     { name: "8-й Малоомелянівський провулок", latitude: 50.000000, longitude: 25.000000 },
-    { name: "Авіаторів", latitude: 50.000000, longitude: 25.000000 },
+    { name: "Авіаторів", latitude: 50.7679206, longitude: 25.3407177 },
     { name: "Агатангела Кримського", latitude: 50.000000, longitude: 25.000000 },
     { name: "Агрономічна", latitude: 50.000000, longitude: 25.000000 },
     { name: "Айвазовського", latitude: 50.000000, longitude: 25.000000 },
