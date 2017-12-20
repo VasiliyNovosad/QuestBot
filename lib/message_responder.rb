@@ -444,7 +444,7 @@ class MessageResponder
       text = message.text[8..-1].strip
       return if text == '' || text.nil?
       answer = LutskStreet.like_name(text).join("\n")
-      answer_with_message answer, message.chat
+      send_level_text answer, message.chat
     end
   end
 
