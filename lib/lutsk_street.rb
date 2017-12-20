@@ -1,21 +1,22 @@
 require_relative 'ee_strings'
+require 'rgeo/shapefile'
 
 class LutskStreet
   STREETS = [
-    { name: "1-й Збаразький провулок", latitude: 50.000000, longitude: 25.000000 },
-    { name: "1-й Малоомелянівський провулок", latitude: 50.000000, longitude: 25.000000 },
+    { name: "1-й Збаразький провулок", latitude: 50.7215292, longitude: 25.3735973 },
+    { name: "1-й Малоомелянівський провулок", latitude: 50.7304044, longitude: 25.282384 },
     { name: "1-й Степовий провулок", latitude: 50.000000, longitude: 25.000000 },
     { name: "1-й провулок Трутовського", latitude: 50.000000, longitude: 25.000000 },
     { name: "2-й Збаразький провулок", latitude: 50.000000, longitude: 25.000000 },
-    { name: "2-й Малоомелянівський провулок", latitude: 50.000000, longitude: 25.000000 },
+    { name: "2-й Малоомелянівський провулок", latitude: 50.7314691, longitude: 25.2835369 },
     { name: "2-й Степовий провулок", latitude: 50.000000, longitude: 25.000000 },
     { name: "2-й провулок Трутовського", latitude: 50.000000, longitude: 25.000000 },
-    { name: "3-й Малоомелянівський провулок", latitude: 50.000000, longitude: 25.000000 },
+    { name: "3-й Малоомелянівський провулок", latitude: 50.7321037, longitude: 25.282947 },
     { name: "3-й Степовий провулок", latitude: 50.000000, longitude: 25.000000 },
     { name: "3-й провулок Трутовського", latitude: 50.000000, longitude: 25.000000 },
-    { name: "4-й Малоомелянівський провулок", latitude: 50.000000, longitude: 25.000000 },
+    { name: "4-й Малоомелянівський провулок", latitude: 50.7326628, longitude: 25.2833985 },
     { name: "4-й Степовий провулок", latitude: 50.000000, longitude: 25.000000 },
-    { name: "5-й Малоомелянівський провулок", latitude: 50.000000, longitude: 25.000000 },
+    { name: "5-й Малоомелянівський провулок", latitude: 50.7337104, longitude: 25.2821886 },
     { name: "6-й Малоомелянівський провулок", latitude: 50.000000, longitude: 25.000000 },
     { name: "7-й Малоомелянівський провулок", latitude: 50.000000, longitude: 25.000000 },
     { name: "8-го Березня", latitude: 50.000000, longitude: 25.000000 },
@@ -496,55 +497,22 @@ class LutskStreet
   ].freeze
 
   def self.like_name(name)
-    STREETS.select { |street|  Regexp.new(name.downcase_utf8_cyr) =~ street[:name].downcase_utf8_cyr }.map { |street| street[:name] }
+    STREETS.select { |street| Regexp.new(name.downcase_utf8_cyr) =~ street[:name].downcase_utf8_cyr }.map { |street| street[:name] }
   end
 
-  # private
-  #
-  # def downcase_utf8_cyr(name)
-  #   s = name.downcase
-  #   ar = s.chars.map do |ch|
-  #     case ch
-  #       when "А" then "а"
-  #       when "Б" then "б"
-  #       when "В" then "в"
-  #       when "Г" then "г"
-  #       when "Д" then "д"
-  #       when "Е" then "е"
-  #       when "Ё" then "ё"
-  #       when "Ж" then "ж"
-  #       when "З" then "з"
-  #       when "И" then "и"
-  #       when "Й" then "й"
-  #       when "К" then "к"
-  #       when "Л" then "л"
-  #       when "М" then "м"
-  #       when "Н" then "н"
-  #       when "О" then "о"
-  #       when "П" then "п"
-  #       when "Р" then "р"
-  #       when "С" then "с"
-  #       when "Т" then "т"
-  #       when "У" then "у"
-  #       when "Ф" then "ф"
-  #       when "Х" then "х"
-  #       when "Ц" then "ц"
-  #       when "Ч" then "ч"
-  #       when "Ш" then "ш"
-  #       when "Щ" then "щ"
-  #       when "Ъ" then "ъ"
-  #       when "Ы" then "ы"
-  #       when "Ь" then "ь"
-  #       when "Э" then "э"
-  #       when "Ю" then "ю"
-  #       when "Я" then "я"
-  #       when "І" then "і"
-  #       when "Ї" then "ї"
-  #       when "Є" then "є"
-  #       else ch
-  #     end
-  #   end
-  #
-  #   ar.join
-  # end
+  def self.read_streets
+    RGeo::Shapefile::Reader.open(File.dirname(__FILE__) + '/shp/roads.shp') do |file|
+      puts "File contains #{file.num_records} records."
+      file.each do |record|
+        if record.attributes['type'] == 'tertiary' && record.attributes['name'] != ''
+          puts "Record number #{record.index}:"
+          puts "  Geometry: #{record.geometry.as_text}"
+          puts "  Attributes: #{record.attributes.inspect}"
+        end
+      end
+      # file.rewind
+      # record = file.next
+      # puts "First record geometry was: #{record.geometry.as_text}"
+    end
+  end
 end
