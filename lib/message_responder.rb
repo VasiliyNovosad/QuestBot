@@ -3,6 +3,7 @@ require './lib/quest_parser_json'
 require './lib/app_configurator'
 require './lib/morze'
 require './lib/braille'
+require './lib/lutsk_street'
 
 class MessageResponder
   attr_accessor :message, :blocked_answer
@@ -436,6 +437,14 @@ class MessageResponder
 
     on %r{^\/kb$} do
       answer_with_photo('/images/kb.jpg', message.chat)
+    end
+
+    on %r{^\/street } do
+      # logger.debug "@#{message.from.username}: #{message.text}"
+      text = message.text[8..-1].strip
+      return if text == '' or text.nil?
+      answer = LutskStreet.like_name(text).join("\n")
+      answer_with_message answer, message.chat
     end
   end
 
