@@ -11,14 +11,15 @@ def read_streets
     #     puts "  Attributes: #{record.attributes.inspect}"
 
         street = {}
-        street[:osm_id] = record.attributes['osm_id']
-        street[:name] = record.attributes['name'].force_encoding("utf-8")
-        street[:ref] = record.attributes['ref']
-        street[:type] = record.attributes['type']
-        street[:oneway] = record.attributes['oneway']
-        street[:bridge] = record.attributes['bridge']
-        street[:maxspeed] = record.attributes['maxspeed']
-        street[:geometry] = record.geometry.to_json
+        street['osm_id'] = record.attributes['osm_id']
+        street['name'] = record.attributes['name'].force_encoding('ASCII-8BIT').force_encoding('UTF-8')
+        street['ref'] = record.attributes['ref'].force_encoding('ASCII-8BIT').force_encoding('UTF-8')
+        street['type'] = record.attributes['type']
+        street['oneway'] = record.attributes['oneway']
+        street['bridge'] = record.attributes['bridge']
+        street['maxspeed'] = record.attributes['maxspeed']
+        street['latitude'] = record.geometry[0].start_point.y
+        street['longitude'] = record.geometry[0].start_point.x
         streets << street
       end
     end
@@ -29,7 +30,7 @@ def read_streets
   end
 end
 
-
+Encoding.default_external = Encoding::UTF_8
 File.open("streets.json","w") do |f|
   f.write(read_streets.to_json)
 end
