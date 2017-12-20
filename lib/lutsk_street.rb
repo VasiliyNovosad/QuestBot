@@ -1,3 +1,5 @@
+require 'ee_strings'
+
 class LutskStreet
   STREETS = [
     { name: "1-й Збаразький провулок", latitude: 50.000000, longitude: 25.000000 },
@@ -494,55 +496,55 @@ class LutskStreet
   ].freeze
 
   def self.like_name(name)
-    STREETS.select { |street| downcase_utf8_cyr(street[:name]).include?(downcase_utf8_cyr(name)) }.map { |street| street[:name] }
+    STREETS.select { |street| street[:name].downcase_utf8_cyr.include?(name.downcase_utf8_cyr) }.map { |street| street[:name] }
   end
 
-  private
-
-  def downcase_utf8_cyr(name)
-    s = name.downcase
-    ar = s.chars.map do |ch|
-      case ch
-        when "А" then "а"
-        when "Б" then "б"
-        when "В" then "в"
-        when "Г" then "г"
-        when "Д" then "д"
-        when "Е" then "е"
-        when "Ё" then "ё"
-        when "Ж" then "ж"
-        when "З" then "з"
-        when "И" then "и"
-        when "Й" then "й"
-        when "К" then "к"
-        when "Л" then "л"
-        when "М" then "м"
-        when "Н" then "н"
-        when "О" then "о"
-        when "П" then "п"
-        when "Р" then "р"
-        when "С" then "с"
-        when "Т" then "т"
-        when "У" then "у"
-        when "Ф" then "ф"
-        when "Х" then "х"
-        when "Ц" then "ц"
-        when "Ч" then "ч"
-        when "Ш" then "ш"
-        when "Щ" then "щ"
-        when "Ъ" then "ъ"
-        when "Ы" then "ы"
-        when "Ь" then "ь"
-        when "Э" then "э"
-        when "Ю" then "ю"
-        when "Я" then "я"
-        when "І" then "і"
-        when "Ї" then "ї"
-        when "Є" then "є"
-        else ch
-      end
-    end
-
-    ar.join
-  end
+  # private
+  #
+  # def downcase_utf8_cyr(name)
+  #   s = name.downcase
+  #   ar = s.chars.map do |ch|
+  #     case ch
+  #       when "А" then "а"
+  #       when "Б" then "б"
+  #       when "В" then "в"
+  #       when "Г" then "г"
+  #       when "Д" then "д"
+  #       when "Е" then "е"
+  #       when "Ё" then "ё"
+  #       when "Ж" then "ж"
+  #       when "З" then "з"
+  #       when "И" then "и"
+  #       when "Й" then "й"
+  #       when "К" then "к"
+  #       when "Л" then "л"
+  #       when "М" then "м"
+  #       when "Н" then "н"
+  #       when "О" then "о"
+  #       when "П" then "п"
+  #       when "Р" then "р"
+  #       when "С" then "с"
+  #       when "Т" then "т"
+  #       when "У" then "у"
+  #       when "Ф" then "ф"
+  #       when "Х" then "х"
+  #       when "Ц" then "ц"
+  #       when "Ч" then "ч"
+  #       when "Ш" then "ш"
+  #       when "Щ" then "щ"
+  #       when "Ъ" then "ъ"
+  #       when "Ы" then "ы"
+  #       when "Ь" then "ь"
+  #       when "Э" then "э"
+  #       when "Ю" then "ю"
+  #       when "Я" then "я"
+  #       when "І" then "і"
+  #       when "Ї" then "ї"
+  #       when "Є" then "є"
+  #       else ch
+  #     end
+  #   end
+  #
+  #   ar.join
+  # end
 end

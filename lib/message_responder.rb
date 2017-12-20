@@ -356,7 +356,7 @@ class MessageResponder
     on %r{^\/morze } do
       # logger.debug "@#{message.from.username}: #{message.text}"
       text = message.text[7..-1].strip
-      return if text == '' or text.nil?
+      return if text == '' || text.nil?
       answer = "Морзе\n"
       answer << "En: #{Morze.code_to_text_en(text)}\n"
       answer << "Ukr: #{Morze.code_to_text_ukr(text)}\n"
@@ -367,7 +367,7 @@ class MessageResponder
     on %r{^\/brail } do
       # logger.debug "@#{message.from.username}: #{message.text}"
       text = message.text[7..-1].strip
-      return if text == '' or text.nil?
+      return if text == '' || text.nil?
       answer = "Брайль\n"
       answer << "En: #{Braille.code_to_text_en(text)}\n"
       answer << "Ukr: #{Braille.code_to_text_ukr(text)}\n"
@@ -442,7 +442,7 @@ class MessageResponder
     on %r{^\/street } do
       # logger.debug "@#{message.from.username}: #{message.text}"
       text = message.text[8..-1].strip
-      return if text == '' or text.nil?
+      return if text == '' || text.nil?
       answer = LutskStreet.like_name(text).join("\n")
       answer_with_message answer, message.chat
     end
