@@ -250,7 +250,7 @@ class MessageResponder
         return
       end
       code = message.text[1..-1]
-      return if code.strip == '' || code[0] == ' '
+      return if code.strip == ''
       code = code.strip.downcase
       result = parser.send_answer(code)
       result = parser.send_answer(code) if result.nil?
