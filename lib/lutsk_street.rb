@@ -45,7 +45,6 @@ class LutskStreet
     { name: "Берестечківська", latitude: 50.000000, longitude: 25.000000 },
     { name: "Берестова", latitude: 50.000000, longitude: 25.000000 },
     { name: "Бесараб Ольги", latitude: 50.000000, longitude: 25.000000 },
-    { name: "Бєлінського", latitude: 50.000000, longitude: 25.000000 },
     { name: "Бічна", latitude: 50.000000, longitude: 25.000000 },
     { name: "Богдана Хмельницького", latitude: 50.000000, longitude: 25.000000 },
     { name: "Богачука Олександра", latitude: 50.000000, longitude: 25.000000 },
