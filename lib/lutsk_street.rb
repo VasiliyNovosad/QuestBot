@@ -534,7 +534,15 @@ class LutskStreet
   ].freeze
 
   def self.like_name(name)
-    STREETS.select { |street| Regexp.new(name.downcase_utf8_cyr) =~ street[:name].downcase_utf8_cyr }.map { |street| street[:name] }
+    STREETS.select do |street|
+      begin
+        Regexp.new(name.downcase_utf8_cyr) =~ street[:name].downcase_utf8_cyr
+      rescue => detail
+        false
+      end
+    end.map do |street|
+      street[:name]
+    end
   end
 
   def self.read_streets
