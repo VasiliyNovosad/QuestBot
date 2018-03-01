@@ -1,10 +1,11 @@
 class Level
   attr_reader :id, :number, :has_answer_block_rule
-  attr_accessor :coords
+  attr_accessor :coords, :notified
 
   def initialize(level_json)
     @coords = []
     load_level_from_json(level_json)
+    @notified = false
   end
 
   def full_info(level_json, by_timer = false)
@@ -13,13 +14,13 @@ class Level
     { text: full_level_info(by_timer), coords: coords }
   end
 
-  def updated_info(level_json, with_q_time = false, block_sector = false)
+  def updated_info(level_json, with_q_time = false, block_sector = false, notify_before = 5)
     @coords = []
     if level_json['Level']['LevelId'] != @id
       full_info(level_json, !with_q_time)
     else
-      result = load_updated_info(level_json['Level'], with_q_time, block_sector)
-      load_level_from_json(level_json)
+      result = load_updated_info(level_json['Level'], with_q_time, block_sector, notify_before)
+      update_level_from_json(level_json)
       { text: result, coords: coords }
     end
   end
@@ -58,6 +59,35 @@ class Level
   private
 
   def load_level_from_json(level_json)
+    levels = level_json['Levels']
+    @levels_count = levels.nil? ? 0 : levels.count
+    level_json = level_json['Level'] || {}
+    @id = level_json['LevelId']
+    @name = level_json['Name']
+    @number = level_json['Number']
+    @timeout_seconds_remain = level_json['TimeoutSecondsRemain']
+    @has_answer_block_rule = level_json['HasAnswerBlockRule']
+    @block_duration = level_json['BlockDuration']
+    @block_target_id = level_json['BlockTargetId']
+    @attemts_number = level_json['AttemtsNumber']
+    @attemts_period = level_json['AttemtsPeriod']
+    @required_sectors_count = level_json['RequiredSectorsCount']
+    @passed_sectors_count = level_json['PassedSectorsCount']
+    @sectors_left_to_close = level_json['SectorsLeftToClose']
+    @task = ''
+    unless Array(level_json['Tasks']).empty?
+      @task = level_json['Tasks'][0]['TaskText']
+    end
+    @messages = Array(level_json['Messages']).map { |rec| json_to_message(rec) }
+    @sectors = Array(level_json['Sectors']).map { |rec| json_to_sector(rec) }
+    @helps = Array(level_json['Helps']).map { |rec| json_to_help(rec) }
+    @penalty_helps = Array(level_json['PenaltyHelps']).map do |rec|
+      json_to_penalty_help(rec)
+    end
+    @bonuses = Array(level_json['Bonuses']).map { |rec| json_to_bonus(rec) }
+  end
+
+  def update_level_from_json(level_json)
     levels = level_json['Levels']
     @levels_count = levels.nil? ? 0 : levels.count
     level_json = level_json['Level'] || {}
@@ -198,14 +228,20 @@ class Level
     result << "* за *#{seconds_to_string(@attemts_period)}*\n\n"
   end
 
-  def load_updated_info(level_json, with_q_time = false, block_sector = false)
+  def load_updated_info(level_json, with_q_time = false, block_sector = false, notify_before = 5)
     result = ''
-    if with_q_time && level_json['TimeoutSecondsRemain'] > 0
-      result << '*Автоперехід* через '
-      result << "*#{seconds_to_string(level_json['TimeoutSecondsRemain'])}*\n\n"
+    if level_json['TimeoutSecondsRemain'] > 0
+      if with_q_time
+        result << '*Автоперехід* через '
+        result << "*#{seconds_to_string(level_json['TimeoutSecondsRemain'])}*\n\n"
+      elsif notify_before > (level_json['TimeoutSecondsRemain'] / 60) && !notified
+        @notified = true
+        result << '*Автоперехід* через '
+        result << "*#{seconds_to_string(level_json['TimeoutSecondsRemain'])}*\n\n"
+      end
     end
     result << task_updated(level_json['Tasks'])
-    result << helps_updated(level_json['Helps'])
+    result << helps_updated(level_json['Helps'], notify_before)
     result << penalty_helps_updated(level_json['PenaltyHelps'])
     result << bonuses_updated(level_json['Bonuses']) unless block_sector
     result << sectors_updated(level_json['Sectors']) unless block_sector
@@ -213,7 +249,7 @@ class Level
     result
   end
 
-  def helps_updated(helps_json)
+  def helps_updated(helps_json, notify_before = 5)
     result = ''
     helps_json.each do |help_json|
       help = @helps.select { |h| h[:id] == help_json['HelpId'] }
@@ -222,6 +258,11 @@ class Level
         result << help_to_text(help)
       else
         help = help[0]
+        if !help[:notified] && notify_before > help_json['RemainSeconds'] * 60
+          help[:notified] = true
+          updated_help = json_to_help(help_json)
+          result << help_to_text(updated_help)
+        end
         if help[:text] != help_json['HelpText']
           help = json_to_help(help_json)
           result << help_to_text(help)

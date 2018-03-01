@@ -1,5 +1,5 @@
 require_relative 'ee_strings'
-require 'rgeo/shapefile'
+# require 'rgeo/shapefile'
 
 class LutskStreet
   STREETS = [
@@ -538,6 +538,7 @@ class LutskStreet
       begin
         Regexp.new(name.downcase_utf8_cyr) =~ street[:name].downcase_utf8_cyr
       rescue => detail
+        p detail
         false
       end
     end.map do |street|
@@ -545,19 +546,19 @@ class LutskStreet
     end
   end
 
-  def self.read_streets
-    RGeo::Shapefile::Reader.open(File.dirname(__FILE__) + '/shp/roads.shp') do |file|
-      puts "File contains #{file.num_records} records."
-      file.each do |record|
-        if record.attributes['type'] == 'tertiary' && record.attributes['name'] != ''
-          puts "Record number #{record.index}:"
-          puts "  Geometry: #{record.geometry.as_text}"
-          puts "  Attributes: #{record.attributes.inspect}"
-        end
-      end
-      # file.rewind
-      # record = file.next
-      # puts "First record geometry was: #{record.geometry.as_text}"
-    end
-  end
+  # def self.read_streets
+  #   RGeo::Shapefile::Reader.open(File.dirname(__FILE__) + '/shp/roads.shp') do |file|
+  #     puts "File contains #{file.num_records} records."
+  #     file.each do |record|
+  #       if record.attributes['type'] == 'tertiary' && record.attributes['name'] != ''
+  #         puts "Record number #{record.index}:"
+  #         puts "  Geometry: #{record.geometry.as_text}"
+  #         puts "  Attributes: #{record.attributes.inspect}"
+  #       end
+  #     end
+  #     # file.rewind
+  #     # record = file.next
+  #     # puts "First record geometry was: #{record.geometry.as_text}"
+  #   end
+  # end
 end
