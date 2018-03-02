@@ -14,7 +14,7 @@ require_relative '../lib/bot_utils'
 
 class Help
   include BotUtils
-  attr_accessor :id, :text, :number, :is_penalty, :penalty, :penalty_comment, :request_confirm, :penalty_help_state, :remain_seconds, :penalty_message
+  attr_accessor :id, :text, :number, :is_penalty, :penalty, :penalty_comment, :request_confirm, :penalty_help_state, :remain_seconds, :penalty_message, :coords
 
   def initialize(id, number, text, is_penalty, penalty, penalty_comment, request_confirm, penalty_help_state, remain_seconds, penalty_message)
     @id = id
@@ -27,6 +27,7 @@ class Help
     @penalty_help_state = penalty_help_state
     @remain_seconds = remain_seconds
     @penalty_message = penalty_message
+    @coords = []
   end
 
   def self.from_json(help_json)
@@ -44,6 +45,18 @@ class Help
     )
   end
 
+  def from_json(help_json)
+    @number = help_json['Number']
+    @text = help_json['HelpText']
+    @is_penalty = help_json['IsPenalty']
+    @penalty = help_json['Penalty']
+    @penalty_comment = help_json['PenaltyComment']
+    @request_confirm = help_json['RequestConfirm']
+    @penalty_help_state = help_json['PenaltyHelpState']
+    @remain_seconds = help_json['RemainSeconds']
+    @penalty_message = help_json['PenaltyMessage']
+  end
+
   def ==(other_object)
     other_object.class == self.class &&
       id == other_object.id &&
@@ -54,7 +67,9 @@ class Help
   def to_text
     result = "*Підказка #{number}*: "
     if remain_seconds.zero?
-      result << "\n#{parsed(text)}\n\n"
+      parsed_text = parsed(text)
+      @coords = parsed_text[:coords]
+      result << "\n#{parsed_text[:text]}\n\n"
     else
       result << "буде через *#{seconds_to_string(remain_seconds)}*\n\n"
     end

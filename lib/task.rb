@@ -7,14 +7,19 @@ require_relative '../lib/bot_utils'
 
 class Task
   include BotUtils
-  attr_accessor :text
+  attr_accessor :text, :coords
 
   def initialize(text)
     @text = text
+    @coords = []
   end
 
   def self.from_json(task_json)
     Task.new(task_json['TaskText'])
+  end
+
+  def from_json(task_json)
+    @text = task_json['TaskText']
   end
 
   def ==(other_object)
@@ -23,6 +28,8 @@ class Task
   end
 
   def to_text
-    "Завдання:\n#{parsed(text)}\n\n"
+    parsed_text = parsed(text)
+    @coords = parsed_text[:coords]
+    "Завдання:\n#{parsed_text[:text]}\n\n"
   end
 end

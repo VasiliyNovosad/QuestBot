@@ -38,6 +38,13 @@ class Sector
     )
   end
 
+  def from_json(sector_json)
+    @order = sector_json['Order']
+    @name = sector_json['Name']
+    @answer = sector_json['IsAnswered']
+    @is_answered = sector_json['IsAnswered'] ? sector_json['Answer']['Answer'] : nil
+  end
+
   def ==(other_object)
     other_object.class == self.class &&
       id == other_object.id &&
@@ -47,6 +54,6 @@ class Sector
   end
 
   def to_text
-    is_answered ? "Сектор *#{parsed(name)}* закрито кодом *#{parsed(answer)}*\n" : "Сектор *#{parsed(name)}*"
+    is_answered ? "Сектор *#{parsed(name)[:text]}* закрито кодом *#{parsed(answer)[:text]}*\n" : "Сектор *#{parsed(name)[:text]}*"
   end
 end
