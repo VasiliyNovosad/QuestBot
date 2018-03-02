@@ -10,7 +10,10 @@
 #     "RemainSeconds": 0,
 #     "PenaltyMessage": null
 # }
+require_relative '../lib/bot_utils'
+
 class PenaltyHelp
+  include BotUtils
   attr_accessor :id, :number, :text, :is_penalty, :penalty, :comment, :request_confirm,
                 :help_state, :remain_seconds, :message
 
@@ -28,7 +31,7 @@ class PenaltyHelp
   end
 
   def self.from_json(help_json)
-    PenaltyHelp(
+    PenaltyHelp.new(
         help_json['HelpId'],
         help_json['Number'],
         help_json['HelpText'],
@@ -51,5 +54,17 @@ class PenaltyHelp
       comment == other_object.comment &&
       message == other_object.message &&
       help_state == other_object.help_state
+  end
+
+  def to_text
+    result = "*Штрафна підказка #{number}*: "
+    if remain_seconds.zero?
+      result << "\n*Опис*: #{parsed(comment)}" unless comment.nil? || comment == ''
+      result << "\n*Підказка*: #{parsed(text)}" unless text.nil? || text == ''
+      result << "\n*Штраф*: #{seconds_to_string(penalty)}\n\n"
+    else
+      result << "буде через *#{seconds_to_string(remain_seconds)}*\n\n"
+    end
+    result
   end
 end

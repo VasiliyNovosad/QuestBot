@@ -6,7 +6,10 @@
 #     "WrappedText": "Если описание расположения локации непонятно - двигайтесь по указателям. ",
 #     "ReplaceNl2Br": true
 # }
+require_relative '../lib/bot_utils'
+
 class Message
+  include BotUtils
   attr_accessor :owner_id, :owner_login, :id, :text
 
   def initialize(owner_id, owner_login, id, text)
@@ -17,7 +20,7 @@ class Message
   end
 
   def self.from_json(message_json)
-    Message(
+    Message.new(
       message_json['OwnerId'],
       message_json['OwnerLogin'],
       message_json['MessageId'],
@@ -30,5 +33,9 @@ class Message
       id == other_object.id &&
       text == other_object.text &&
       owner_id == other_object.owner_id
+  end
+
+  def to_text
+    "*Повідомлення* від *#{parsed(owner_login)}*: #{parsed(text)}\n\n"
   end
 end

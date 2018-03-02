@@ -18,7 +18,10 @@
 #         "UserId": 69789
 #     }
 # }
+require_relative '../lib/bot_utils'
+
 class Bonus
+  include BotUtils
   attr_accessor :id, :name, :number, :task, :help, :answer, :is_answered, :expired, :seconds_to_start, :seconds_left, :award_time
 
   def initialize(id, name, number, task, help, answer, is_answered, expired, seconds_to_start, seconds_left, award_time)
@@ -36,7 +39,7 @@ class Bonus
   end
 
   def self.from_json(bonus_json)
-    Bonus(
+    Bonus.new(
       bonus_json['BonusId'],
       bonus_json['Name'],
       bonus_json['Number'],
@@ -60,5 +63,31 @@ class Bonus
       answer == other_object.answer &&
       is_answered == other_object.is_answered &&
       expired == other_object.expired
+  end
+
+  def to_text
+    result = "*Бонус #{number}*"
+    unless name.nil? || name.empty? || (number.to_s == name)
+      result << " *#{parsed(name)}*"
+    end
+    result << ':'
+    if seconds_to_start > 0
+      result << "буде доступний через *#{seconds_to_string(seconds_to_start)}*\n"
+    end
+    if seconds_left > 0
+      result << "закриється через *#{seconds_to_string(seconds_left)}*\n"
+    end
+    if is_answered
+      result << "закрито кодом *#{parsed(answer)}*\n"
+    end
+    result << "не закрито\n" if expired
+    unless task.nil? || parsed(task).strip.empty? || is_answered
+      result << "*Завдання*: #{parsed(task)}\n"
+    end
+    unless help.nil? || parsed(help).strip.empty?
+      result << "*Підказка*: #{parsed(help)}\n"
+    end
+    result << "\n"
+    result
   end
 end
