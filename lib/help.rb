@@ -14,7 +14,7 @@ require_relative '../lib/bot_utils'
 
 class Help
   include BotUtils
-  attr_accessor :id, :text, :number, :is_penalty, :penalty, :penalty_comment, :request_confirm, :penalty_help_state, :remain_seconds, :penalty_message, :coords
+  attr_accessor :id, :text, :number, :is_penalty, :penalty, :penalty_comment, :request_confirm, :penalty_help_state, :remain_seconds, :penalty_message, :coords, :notified
 
   def initialize(id, number, text, is_penalty, penalty, penalty_comment, request_confirm, penalty_help_state, remain_seconds, penalty_message)
     @id = id
@@ -28,6 +28,7 @@ class Help
     @remain_seconds = remain_seconds
     @penalty_message = penalty_message
     @coords = []
+    @notified = false
   end
 
   def self.from_json(help_json)
