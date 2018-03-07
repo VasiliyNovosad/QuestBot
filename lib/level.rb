@@ -13,26 +13,26 @@ class Level
                 :passed_sectors_count, :sectors_left_to_close, :task, :helps, :penalty_helps, :sectors,
                 :bonuses, :messages, :notified, :levels_count
 
-  def initialize(level_json)
+  def initialize(level_json, notify_before = 5)
     @coords = []
     levels = level_json['Levels']
     @levels_count = levels.nil? ? 0 : levels.count
-    from_json(level_json['Level'] || {})
     @notified = false
+    from_json(level_json['Level'] || {}, notify_before)
   end
 
-  def full_info(level_json, by_timer = false)
+  def full_info(level_json, by_timer = false, notify_before = 5)
     @coords = []
     levels = level_json['Levels']
     @levels_count = levels.nil? ? 0 : levels.count
-    from_json(level_json['Level'] || {})
+    from_json(level_json['Level'] || {}, notify_before)
     { text: to_text(by_timer), coords: coords }
   end
 
   def updated_info(level_json, with_q_time = false, block_sector = false, notify_before = 5)
     @coords = []
     if level_json['Level']['LevelId'] != @id
-      full_info(level_json, !with_q_time)
+      full_info(level_json, !with_q_time, notify_before)
     else
       levels = level_json['Levels']
       @levels_count = levels.nil? ? 0 : levels.count
@@ -75,11 +75,12 @@ class Level
 
   private
 
-  def from_json(level_json)
+  def from_json(level_json, notify_before = 5)
     @id = level_json['LevelId']
     @name = level_json['Name']
     @number = level_json['Number']
     @timeout_seconds_remain = level_json['TimeoutSecondsRemain']
+    @notified = (level_json['TimeoutSecondsRemain'] || 100000) < notify_before * 60
     @has_answer_block_rule = level_json['HasAnswerBlockRule']
     @block_duration = level_json['BlockDuration']
     @block_target_id = level_json['BlockTargetId']
@@ -89,27 +90,29 @@ class Level
     @passed_sectors_count = level_json['PassedSectorsCount']
     @sectors_left_to_close = level_json['SectorsLeftToClose']
     @task = nil
-    unless level_json['Tasks'].length == 0
+    unless Array(level_json['Tasks']).length == 0
       @task = Task.from_json(level_json['Tasks'][0])
     end
     @messages = {}
-    level_json['Messages'].each do |message_json|
+    Array(level_json['Messages']).each do |message_json|
       @messages[message_json['MessageId']] = Message.from_json(message_json)
     end
     @sectors = {}
-    level_json['Sectors'].each do |sector_json|
+    Array(level_json['Sectors']).each do |sector_json|
       @sectors[sector_json['SectorId']] = Sector.from_json(sector_json)
     end
     @helps = {}
-    level_json['Helps'].each do |help_json|
-      @helps[help_json['HelpId']] = Help.from_json(help_json)
+    Array(level_json['Helps']).each do |help_json|
+      new_help = Help.from_json(help_json)
+      new_help.notified = new_help.remain_seconds < 60 * notify_before
+      @helps[help_json['HelpId']] = new_help
     end
     @penalty_helps = {}
-    level_json['PenaltyHelps'].each do |help_json|
+    Array(level_json['PenaltyHelps']).each do |help_json|
       @penalty_helps[help_json['HelpId']] = PenaltyHelp.from_json(help_json)
     end
     @bonuses = {}
-    level_json['Bonuses'].each do |bonus_json|
+    Array(level_json['Bonuses']).each do |bonus_json|
       @bonuses[bonus_json['BonusId']] = Bonus.from_json(bonus_json)
     end
   end
@@ -280,7 +283,7 @@ class Level
       help = @helps[new_help.id]
       if help.nil?
         result << new_help.to_text
-        new_help.notified = true if new_help.remain_seconds < notify_before * 60
+        new_help.notified = new_help.remain_seconds < notify_before * 60
         @coords += new_help.coords
         @helps[new_help.id] = new_help
       else
