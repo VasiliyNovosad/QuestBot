@@ -73,6 +73,24 @@ class Level
     { text: result, coords: coords }
   end
 
+  def all_coords
+    all_coords = {}
+    all_coords['Завдання'] = task.coords if task.coords.length > 0
+    helps.each do |id, help|
+      all_coords["Підказка #{help.number}"] = help.coords if help.coords.length > 0
+    end
+    penalty_helps.each do |id, help|
+      all_coords["Штрафна підказка #{help.number}"] = help.coords if help.coords.length > 0
+    end
+    bonuses.each do |id, bonus|
+      all_coords["Бонус #{bonus.number}: #{bonus.name}"] = bonus.coords if bonus.coords.length > 0
+    end
+    messages.each do |id, message|
+      all_coords["Повідомлення #{message.id} від #{message.owner_login}"] = message.coords if message.coords.length > 0
+    end
+    all_coords
+  end
+
   private
 
   def from_json(level_json, notify_before = 5)

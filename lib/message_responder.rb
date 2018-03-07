@@ -4,6 +4,7 @@ require './lib/app_configurator'
 require './lib/morze'
 require './lib/braille'
 require './lib/lutsk_street'
+require 'ruby_kml'
 
 class MessageResponder
   attr_accessor :message, :blocked_answer
@@ -439,6 +440,13 @@ class MessageResponder
       answer_with_photo('/images/kb.jpg', message.chat)
     end
 
+    on %r{^\/coords$} do
+      logger.debug "@#{message.from.username}: #{message.text}"
+      return if message.from.id != admin_id
+      return if message.chat.id != personal_chat_id
+      answer_with_file(coords_to_kml(parser.level.all_coords, parser.level.name), message.chat) if parser
+    end
+
     on %r{^\/street } do
       # logger.debug "@#{message.from.username}: #{message.text}"
       text = message.text[8..-1].strip
@@ -574,5 +582,26 @@ class MessageResponder
 
   def answer_with_location(coord, chat)
     MessageSender.new(bot: bot, chat: chat, latitude: coord[:latitude], longitude: coord[:longitude], name: coord[:name]).send_location
+  end
+
+  def answer_with_file(file_name, chat)
+    MessageSender.new(bot: bot, chat: chat, text: file_name).send_document
+  end
+
+  def coords_to_kml(coords, level_name)
+    kml = KMLFile.new
+    folder = KML::Document.new(name: level_name)
+    coords.each do |k, v|
+      v.each_with_index do |coord, index|
+        folder.features << KML::Placemark.new(
+            name: "#{k}: Точка #{index + 1}",
+            geometry: KML::Point.new(coordinates: {lat: coord[:latitude], lng: coord[:longitude]})
+        )
+      end
+    end
+    kml.objects << folder
+    kml.render
+    kml.save(File.dirname(__FILE__) + "/kml/#{level_name}.kml")
+    "/kml/#{level_name}.kml"
   end
 end
