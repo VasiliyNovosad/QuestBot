@@ -48,7 +48,7 @@ class Level
     return nil if @sectors.count < 2
     result = "Лишилось закрити *#{@sectors_left_to_close}*.\nНезакриті сектори:\n"
     @sectors.each do |_, sector|
-      result << "#{parsed(sector.name)[:text]}\n" unless sector.answered
+      result << "#{parsed(sector.name)[:text]}\n" unless sector.is_answered
     end
     { text: result, coords: coords }
   end
@@ -59,7 +59,7 @@ class Level
     return nil if @sectors.count < 2
     result = "Лишилось закрити *#{@sectors_left_to_close}*.\nCектори:\n"
     @sectors.each do |_, sector|
-      result << "#{parsed(sector.name)[:text]}: #{sector.answered ? parsed(sector.answer)[:text] : '-'}\n"
+      result << "#{parsed(sector.name)[:text]}: #{sector.is_answered ? parsed(sector.answer)[:text] : '-'}\n"
     end
     { text: result, coords: coords }
   end
@@ -350,7 +350,6 @@ class Level
     sectors_json.each do |sector_json|
       new_sector = Sector.from_json(sector_json)
       sector = @sectors[new_sector.id]
-
       if sector.nil? || sector != new_sector
         result << new_sector.to_text
       end

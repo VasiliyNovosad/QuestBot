@@ -41,8 +41,8 @@ class Sector
   def from_json(sector_json)
     @order = sector_json['Order']
     @name = sector_json['Name']
-    @answer = sector_json['IsAnswered']
-    @is_answered = sector_json['IsAnswered'] ? sector_json['Answer']['Answer'] : nil
+    @answer = sector_json['IsAnswered'] ? sector_json['Answer']['Answer'] : nil
+    @is_answered = sector_json['IsAnswered']
   end
 
   def ==(other_object)

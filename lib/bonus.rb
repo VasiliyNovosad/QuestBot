@@ -39,7 +39,7 @@ class Bonus
     @coords = []
   end
 
-  def self.from_json(bonus_json)
+  def from_json(bonus_json)
     @name = bonus_json['Name']
     @number = bonus_json['Number']
     @task = bonus_json['Task']
@@ -52,7 +52,7 @@ class Bonus
     @award_time = bonus_json['AwardTime']
   end
 
-  def from_json(bonus_json)
+  def self.from_json(bonus_json)
     Bonus.new(
         bonus_json['BonusId'],
         bonus_json['Name'],
