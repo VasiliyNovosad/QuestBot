@@ -1,4 +1,5 @@
 source 'https://rubygems.org'
 # gem 'mechanize'
 gem 'telegram-bot-ruby'
-gem 'rgeo-shapefile'
+# gem 'rgeo-shapefile'
+gem 'ruby_kml', git: 'git://github.com/VasiliyNovosad/ruby_kml.git'

@@ -1,70 +1,104 @@
+require_relative '../lib/task'
+require_relative '../lib/sector'
+require_relative '../lib/bonus'
+require_relative '../lib/help'
+require_relative '../lib/penalty_help'
+require_relative '../lib/message'
+require_relative '../lib/bot_utils'
+
 class Level
-  attr_reader :id, :number, :has_answer_block_rule
-  attr_accessor :coords
+  include BotUtils
+  attr_accessor :id, :number, :has_answer_block_rule, :block_duration, :block_target_id, :attemts_number,
+                :attemts_period, :coords, :notified, :name, :timeout_seconds_remain, :required_sectors_count,
+                :passed_sectors_count, :sectors_left_to_close, :task, :helps, :penalty_helps, :sectors,
+                :bonuses, :messages, :notified, :levels_count
 
-  def initialize(level_json)
+  def initialize(level_json, notify_before = 5)
     @coords = []
-    load_level_from_json(level_json)
+    levels = level_json['Levels']
+    @levels_count = levels.nil? ? 0 : levels.count
+    @notified = false
+    from_json(level_json['Level'] || {}, notify_before)
   end
 
-  def full_info(level_json, by_timer = false)
+  def full_info(level_json, by_timer = false, notify_before = 5)
     @coords = []
-    load_level_from_json(level_json)
-    { text: full_level_info(by_timer), coords: coords }
+    levels = level_json['Levels']
+    @levels_count = levels.nil? ? 0 : levels.count
+    from_json(level_json['Level'] || {}, notify_before)
+    { text: to_text(by_timer), coords: coords }
   end
 
-  def updated_info(level_json, with_q_time = false, block_sector = false)
+  def updated_info(level_json, with_q_time = false, block_sector = false, notify_before = 5)
     @coords = []
     if level_json['Level']['LevelId'] != @id
-      full_info(level_json, !with_q_time)
+      full_info(level_json, !with_q_time, notify_before)
     else
-      result = load_updated_info(level_json['Level'], with_q_time, block_sector)
-      load_level_from_json(level_json)
+      levels = level_json['Levels']
+      @levels_count = levels.nil? ? 0 : levels.count
+      result = load_updated_info(level_json['Level'], with_q_time, block_sector, notify_before)
+      update_from_json(level_json['Level'])
       { text: result, coords: coords }
     end
   end
 
   def needed_sectors(level_json)
     @coords = []
-    load_level_from_json(level_json)
+    update_from_json(level_json['Level'])
     return nil if @sectors.count < 2
     result = "Лишилось закрити *#{@sectors_left_to_close}*.\nНезакриті сектори:\n"
-    @sectors.each do |sector|
-      result << "#{sector[:name]}\n" unless sector[:answered]
+    @sectors.each do |_, sector|
+      result << "#{parsed(sector.name)[:text]}\n" unless sector.is_answered
     end
     { text: result, coords: coords }
   end
 
   def all_sectors(level_json)
     @coords = []
-    load_level_from_json(level_json)
+    update_from_json(level_json['Level'])
     return nil if @sectors.count < 2
     result = "Лишилось закрити *#{@sectors_left_to_close}*.\nCектори:\n"
-    @sectors.each do |sector|
-      result << "#{sector[:name]}: #{sector[:answered] ? sector[:answer][:answer] : '-'}\n"
+    @sectors.each do |_, sector|
+      result << "#{parsed(sector.name)[:text]}: #{sector.is_answered ? parsed(sector.answer)[:text] : '-'}\n"
     end
     { text: result, coords: coords }
   end
 
   def all_bonuses(level_json)
     @coords = []
-    load_level_from_json(level_json)
+    update_from_json(level_json['Level'])
     return nil if @sectors.count.zero?
     result = ''
-    @bonuses.each { |bonus| result << bonus_to_text(bonus) }
+    @bonuses.each { |bonus| result << bonus.to_text }
     { text: result, coords: coords }
+  end
+
+  def all_coords
+    all_coords = {}
+    all_coords['Завдання'] = task.coords if task.coords.length > 0
+    helps.each do |id, help|
+      all_coords["Підказка #{help.number}"] = help.coords if help.coords.length > 0
+    end
+    penalty_helps.each do |id, help|
+      all_coords["Штрафна підказка #{help.number}"] = help.coords if help.coords.length > 0
+    end
+    bonuses.each do |id, bonus|
+      all_coords["Бонус #{bonus.number}: #{bonus.name}"] = bonus.coords if bonus.coords.length > 0
+    end
+    messages.each do |id, message|
+      all_coords["Повідомлення #{message.id} від #{message.owner_login}"] = message.coords if message.coords.length > 0
+    end
+    all_coords
   end
 
   private
 
-  def load_level_from_json(level_json)
-    levels = level_json['Levels']
-    @levels_count = levels.nil? ? 0 : levels.count
-    level_json = level_json['Level'] || {}
+  def from_json(level_json, notify_before = 5)
     @id = level_json['LevelId']
     @name = level_json['Name']
     @number = level_json['Number']
     @timeout_seconds_remain = level_json['TimeoutSecondsRemain']
+    @notified = (level_json['TimeoutSecondsRemain'] || 100000) < notify_before * 60
     @has_answer_block_rule = level_json['HasAnswerBlockRule']
     @block_duration = level_json['BlockDuration']
     @block_target_id = level_json['BlockTargetId']
@@ -73,17 +107,131 @@ class Level
     @required_sectors_count = level_json['RequiredSectorsCount']
     @passed_sectors_count = level_json['PassedSectorsCount']
     @sectors_left_to_close = level_json['SectorsLeftToClose']
-    @task = ''
-    unless Array(level_json['Tasks']).empty?
-      @task = level_json['Tasks'][0]['TaskText']
+    @task = nil
+    unless Array(level_json['Tasks']).length == 0
+      @task = Task.from_json(level_json['Tasks'][0])
     end
-    @messages = Array(level_json['Messages']).map { |rec| json_to_message(rec) }
-    @sectors = Array(level_json['Sectors']).map { |rec| json_to_sector(rec) }
-    @helps = Array(level_json['Helps']).map { |rec| json_to_help(rec) }
-    @penalty_helps = Array(level_json['PenaltyHelps']).map do |rec|
-      json_to_penalty_help(rec)
+    @messages = {}
+    Array(level_json['Messages']).each do |message_json|
+      @messages[message_json['MessageId']] = Message.from_json(message_json)
     end
-    @bonuses = Array(level_json['Bonuses']).map { |rec| json_to_bonus(rec) }
+    @sectors = {}
+    Array(level_json['Sectors']).each do |sector_json|
+      @sectors[sector_json['SectorId']] = Sector.from_json(sector_json)
+    end
+    @helps = {}
+    Array(level_json['Helps']).each do |help_json|
+      new_help = Help.from_json(help_json)
+      new_help.notified = new_help.remain_seconds < 60 * notify_before
+      @helps[help_json['HelpId']] = new_help
+    end
+    @penalty_helps = {}
+    Array(level_json['PenaltyHelps']).each do |help_json|
+      @penalty_helps[help_json['HelpId']] = PenaltyHelp.from_json(help_json)
+    end
+    @bonuses = {}
+    Array(level_json['Bonuses']).each do |bonus_json|
+      @bonuses[bonus_json['BonusId']] = Bonus.from_json(bonus_json)
+    end
+  end
+
+  def update_from_json(level_json)
+    @name = level_json['Name']
+    @number = level_json['Number']
+    @timeout_seconds_remain = level_json['TimeoutSecondsRemain'] || 0
+    @has_answer_block_rule = level_json['HasAnswerBlockRule']
+    @block_duration = level_json['BlockDuration']
+    @block_target_id = level_json['BlockTargetId']
+    @attemts_number = level_json['AttemtsNumber']
+    @attemts_period = level_json['AttemtsPeriod']
+    @required_sectors_count = level_json['RequiredSectorsCount']
+    @passed_sectors_count = level_json['PassedSectorsCount']
+    @sectors_left_to_close = level_json['SectorsLeftToClose']
+    unless level_json['Tasks'].length == 0
+      @task.from_json(level_json['Tasks'][0])
+    end
+    level_json['Messages'].each do |message_json|
+      message = @messages[message_json['MessageId']]
+      if message.nil?
+        message = Message.from_json(message_json)
+      else
+        message.from_json(message_json)
+      end
+      @messages[message_json['MessageId']] = message
+    end
+    level_json['Sectors'].each do |sector_json|
+      sector = @sectors[sector_json['SectorId']]
+      if sector.nil?
+        sector = Sector.from_json(sector_json)
+      else
+        sector.from_json(sector_json)
+      end
+      @sectors[sector_json['SectorId']] = sector
+    end
+    level_json['Helps'].each do |help_json|
+      help = @helps[help_json['HelpId']]
+      if help.nil?
+        help = Help.from_json(help_json)
+      else
+        help.from_json(help_json)
+      end
+      @helps[help_json['HelpId']] = help
+    end
+    level_json['PenaltyHelps'].each do |help_json|
+      help = @penalty_helps[help_json['HelpId']]
+      if help.nil?
+        help = Help.from_json(help_json)
+      else
+        help.from_json(help_json)
+      end
+      @penalty_helps[help_json['HelpId']] = help
+    end
+    level_json['Bonuses'].each do |bonus_json|
+      bonus = @bonuses[bonus_json['HelpId']]
+      if bonus.nil?
+        bonus = Bonus.from_json(bonus_json)
+      else
+        bonus.from_json(bonus_json)
+      end
+      @bonuses[bonus_json['BonusId']] = bonus
+    end
+  end
+
+  def to_text(by_timer = false)
+    result = ''
+    result << "\xE2\x80\xBC *UP* \xE2\x80\xBC\n\n" if by_timer
+    result << "*Рівень #{number} із #{levels_count}*"
+    result << "#{": #{parsed(name)[:text]}" unless name.nil? || name.empty?}\n\n"
+    if (timeout_seconds_remain || 0) > 0
+      result << "*Автоперехід* через *#{seconds_to_string(timeout_seconds_remain || 0)}*\n\n"
+    end
+    result << block_rule if has_answer_block_rule
+    result << task.to_text
+    @coords += task.coords
+    result << "\n\n"
+    unless sectors.empty?
+      result << "Треба закрити *#{sectors_left_to_close}* секторів із *#{sectors.count}*\n\n"
+    end
+    helps.each do |_, help|
+      result << help.to_text
+      @coords += help.coords
+    end
+    result << "\n" unless helps.empty?
+    penalty_helps.each do |_, help|
+      result << help.to_text
+      @coords += help.coords
+    end
+    result << "\n" unless penalty_helps.empty?
+    bonuses.each do |_, bonus|
+      result << bonus.to_text
+      @coords += bonus.coords
+    end
+    result << "\n" unless bonuses.empty?
+    messages.each do |_, message|
+      result << message.to_text
+      @coords += message.coords
+    end
+    result
   end
 
   def answer(rec)
@@ -116,81 +264,6 @@ class Level
     result
   end
 
-  def help_to_text(help)
-    result = "*Підказка #{help[:number]}*: "
-    if help[:remains].zero?
-      result << "\n#{parsed(help[:text])}\n\n"
-    else
-      result << "буде через *#{seconds_to_string(help[:remains])}*\n\n"
-    end
-    result
-  end
-
-  def penalty_help_to_text(help)
-    result = "*Штрафна підказка #{help[:number]}*: "
-    if help[:remains].zero?
-      result << "\n*Опис*: #{parsed(help[:comment])}" unless help[:comment].nil? || help[:comment] == ''
-      result << "\n*Підказка*: #{parsed(help[:text])}" unless help[:text].nil? || help[:text] == ''
-      result << "\n*Штраф*: #{seconds_to_string(help[:penalty])}\n\n"
-    else
-      result << "буде через *#{seconds_to_string(help[:remains])}*\n\n"
-    end
-    result
-  end
-
-  def bonus_to_text(bonus)
-    result = "*Бонус #{bonus[:number]}*"
-    unless bonus[:name].nil? || bonus[:name].empty? || (bonus[:number].to_s == bonus[:name])
-      result << " *#{parsed(bonus[:name])}*"
-    end
-    result << ':'
-    if bonus[:seconds_to_start] > 0
-      result << "буде доступний через *#{seconds_to_string(bonus[:seconds_to_start])}*\n"
-    end
-    if bonus[:seconds_left] > 0
-      result << "закриється через *#{seconds_to_string(bonus[:seconds_left])}*\n"
-    end
-    if bonus[:answered]
-      result << "закрито кодом *#{parsed(bonus[:answer][:answer])}*\n"
-    end
-    result << "не закрито\n" if bonus[:expired]
-    unless bonus[:task].nil? || parsed(bonus[:task]).empty? || bonus[:answered]
-      result << "*Завдання*: #{parsed(bonus[:task])}\n"
-    end
-    unless bonus[:help].nil? || parsed(bonus[:help]).strip.empty?
-      result << "*Підказка*: #{parsed(bonus[:help])}\n"
-    end
-    result << "\n"
-    result
-  end
-
-  def seconds_to_string(seconds, nominative = false)
-    result = ''
-    if seconds / 3600 > 0
-      result << time_part_to_text(seconds / 3600, 'годин', nominative)
-    end
-    if (seconds / 60) % 60 > 0
-      result << time_part_to_text((seconds / 60) % 60, 'хвилин', nominative)
-    end
-    if seconds % 60 > 0
-      result << time_part_to_text(seconds % 60, 'секунд', nominative)
-    end
-    result
-  end
-
-  def time_part_to_text(count, part, nominative)
-    result = ''
-    case count % 10
-    when 1
-      result << (nominative ? "#{count} #{part}а " : "#{count} #{part}у ")
-    when 2..4
-      result << "#{count} #{part}и "
-    else
-      result << "#{count} #{part} "
-    end
-    result
-  end
-
   def block_rule
     result = '*УВАГА!!! Обмеження на ввід*: '
     result << "*#{@attemts_number}* спроб на *"
@@ -198,33 +271,48 @@ class Level
     result << "* за *#{seconds_to_string(@attemts_period)}*\n\n"
   end
 
-  def load_updated_info(level_json, with_q_time = false, block_sector = false)
+  def load_updated_info(level_json, with_q_time = false, block_sector = false, notify_before = 5)
     result = ''
-    if with_q_time && level_json['TimeoutSecondsRemain'] > 0
-      result << '*Автоперехід* через '
-      result << "*#{seconds_to_string(level_json['TimeoutSecondsRemain'])}*\n\n"
+    if level_json['TimeoutSecondsRemain'] > 0
+      if with_q_time
+        result << '*Автоперехід* через '
+        result << "*#{seconds_to_string(level_json['TimeoutSecondsRemain'])}*\n\n"
+      elsif notify_before * 60 > level_json['TimeoutSecondsRemain'] && !notified
+        @notified = true
+        result << '*Автоперехід* через '
+        result << "*#{seconds_to_string(level_json['TimeoutSecondsRemain'])}*\n\n"
+      end
     end
     result << task_updated(level_json['Tasks'])
-    result << helps_updated(level_json['Helps'])
+    result << helps_updated(level_json['Helps'], notify_before)
     result << penalty_helps_updated(level_json['PenaltyHelps'])
-    result << bonuses_updated(level_json['Bonuses']) unless block_sector
-    result << sectors_updated(level_json['Sectors']) unless block_sector
+    bonus_updated = bonuses_updated(level_json['Bonuses'])
+    result << bonus_updated unless block_sector
+    sector_updated = sectors_updated(level_json['Sectors'])
+    result << sector_updated unless block_sector
     result << messages_updated(level_json['Messages'])
     result
   end
 
-  def helps_updated(helps_json)
+  def helps_updated(helps_json, notify_before = 5)
     result = ''
     helps_json.each do |help_json|
-      help = @helps.select { |h| h[:id] == help_json['HelpId'] }
-      if help.empty?
-        help = json_to_help(help_json)
-        result << help_to_text(help)
+      new_help = Help.from_json(help_json)
+      help = @helps[new_help.id]
+      if help.nil?
+        result << new_help.to_text
+        new_help.notified = new_help.remain_seconds < notify_before * 60
+        @coords += new_help.coords
+        @helps[new_help.id] = new_help
       else
-        help = help[0]
-        if help[:text] != help_json['HelpText']
-          help = json_to_help(help_json)
-          result << help_to_text(help)
+        if !help.notified && new_help.remain_seconds < notify_before * 60
+          @helps[new_help.id].notified = true
+          result << new_help.to_text
+          @coords += new_help.coords
+        end
+        unless @helps[new_help.id] == new_help
+          result << new_help.to_text
+          @coords += new_help.coords
         end
       end
     end
@@ -234,16 +322,11 @@ class Level
   def penalty_helps_updated(helps_json)
     result = ''
     helps_json.each do |help_json|
-      help = @penalty_helps.select { |h| h[:id] == help_json['HelpId'] }
-      if help.empty?
-        help = json_to_penalty_help(help_json)
-        result << penalty_help_to_text(help)
-      else
-        help = help[0]
-        if help_json['RemainSeconds'].zero? && (help[:comment] != help_json['PenaltyComment'] || help[:message] != help_json['PenaltyMessage'])
-          help = json_to_penalty_help(help_json)
-          result << penalty_help_to_text(help)
-        end
+      new_help = PenaltyHelp.from_json(help_json)
+      help = @penalty_helps[new_help.id]
+      if help.empty? || help != new_help
+        result << new_help.to_text
+        @coords += new_help.coords
       end
     end
     result
@@ -251,105 +334,37 @@ class Level
 
   def bonuses_updated(bonuses_json)
     result = ''
-    bonuses_json.each do |rec|
-      bonuses = @bonuses.select { |h| h[:id] == rec['BonusId'] }
-      next if bonuses.empty?
-      bonus = bonuses[0]
-      new_bonus = json_to_bonus(rec)
-      next if bonuses_identical?(bonus, new_bonus)
-      result << bonus_to_text(new_bonus)
-    end
-    result
-  end
-
-  def bonuses_identical?(bonus1, bonus2)
-    bonus1[:answered] == bonus2[:answered] &&
-      bonus1[:expired] == bonus2[:expired] &&
-      bonus1[:task] == bonus2[:task] &&
-      bonus1[:help] == bonus2[:help]
-  end
-
-  def json_to_bonus(bonus_json)
-    {
-      id: bonus_json['BonusId'],
-      name: bonus_json['Name'],
-      number: bonus_json['Number'],
-      task: bonus_json['Task'],
-      help: bonus_json['Help'],
-      answered: bonus_json['IsAnswered'],
-      expired: bonus_json['Expired'],
-      seconds_to_start: bonus_json['SecondsToStart'],
-      seconds_left: bonus_json['SecondsLeft'],
-      award: bonus_json['AwardTime'],
-      answer: bonus_json['Answer'].nil? ? nil : answer(bonus_json['Answer'])
-    }
-  end
-
-  def json_to_help(help_json)
-    {
-      id: help_json['HelpId'],
-      number: help_json['Number'],
-      text: help_json['HelpText'],
-      remains: help_json['RemainSeconds']
-    }
-  end
-
-  def json_to_penalty_help(help_json)
-    {
-      id: help_json['HelpId'],
-      number: help_json['Number'],
-      text: help_json['HelpText'],
-      message: help_json['PenaltyMessage'],
-      remains: help_json['RemainSeconds'],
-      penalty: help_json['Penalty'],
-      comment: help_json['PenaltyComment'],
-      state: help_json['PenaltyHelpState']
-    }
-  end
-
-  def json_to_message(message_json)
-    {
-      id: message_json['MessageId'],
-      owner: message_json['OwnerLogin'],
-      text: message_json['MessageText']
-    }
-  end
-
-  def json_to_sector(sector_json)
-    {
-      id: sector_json['SectorId'],
-      number: sector_json['Order'],
-      name: sector_json['Name'],
-      answer: sector_json['Answer'].nil? ? nil : answer(sector_json['Answer']),
-      answered: sector_json['IsAnswered']
-    }
-  end
-
-  def sectors_updated(sectors_json)
-    result = ''
-    sectors_json.each do |rec|
-      sectors = @sectors.select { |h| h[:id] == rec['SectorId'] }
-      next if sectors.empty?
-      sector = sectors[0]
-      new_sector = json_to_sector(rec)
-      if sector[:answered] != new_sector[:answered]
-        result << sector_to_text(new_sector)
+    bonuses_json.each do |bonus_json|
+      new_bonus = Bonus.from_json(bonus_json)
+      bonus = @bonuses[new_bonus.id]
+      if bonus.nil? || bonus != new_bonus
+        result << new_bonus.to_text
+        @coords += new_bonus.coords
       end
     end
     result
   end
 
-  def sector_to_text(sector)
-    "Сектор *#{parsed(sector[:name])}* закрито кодом *#{parsed(sector[:answer][:answer])}*\n"
+  def sectors_updated(sectors_json)
+    result = ''
+    sectors_json.each do |sector_json|
+      new_sector = Sector.from_json(sector_json)
+      sector = @sectors[new_sector.id]
+      if sector.nil? || sector != new_sector
+        result << new_sector.to_text
+      end
+    end
+    result
   end
 
   def messages_updated(messages_json)
     result = ''
     messages_json.each do |message_json|
-      message = @messages.select { |h| h[:id] == message_json['MessageId'] }
-      if message.empty? || message[0][:text] != message_json['MessageText']
-        result << "*Повідомлення* від *#{parsed(message_json['OwnerLogin'])}*: "
-        result << "#{parsed(message_json['MessageText'])}\n\n"
+      new_message = Message.from_json(message_json)
+      message = @messages[new_message.id]
+      if message.nil? || message != new_message
+        result << new_message.to_text
+        @coords += new_message.coords
       end
     end
     result
@@ -357,128 +372,14 @@ class Level
 
   def task_updated(tasks_json)
     result = ''
-    if tasks_json.count > 0 && @task != tasks_json[0]['TaskText']
-      result << "#{parsed(tasks_json[0]['TaskText'])}\n\n"
+    if tasks_json.count > 0
+      new_task = Task.from_json(tasks_json[0])
+      unless @task == new_task
+        result << new_task.to_text
+        @coords += new_task.coords
+      end
     end
     result
-  end
-
-  def parsed(text)
-    result = text
-
-    ire = %r{<img.+?src="\s*(https?://.+?)\s*".*?>}
-    ireA = /<a.+?href=?"(https?:\/\/.+?.(jpg|png|bmp))?".*?>(.*?)<\/a>/
-
-    reBr = %r{</*br\s*/?>}
-    reHr = %r{<hr.*?/?>}
-    reP = %r{<p>([\s\S.]+?)</p>}
-    reBold = %r{<b.*?/?>([\s\S.]+?)</b>}
-    reStrong = %r{<strong.*?>([\s\S.]*?)</strong>}
-    reItalic = %r{<i>([\s\S.]+?)</i>}
-    reStyle = %r{<style.*?>([\s\S.]*?)</style>}
-    reScript = %r{<script.*?>([\s\S.]*?)</script>}
-    reSpan = %r{<span.*?>([\s\S.]*?)</span>}
-    reCenter = %r{<center>([\s\S.]+?)</center>}
-    reFont = %r{<font.+?colors*=?["«]?#?(w+)?["»]?.*?>([\s\S.]+?)</font>}
-    reA = %r{<a.+?href=?"(.+?)?".*?>(.+?)</a>}
-    reTable = %r{<table.*?>([\s\S.]*?)</table>}
-    reTr = %r{<tr.*?>([\s\S.]*?)</tr>}
-    reTd = %r{<td.*?>([\s\S.]*?)</td>}
-
-
-    # <a href="https://www.google.com.ua/maps/place/50%C2%B044'33.4%22N+25%C2%B028'26.2%22E/@50.7407788,25.4743992,378m/data=!3m1!1e3!4m5!3m4!1s0x0:0x0!8m2!3d50.7426!4d25.473939?hl=uk" target="blank">50.742600,25.473939</a>
-    # <a href="geo:49.976136, 36.267256">49.976136, 36.267256</a>
-    geoHrefRe = %r{<a.+?href="geo:(\d{1,3}[.,]\d{3,}),?\s*(-*\d{1,2}[.,]\d{3,})">(.+?)</a>}
-
-    # <a href="https://www.google.com.ua/maps/@50.0363257,36.2120039,19z" target="blank">50.036435 36.211914</a>
-		hrefRe = %r{<a.+?href="https?://.+?(\d{1,3}[.,]\d{3,}),?\s*(-*\d{1,2}[.,]\d{3,}).*?">(.+?)</a>}
-
-    # 49.976136, 36.267256
-    numbersRe = /(\d{1,3}[.,]\d{3,}),?\s*(-*\d{1,2}[.,]\d{3,})/
-
-
-    mrStyle = result.to_enum(:scan, reStyle).map { Regexp.last_match }
-    mrStyle.each { |match| result = result.gsub(match[0], '') }
-
-    mrScript = result.to_enum(:scan, reScript).map { Regexp.last_match }
-    mrScript.each { |match| result = result.gsub(match[0], '') }
-    result = result.gsub("_", "\\_").gsub("*", "\\*")
-
-    mrFont = result.to_enum(:scan, reFont).map { Regexp.last_match }
-    mrFont.each { |match| result = result.gsub(match[0], match[2]) }
-
-    mrBold = result.to_enum(:scan, reBold).map { Regexp.last_match }
-    mrBold.each { |match| result = result.gsub(match[0], "*#{match[1]}*") }
-
-    mrStrong = result.to_enum(:scan, reStrong).map { Regexp.last_match }
-    mrStrong.each { |match| result = result.gsub(match[0], "*#{match[1]}*") }
-
-    mrItalic = result.to_enum(:scan, reItalic).map { Regexp.last_match }
-    mrItalic.each { |match| result = result.gsub(match[0], "#{match[1]}") }
-
-    mrGeoHrefRe = result.to_enum(:scan, geoHrefRe).map { Regexp.last_match }
-    mrGeoHrefRe.each do |match|
-      result = result.gsub(match[0], "#{match[1]}, #{match[2]}")
-      unless @coords.any? { |coord| coord[:latitude] == match[1] && coord[:longitude] == match[2] }
-        @coords << { latitude: match[1], longitude: match[2], name: match[3] }
-      end
-    end
-
-    mrHrefRe = result.to_enum(:scan, hrefRe).map { Regexp.last_match }
-    mrHrefRe.each do |match|
-      result = result.gsub(match[0], "#{match[1]}, #{match[2]}")
-      unless @coords.any? { |coord| coord[:latitude] == match[1] && coord[:longitude] == match[2] }
-        @coords << { latitude: match[1], longitude: match[2], name: match[3] }
-      end
-    end
-
-    mrNumbersRe = result.to_enum(:scan, numbersRe).map { Regexp.last_match }
-    mrNumbersRe.each do |match|
-      # result = result.gsub(
-      #   # match[0],
-      #   # "[#{match[1]} #{match[2]}] (#{google_link(match[1], match[2])})"
-      # )
-      unless @coords.any? { |coord| coord[:latitude] == match[1] && coord[:longitude] == match[2] }
-        @coords << { latitude: match[1], longitude: match[2], name: "#{match[1]}, #{match[2]}" }
-      end
-    end
-
-    mrSpan = result.to_enum(:scan, reSpan).map { Regexp.last_match }
-    mrSpan.each { |match| result = result.gsub(match[0], match[1]) }
-
-    mrCenter = result.to_enum(:scan, reCenter).map { Regexp.last_match }
-    mrCenter.each { |match| result = result.gsub(match[0], match[1]) }
-
-    mre = result.to_enum(:scan, ire).map { Regexp.last_match }
-    mre.each { |match| result = result.gsub(match[0], match[1]) }
-
-    mreA = result.to_enum(:scan, ireA).map { Regexp.last_match }
-    mreA.each { |match| result.gsub!(match[0], match[1]) }
-
-    mrA = result.to_enum(:scan, reA).map { Regexp.last_match }
-    mrA.each { |match| result = result.gsub(match[0], "[#{match[2]}](#{match[1]})") }
-
-    mrP = result.to_enum(:scan, reP).map { Regexp.last_match }
-    mrP.each { |match| result = result.gsub(match[0], "\n#{match[1]}") }
-
-    mrBr = result.to_enum(:scan, reBr).map { Regexp.last_match }
-    mrBr.each { |match| result = result.gsub(match[0], "\n") }
-
-    mrHr = result.to_enum(:scan, reHr).map { Regexp.last_match }
-    mrHr.each { |match| result = result.gsub(match[0], "\n") }
-
-    mrTd = result.to_enum(:scan, reTd).map { Regexp.last_match }
-    mrTd.each { |match| result = result.gsub(match[0], "#{match[1]} : ") }
-
-    mrTr = result.to_enum(:scan, reTr).map { Regexp.last_match }
-    mrTr.each { |match| result = result.gsub(match[0], "#{match[1]}\n") }
-
-    mrTable = result.to_enum(:scan, reTable).map { Regexp.last_match }
-    mrTable.each { |match| result = result.gsub(match[0], match[1]) }
-
-    result = result.gsub('&nbsp;', ' ')
-    result = result.gsub("\r", '')
-    result.gsub("\n\n\n", "\n\n")
   end
 
   def google_link(lat, lon)

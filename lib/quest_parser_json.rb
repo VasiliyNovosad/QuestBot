@@ -9,7 +9,7 @@ class QuestParserJson
   FORMAT_URL = '?json=1'.freeze
 
   attr_accessor :domain_name, :game_id, :login,
-                :password, :cookie, :errors, :level, :block_sector_update
+                :password, :cookie, :errors, :level, :block_sector_update, :notify_before
 
   def initialize(domain_name, game_id)
     @domain_name = domain_name
@@ -20,13 +20,14 @@ class QuestParserJson
     @password = nil
     @errors = nil
     @block_sector_update = false
+    @notify_before = 1
   end
 
   # Get full info for current level
   def full_info
     level_json = get_level
     return nil if level_json.nil? || level_json['Level'].nil?
-    level.full_info(level_json)
+    level.full_info(level_json, false, notify_before)
   rescue => detail
     print detail.message
     print detail.backtrace.join("\n")
@@ -37,7 +38,7 @@ class QuestParserJson
   def updated_info(with_q_time)
     level_json = get_level
     return nil if level_json.nil? || level_json['Level'].nil?
-    level.updated_info(level_json, with_q_time, block_sector_update)
+    level.updated_info(level_json, with_q_time, block_sector_update, notify_before)
   rescue => detail
     print detail.message
     print detail.backtrace.join("\n")

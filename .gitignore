@@ -1,4 +1,5 @@
 .idea/*
 *.iml
 *.log
-/config/*.yml
+config/*.yml
+kml/*.kml

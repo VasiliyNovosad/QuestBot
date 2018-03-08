@@ -36,6 +36,11 @@ class MessageSender
     bot.api.send_photo(chat_id: chat.id, photo: Faraday::UploadIO.new(File.dirname(__FILE__) + text, 'image/jpeg'))
   end
 
+  def send_document
+    p text
+    bot.api.send_document(chat_id: chat.id, document: Faraday::UploadIO.new(File.dirname(__FILE__) + text, 'text/xml'))
+  end
+
   def send_location
     bot.api.send_location(chat_id: chat.id, latitude: latitude, longitude: longitude)
   end

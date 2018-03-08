@@ -1,3 +1,10 @@
+GIT
+  remote: git://github.com/VasiliyNovosad/ruby_kml.git
+  revision: c236839759f5c5a3fd5a1e53f8a667bee358cc25
+  specs:
+    ruby_kml (0.1.7)
+      builder
+
 GEM
   remote: https://rubygems.org/
   specs:
@@ -5,21 +12,17 @@ GEM
       descendants_tracker (~> 0.0.4)
       ice_nine (~> 0.11.0)
       thread_safe (~> 0.3, >= 0.3.1)
+    builder (3.2.3)
     coercible (1.0.0)
       descendants_tracker (~> 0.0.1)
-    dbf (3.1.1)
     descendants_tracker (0.0.4)
       thread_safe (~> 0.3, >= 0.3.1)
     equalizer (0.0.11)
-    faraday (0.13.1)
+    faraday (0.14.0)
       multipart-post (>= 1.2, < 3)
     ice_nine (0.11.2)
     inflecto (0.0.2)
     multipart-post (2.0.0)
-    rgeo (0.6.0)
-    rgeo-shapefile (0.4.2)
-      dbf (~> 3.0)
-      rgeo (~> 0.3)
     telegram-bot-ruby (0.8.6.1)
       faraday
       inflecto
@@ -33,11 +36,10 @@ GEM
 
 PLATFORMS
   ruby
-  x64-mingw32
 
 DEPENDENCIES
-  rgeo-shapefile
+  ruby_kml!
   telegram-bot-ruby
 
 BUNDLED WITH
-   1.16.0
+   1.16.1
