@@ -1,3 +1,4 @@
+require './models/user'
 require './lib/message_sender'
 require './lib/quest_parser_json'
 require './lib/app_configurator'
@@ -8,7 +9,7 @@ require 'ruby_kml'
 
 class MessageResponder
   attr_accessor :message, :blocked_answer
-  attr_reader :bot, :logger, :admin_id, :personal_chat_id
+  attr_reader :bot, :logger, :admin_id, :personal_chat_id, :user
   attr_accessor :parser, :chat, :timer_interval, :start_timer, :block_answer
 
   def initialize(options)
@@ -266,14 +267,6 @@ class MessageResponder
       end
     end
 
-    on %r{^\/setlogin } do
-      logger.debug "@#{message.from.username}: #{message.text}"
-      return if message.from.id != admin_id
-      return if message.chat.id != personal_chat_id
-      puts parser
-      parser.login = message.text[10..-1].strip if parser
-    end
-
     on %r{^\/off$} do
       logger.debug "@#{message.from.username}: #{message.text}"
       return if message.from.id != admin_id
@@ -316,12 +309,39 @@ class MessageResponder
       parser.block_sector_update = false if parser
     end
 
-    on %r{^\/setpassword } do
+    on %r{^\/setlogin } do
       logger.debug "@#{message.from.username}: #{message.text}"
       return if message.from.id != admin_id
       return if message.chat.id != personal_chat_id
       puts parser
+      parser.login = message.text[10..-1].strip if parser
+      user = User.find_or_create_by(uid: admin_id)
+      user.enlogin = message.text[10..-1].strip
+      user.save!
+    end
+
+    on %r{^\/setpassword } do
+      logger.debug "@#{message.from.username}: #{message.text}"
+      return if message.from.id != admin_id
+      return if message.chat.id != personal_chat_id
       parser.password = message.text[13..-1].strip if parser
+      user = User.find_or_create_by(uid: admin_id)
+      user.enpassword = message.text[13..-1].strip
+      user.save!
+    end
+
+    on %r{^\/setuserlogin } do
+      logger.debug "@#{message.from.username}: #{message.text}"
+      user = User.find_or_create_by(uid: message.from.id)
+      user.enlogin = message.text[14..-1].strip
+      user.save!
+    end
+
+    on %r{^\/setuserpassword } do
+      logger.debug "@#{message.from.username}: #{message.text}"
+      user = User.find_or_create_by(uid: message.from.id)
+      user.enpassword = message.text[17..-1].strip
+      user.save!
     end
 
     on %r{^\/setchatcurrent$} do

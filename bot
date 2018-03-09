@@ -9,6 +9,7 @@ require 'openssl'
 OpenSSL::SSL::VERIFY_PEER = OpenSSL::SSL::VERIFY_NONE
 
 config = AppConfigurator.new
+config.configure
 
 token = ENV['TELEGRAM_BOT_TOKEN'] || config.get_token
 logger = config.get_logger
