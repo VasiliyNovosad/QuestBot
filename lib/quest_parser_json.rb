@@ -20,7 +20,7 @@ class QuestParserJson
     @password = nil
     @errors = nil
     @block_sector_update = false
-    @notify_before = 1
+    @notify_before = 5
   end
 
   # Get full info for current level

@@ -69,24 +69,56 @@ class MessageResponder
       end
     end
 
-#     on %r{^\/help$} do
-#       logger.debug "@#{message.from.username}: #{message.text}"
-#       text = 'List of commands:
-# /start <domain_name>;<game_id>
-# /stop
-# /restart
-# /starttimer
-# /starttimer <secs>
-# /stoptimer
-# /+
-# /\\*
-# /-
-# /-+
-# /. <answer1> <answer2> ... <answern>
-# . <answer1> <answer2> ... <answern>
-# /.<answer> or /,<answer> or .<answer> or ,<answer>'
-#       answer_with_message(text, chat || message.chat)
-#     end
+    on %r{^\/help$} do
+      logger.debug "@#{message.from.username}: #{message.text}"
+      text = 'Список команд:
+/start <domain_name>;<game_id> - (!) встановити домен і ІД гри
+/setlogin <login> - (!) ввести логін гравця в движку
+/setpassword <password> - (!) ввести пароль гравця в движку
+/setchatcurrent - вказати чат для виведення інформації ботом
+/stop - (!) зупинити бот
+/restart - (!) перезапустити бот
+/starttimer - (!) запустити оновлення по таймеру (стандартно 5 секунд)
+/starttimer <secs> - (!) запустити оновлення по таймеру через вказану кількість секунд (стандартно 5 секунд)
+/stoptimer - (!) зупинити оновлення по таймеру
+/on - (!) включити введення кодів через бот (стандартно включено)
+/off - (!) відключити введення кодів через бот (стандартно включено)
+/blon - (!) включити введення кодів на рівні із обмеженням вводу (стандартно виключено)
+/bloff - (!) відключити введення кодів на рівні із обмеженням вводу (стандартно виключено)
+/updon - (!) включити виведення інформації про закриті сектори і бонуси (стандартно включено)
+/updoff - (!) відключити виведення інформації про закриті сектори і бонуси (стандартно включено)
+/setnotifytime <min> - (!) встановити, за який час до апу або підказки виводити повідомлення (стандартно 5 хвилин)
+
+/+ - вивести оновлення рівня
+/\\* - вивести повну інформацію рівня
+/- - вивести незакриті сектори
+/-+ - вивести усі сектори із вірними кодами для закритих
+/. <answer1> <answer2> ... <answern> - вбити одразу кілька кодів через пробіл (після точки поставити пробіл)
+/.<answer> or /,<answer> or .<answer> or ,<answer> - вбити код
+/: or /; - вивести всі бонуси
+/coords - створити kml-файл із координатами рівня
+
+/morze <code> - декодувати азбуку Морзе (задається 1 - тире і 0 - точка, наприклад 000 111 000 - СОС)
+/brail <code> - декодувати шрифт Брайля (1 - чорна точка, 0 - біла, нумерація лівий стовпчик 1-3, правий 4-6)
+/mend - показати таблицю Менделєєва
+/flagen - показати прапорцеву азбуку латинницю
+/flagru - показати прапорцеву азбуку кирилицю
+/flags - показати прапори країн світу
+/dance - показати танцюючі чоловічки
+/masson - показати масонську азбуку
+/moon - показати шрифт Муна
+/shadow
+/semafor - показати семафорку
+/brailen - показати шрифт Брайля латинницю
+/brailru - показати шрифт Брайля кирилицю
+/morzeen - показати азбуку Морзе латинницю
+/morzeru - показати азбуку Морзе латинницю
+/alph - показати англійський, російський і український алфавіт з нумерацією
+/ascii - показати таблицю кодів ascii
+/kb - показати клавіатуру
+/street <filter_regex> - вивести назви вулиць (лише Луцьк)'
+      answer_with_message(text, chat || message.chat)
+    end
 
     on %r{^\/\+$} do
       logger.debug "@#{message.from.username}: #{message.text}"
@@ -266,14 +298,6 @@ class MessageResponder
       end
     end
 
-    on %r{^\/setlogin } do
-      logger.debug "@#{message.from.username}: #{message.text}"
-      return if message.from.id != admin_id
-      return if message.chat.id != personal_chat_id
-      puts parser
-      parser.login = message.text[10..-1].strip if parser
-    end
-
     on %r{^\/off$} do
       logger.debug "@#{message.from.username}: #{message.text}"
       return if message.from.id != admin_id
@@ -314,6 +338,14 @@ class MessageResponder
       return if message.from.id != admin_id
       return if message.chat.id != personal_chat_id
       parser.block_sector_update = false if parser
+    end
+
+    on %r{^\/setlogin } do
+      logger.debug "@#{message.from.username}: #{message.text}"
+      return if message.from.id != admin_id
+      return if message.chat.id != personal_chat_id
+      puts parser
+      parser.login = message.text[10..-1].strip if parser
     end
 
     on %r{^\/setpassword } do
@@ -450,7 +482,7 @@ class MessageResponder
     on %r{^\/coords$} do
       logger.debug "@#{message.from.username}: #{message.text}"
       return if message.from.id != admin_id
-      return if message.chat.id != personal_chat_id
+      return if chat.id != message.chat.id && message.chat.id != personal_chat_id
       answer_with_file(coords_to_kml(parser.level.all_coords, parser.level.name), message.chat) if parser
     end
 
@@ -463,8 +495,8 @@ class MessageResponder
     end
 
     on %r{^(\d{2}[.,]\d{3,}),?\s*(\d{2}[.,]\d{3,})$} do
-      p message.text
-      p message.location
+      logger.debug message.text
+      logger.debug message.location
       if message.location.nil?
         numbersRe = /(\d{2}[.,]\d{3,}),?\s*(\d{2}[.,]\d{3,})/
         mrNumbersRe = message.text.to_enum(:scan, numbersRe).map { Regexp.last_match }
