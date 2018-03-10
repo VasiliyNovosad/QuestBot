@@ -628,6 +628,7 @@ class MessageResponder
   end
 
   def coords_to_kml(coords, level_name)
+    require 'bundler/setup'
     require 'ruby_kml'
     kml = KMLFile.new
     folder = KML::Document.new(name: level_name)
