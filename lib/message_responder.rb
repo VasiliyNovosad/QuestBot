@@ -354,6 +354,13 @@ class MessageResponder
       @start_timer = true
     end
 
+    on %r{^\/setnotifytime } do
+      logger.debug "@#{message.from.username}: #{message.text}"
+      return if message.from.id != admin_id
+      return if message.chat.id != personal_chat_id
+      parser.notify_before = message.text[15..-1].strip.to_i if parser
+    end
+
     on %r{^\/morze } do
       # logger.debug "@#{message.from.username}: #{message.text}"
       text = message.text[7..-1].strip
