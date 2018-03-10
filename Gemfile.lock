@@ -1,5 +1,5 @@
 GIT
-  remote: https://github.com/VasiliyNovosad/ruby_kml.git
+  remote: git://github.com/VasiliyNovosad/ruby_kml.git
   revision: c236839759f5c5a3fd5a1e53f8a667bee358cc25
   specs:
     ruby_kml (0.1.7)
