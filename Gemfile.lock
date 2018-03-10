@@ -1,8 +1,8 @@
 GIT
   remote: git://github.com/VasiliyNovosad/ruby_kml.git
-  revision: c236839759f5c5a3fd5a1e53f8a667bee358cc25
+  revision: ffc96d0bde6fec12aebe119e97937259cb4cf4e0
   specs:
-    ruby_kml (0.1.7)
+    ruby_kml (0.1.8)
       builder
 
 GEM
@@ -45,4 +45,4 @@ RUBY VERSION
    ruby 2.3.3p222
 
 BUNDLED WITH
-   1.15.2
+   1.16.1
