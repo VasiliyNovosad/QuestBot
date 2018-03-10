@@ -72,7 +72,7 @@ class MessageResponder
     on %r{^\/help$} do
       logger.debug "@#{message.from.username}: #{message.text}"
       text = 'Список команд:
-/start <domain_name>;<game_id> - (!) встановити домен і ІД гри
+/start <domain\\_name>;<game\\_id> - (!) встановити домен і ІД гри
 /setlogin <login> - (!) ввести логін гравця в движку
 /setpassword <password> - (!) ввести пароль гравця в движку
 /setchatcurrent - вказати чат для виведення інформації ботом
@@ -116,8 +116,8 @@ class MessageResponder
 /alph - показати англійський, російський і український алфавіт з нумерацією
 /ascii - показати таблицю кодів ascii
 /kb - показати клавіатуру
-/street <filter_regex> - вивести назви вулиць (лише Луцьк)'
-      answer_with_message(text, chat || message.chat)
+/street <filter\\_regex> - вивести назви вулиць (лише Луцьк)'
+      answer_with_message(text, message.chat)
     end
 
     on %r{^\/\+$} do
