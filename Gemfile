@@ -1,4 +1,6 @@
 source 'https://rubygems.org'
+ruby '2.3.3'
+
 # gem 'mechanize'
 gem 'telegram-bot-ruby'
 # gem 'rgeo-shapefile'

@@ -41,5 +41,8 @@ DEPENDENCIES
   ruby_kml!
   telegram-bot-ruby
 
+RUBY VERSION
+   ruby 2.3.3p222
+
 BUNDLED WITH
    1.16.1
