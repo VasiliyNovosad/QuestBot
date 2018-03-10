@@ -4,7 +4,7 @@ require './lib/app_configurator'
 require './lib/morze'
 require './lib/braille'
 require './lib/lutsk_street'
-require 'ruby_kml'
+require './ruby_kml'
 
 class MessageResponder
   attr_accessor :message, :blocked_answer
