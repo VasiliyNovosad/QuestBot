@@ -636,7 +636,7 @@ class MessageResponder
     coords.each do |k, v|
       v.each_with_index do |coord, index|
         folder.features << KML::Placemark.new(
-            name: "#{k}: Точка #{index + 1}",
+            name: "#{k}. Точка #{index + 1}",
             geometry: KML::Point.new(coordinates: {lat: coord[:latitude], lng: coord[:longitude]})
         )
       end
