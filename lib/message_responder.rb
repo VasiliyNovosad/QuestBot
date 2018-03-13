@@ -483,6 +483,7 @@ class MessageResponder
       logger.debug "@#{message.from.username}: #{message.text}"
       return if message.from.id != admin_id
       return if chat.id != message.chat.id && message.chat.id != personal_chat_id
+      return if parser.nil? || parser.level.nil?
       full_info = parser.full_info
       answer_with_file(coords_to_kml(parser.level.all_coords, parser.level.name), message.chat) if parser
     end
@@ -491,6 +492,7 @@ class MessageResponder
       logger.debug "@#{message.from.username}: #{message.text}"
       return if message.from.id != admin_id
       return if chat.id != message.chat.id && message.chat.id != personal_chat_id
+      return if parser.nil? || parser.level.nil?
       full_info = parser.full_info
       answer_with_file(coords_to_gpx(parser.level.all_coords, parser.level.name), message.chat) if parser
     end
@@ -656,8 +658,7 @@ class MessageResponder
   end
 
   def coords_to_gpx(coords, level_name)
-    require 'bundler/setup'
-    require 'GPX'
+    require 'gpx'
     gpx = GPX::GPXFile.new
     coords.each do |k, v|
       v.each_with_index do |coord, index|
