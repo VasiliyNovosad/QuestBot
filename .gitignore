@@ -3,3 +3,4 @@
 *.log
 config/*.yml
 kml/*.kml
+kml/*.gpx
