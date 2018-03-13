@@ -486,7 +486,7 @@ class MessageResponder
       return if chat.id != message.chat.id && message.chat.id != personal_chat_id
       return if parser.nil? || parser.level.nil?
       full_info = parser.full_info
-      answer_with_file(coords_to_kml(parser.level.all_coords, parser.level.name), message.chat) if parser
+      answer_with_file(coords_to_kml(parser.level.all_coords, "Рівень #{parser.level.number}"), message.chat) if parser
     end
 
     on %r{^\/coords2$} do
@@ -495,7 +495,7 @@ class MessageResponder
       return if chat.id != message.chat.id && message.chat.id != personal_chat_id
       return if parser.nil? || parser.level.nil?
       full_info = parser.full_info
-      answer_with_file(coords_to_gpx(parser.level.all_coords, parser.level.name), message.chat) if parser
+      answer_with_file(coords_to_gpx(parser.level.all_coords, "Рівень #{parser.level.number}"), message.chat) if parser
     end
 
     on %r{^\/street } do
