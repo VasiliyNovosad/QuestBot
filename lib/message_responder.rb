@@ -487,6 +487,14 @@ class MessageResponder
       answer_with_file(coords_to_kml(parser.level.all_coords, parser.level.name), message.chat) if parser
     end
 
+    on %r{^\/coords2$} do
+      logger.debug "@#{message.from.username}: #{message.text}"
+      return if message.from.id != admin_id
+      return if chat.id != message.chat.id && message.chat.id != personal_chat_id
+      full_info = parser.full_info
+      answer_with_file(coords_to_gpx(parser.level.all_coords, parser.level.name), message.chat) if parser
+    end
+
     on %r{^\/street } do
       # logger.debug "@#{message.from.username}: #{message.text}"
       text = message.text[8..-1].strip
@@ -645,5 +653,18 @@ class MessageResponder
     kml.render
     kml.save(File.dirname(__FILE__) + "/kml/#{level_name}.kml")
     "/kml/#{level_name}.kml"
+  end
+
+  def coords_to_gpx(coords, level_name)
+    require 'bundler/setup'
+    require 'GPX'
+    gpx = GPX::GPXFile.new
+    coords.each do |k, v|
+      v.each_with_index do |coord, index|
+        gpx.waypoints << GPX::Waypoint.new({name: "#{k}. Точка #{index + 1}", lat: coord[:latitude], lon: coord[:longitude], time: Time.now})
+      end
+    end
+    gpx.write(File.dirname(__FILE__) + "/kml/#{level_name}.gpx")
+    "/kml/#{level_name}.gpx"
   end
 end

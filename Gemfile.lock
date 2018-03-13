@@ -20,9 +20,16 @@ GEM
     equalizer (0.0.11)
     faraday (0.14.0)
       multipart-post (>= 1.2, < 3)
+    gpx (1.0.0)
+      nokogiri (~> 1.7)
+      rake
     ice_nine (0.11.2)
     inflecto (0.0.2)
+    mini_portile2 (2.3.0)
     multipart-post (2.0.0)
+    nokogiri (1.8.2)
+      mini_portile2 (~> 2.3.0)
+    rake (12.3.0)
     telegram-bot-ruby (0.8.6.1)
       faraday
       inflecto
@@ -38,6 +45,7 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
+  gpx
   ruby_kml!
   telegram-bot-ruby
 
