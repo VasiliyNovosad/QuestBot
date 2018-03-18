@@ -324,7 +324,7 @@ class Level
     helps_json.each do |help_json|
       new_help = PenaltyHelp.from_json(help_json)
       help = @penalty_helps[new_help.id]
-      if help.empty? || help != new_help
+      if help.nil? || help != new_help
         result << new_help.to_text
         @coords += new_help.coords
       end
