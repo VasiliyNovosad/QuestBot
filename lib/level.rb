@@ -75,18 +75,18 @@ class Level
 
   def all_coords
     all_coords = {}
-    all_coords['Завдання'] = task.coords if task.coords.length > 0
+    all_coords["#{number}"] = task.coords if task.coords.length > 0
     helps.each do |id, help|
-      all_coords["Підказка #{help.number}"] = help.coords if help.coords.length > 0
+      all_coords["#{number}. Підказка #{help.number}"] = help.coords if help.coords.length > 0
     end
     penalty_helps.each do |id, help|
-      all_coords["Штрафна підказка #{help.number}"] = help.coords if help.coords.length > 0
+      all_coords["#{number}. Штрафна підказка #{help.number}"] = help.coords if help.coords.length > 0
     end
     bonuses.each do |id, bonus|
-      all_coords["Бонус #{bonus.number}: #{bonus.name}"] = bonus.coords if bonus.coords.length > 0
+      all_coords["#{number}. Бонус #{bonus.number}: #{bonus.name}"] = bonus.coords if bonus.coords.length > 0
     end
     messages.each do |id, message|
-      all_coords["Повідомлення #{message.id} від #{message.owner_login}"] = message.coords if message.coords.length > 0
+      all_coords["#{number}. Повідомлення #{message.id} від #{message.owner_login}"] = message.coords if message.coords.length > 0
     end
     all_coords
   end
@@ -324,7 +324,7 @@ class Level
     helps_json.each do |help_json|
       new_help = PenaltyHelp.from_json(help_json)
       help = @penalty_helps[new_help.id]
-      if help.empty? || help != new_help
+      if help.nil? || help != new_help
         result << new_help.to_text
         @coords += new_help.coords
       end

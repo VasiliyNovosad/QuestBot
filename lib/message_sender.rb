@@ -37,7 +37,7 @@ class MessageSender
   end
 
   def send_document
-    p text
+    logger.debug text
     bot.api.send_document(chat_id: chat.id, document: Faraday::UploadIO.new(File.dirname(__FILE__) + text, 'text/xml'))
   end
 

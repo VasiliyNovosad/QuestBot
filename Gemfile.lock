@@ -1,8 +1,8 @@
 GIT
   remote: git://github.com/VasiliyNovosad/ruby_kml.git
-  revision: c236839759f5c5a3fd5a1e53f8a667bee358cc25
+  revision: ffc96d0bde6fec12aebe119e97937259cb4cf4e0
   specs:
-    ruby_kml (0.1.7)
+    ruby_kml (0.1.8)
       builder
 
 GEM
@@ -33,12 +33,19 @@ GEM
     equalizer (0.0.11)
     faraday (0.14.0)
       multipart-post (>= 1.2, < 3)
+    gpx (1.0.0)
+      nokogiri (~> 1.7)
+      rake
     i18n (0.9.5)
       concurrent-ruby (~> 1.0)
     ice_nine (0.11.2)
     inflecto (0.0.2)
+    mini_portile2 (2.3.0)
     minitest (5.11.3)
     multipart-post (2.0.0)
+    nokogiri (1.8.2)
+      mini_portile2 (~> 2.3.0)
+    rake (12.3.0)
     pg (1.0.0)
     rake (12.3.0)
     telegram-bot-ruby (0.8.6.1)
@@ -58,11 +65,15 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
+  gpx
   activerecord
   pg
   rake
   ruby_kml!
   telegram-bot-ruby
+
+RUBY VERSION
+   ruby 2.3.3p222
 
 BUNDLED WITH
    1.16.1

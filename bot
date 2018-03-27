@@ -22,7 +22,7 @@ threads = []
 threads << Thread.new do
   Telegram::Bot::Client.run(token) do |bot|
     bot.listen do |message|
-      p "@#{message.from.username}: #{message.text}"
+      logger.debug "@#{message.from.username}: #{message.text}"
       if message.text && message.text.lines.count == 1 || !message.location.nil?
         options = { bot: bot, message: message, logger: logger }
         message_responder ||= MessageResponder.new(options)

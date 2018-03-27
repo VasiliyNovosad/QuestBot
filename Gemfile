@@ -1,8 +1,11 @@
 source 'https://rubygems.org'
+ruby '2.3.3'
+
 # gem 'mechanize'
 gem 'telegram-bot-ruby'
 # gem 'rgeo-shapefile'
-gem 'ruby_kml', git: 'git://github.com/VasiliyNovosad/ruby_kml.git'
+gem 'ruby_kml', github: 'VasiliyNovosad/ruby_kml'
+gem 'gpx'
 gem 'activerecord'
 gem 'pg'
 gem 'rake'

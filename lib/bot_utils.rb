@@ -77,10 +77,11 @@ module BotUtils
 
     mrHrefRe = result.to_enum(:scan, hrefRe).map { Regexp.last_match }
     mrHrefRe.each do |match|
-      result = result.gsub(match[0], "#{match[1]}, #{match[2]}")
-      unless coords.any? { |coord| coord[:latitude] == match[1] && coord[:longitude] == match[2] }
-        coords << { latitude: match[1], longitude: match[2], name: match[3] }
-      end
+      # result = result.gsub(match[0], "#{match[3]}: #{match[1]}, #{match[2]}")
+      # unless coords.any? { |coord| coord[:latitude] == match[1] && coord[:longitude] == match[2] }
+      #   coords << { latitude: match[1], longitude: match[2], name: match[3] }
+      # end
+      result = result.gsub(match[0], "#{match[3]}")
     end
 
     mrNumbersRe = result.to_enum(:scan, numbersRe).map { Regexp.last_match }
