@@ -45,7 +45,6 @@ GEM
     multipart-post (2.0.0)
     nokogiri (1.8.2)
       mini_portile2 (~> 2.3.0)
-    rake (12.3.0)
     pg (1.0.0)
     rake (12.3.0)
     telegram-bot-ruby (0.8.6.1)
@@ -65,8 +64,8 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
-  gpx
   activerecord
+  gpx
   pg
   rake
   ruby_kml!
