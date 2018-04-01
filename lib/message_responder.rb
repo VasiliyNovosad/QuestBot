@@ -4,6 +4,7 @@ require './lib/app_configurator'
 require './lib/morze'
 require './lib/braille'
 require './lib/lutsk_street'
+require './models/user'
 # require 'ruby_kml'
 
 class MessageResponder
