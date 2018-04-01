@@ -8,15 +8,15 @@ GIT
 GEM
   remote: https://rubygems.org/
   specs:
-    activemodel (5.1.5)
-      activesupport (= 5.1.5)
-    activerecord (5.1.5)
-      activemodel (= 5.1.5)
-      activesupport (= 5.1.5)
+    activemodel (5.1.6)
+      activesupport (= 5.1.6)
+    activerecord (5.1.6)
+      activemodel (= 5.1.6)
+      activesupport (= 5.1.6)
       arel (~> 8.0)
-    activesupport (5.1.5)
+    activesupport (5.1.6)
       concurrent-ruby (~> 1.0, >= 1.0.2)
-      i18n (~> 0.7)
+      i18n (>= 0.7, < 2)
       minitest (~> 5.1)
       tzinfo (~> 1.1)
     arel (8.0.0)
@@ -36,7 +36,7 @@ GEM
     gpx (1.0.0)
       nokogiri (~> 1.7)
       rake
-    i18n (0.9.5)
+    i18n (1.0.0)
       concurrent-ruby (~> 1.0)
     ice_nine (0.11.2)
     inflecto (0.0.2)
@@ -45,8 +45,8 @@ GEM
     multipart-post (2.0.0)
     nokogiri (1.8.2)
       mini_portile2 (~> 2.3.0)
-    pg (1.0.0)
-    rake (12.3.0)
+    pg (0.21.0)
+    rake (12.3.1)
     telegram-bot-ruby (0.8.6.1)
       faraday
       inflecto
@@ -66,7 +66,7 @@ PLATFORMS
 DEPENDENCIES
   activerecord
   gpx
-  pg
+  pg (= 0.21.0)
   rake
   ruby_kml!
   telegram-bot-ruby
