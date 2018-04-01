@@ -2,5 +2,5 @@
 *.iml
 *.log
 config/secret.yml
-kml/*.kml
-kml/*.gpx
+lib/kml/*.kml
+lib/kml/*.gpx
