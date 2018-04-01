@@ -5,7 +5,7 @@ require './lib/morze'
 require './lib/braille'
 require './lib/lutsk_street'
 require './models/user'
-# require 'ruby_kml'
+require './models/game'
 
 class MessageResponder
   attr_accessor :message, :blocked_answer
@@ -19,13 +19,29 @@ class MessageResponder
     @timer_interval = 5
     @start_timer = false
     @chat = @message.chat
-    @parser = nil
-    @block_answer = false
-    @blocked_answer = true
-    @admin_id = (ENV['ADMIN_ID'] || AppConfigurator.get_admin_id).to_i
-    @personal_chat_id = (ENV['PERSONAL_CHAT_ID'] || AppConfigurator.get_personal_chat_id).to_i
+    game = Game.first
+    @admin_id = AppConfigurator.get_admin_id
+    @personal_chat_id = AppConfigurator.get_personal_chat_id
     logger.debug "@admin_id: #{@admin_id}"
     logger.debug "@personal_chat_id: #{@personal_chat_id}"
+    user = User.where(uid: @admin_id).first
+    @parser = nil
+    unless game.nil?
+      @parser = QuestParserJson.new(game.domain, game.uid)
+      unless user.nil?
+        @parser.login = user.enlogin
+        @parser.password = user.enpassword
+      end
+      unless game.chat_id.nil? || game.chat_type.nil?
+        new_chat = Telegram::Bot::Types::Chat.new
+        new_chat.id = game.chat_id
+        new_chat.type = game.chat_type
+        @chat = new_chat
+      end
+      logger.debug "Domain: #{@parser.domain_name}; Game_id: #{@parser.game_id}; Chat_id: #{@chat.id}; Chat_type: #{@chat.type}"
+    end
+    @block_answer = false
+    @blocked_answer = true
   end
 
   def respond
@@ -38,20 +54,26 @@ class MessageResponder
       logger.debug "@#{message.from.username}: #{message.text}"
       return if message.from.id != admin_id
       return if message.chat.id != personal_chat_id
+      Game.destroy_all
       @parser = nil
       @chat = nil
+      answer_with_message "Бот вимкнено", message.chat
     end
 
     on %r{^\/start } do
       logger.debug "@#{message.from.username}: #{message.text}"
       return if message.from.id != admin_id
       return if message.chat.id != personal_chat_id
+      game_domain = message.text[7..-1].strip.split(';')[0]
+      game_id = message.text[7..-1].strip.split(';')[1]
+      game = Game.find_or_create_by(uid: game_id, domain: game_domain)
       @parser = QuestParserJson.new(
-        message.text[7..-1].strip.split(';')[0],
-        message.text[7..-1].strip.split(';')[1]
+        game_domain,
+        game_id
       )
-      puts @parser
       @chat = message.chat
+      logger.debug "Domain: #{@parser.domain_name}; Game_id: #{@parser.game_id}; Chat_id: #{@chat.id}; Chat_type: #{@chat.type}"
+      answer_with_message "Підключено гру: домен: #{@parser.domain_name}; id: #{@parser.game_id}", message.chat
     end
 
     on %r{^\/restart$} do
@@ -67,6 +89,8 @@ class MessageResponder
         @parser = QuestParserJson.new(domain_name, game_id)
         @parser.login = login
         @parser.password = password
+        logger.debug "Domain: #{@parser.domain_name}; Game_id: #{@parser.game_id}; Chat_id: #{@chat.id}; Chat_type: #{@chat.type}"
+        answer_with_message "Перезапущено бот для гри: домен: #{@parser.domain_name}; id: #{@parser.game_id}", message.chat
       end
     end
 
@@ -346,11 +370,11 @@ class MessageResponder
       logger.debug "@#{message.from.username}: #{message.text}"
       return if message.from.id != admin_id
       return if message.chat.id != personal_chat_id
-      puts parser
       parser.login = message.text[10..-1].strip if parser
       user = User.find_or_create_by(uid: admin_id)
       user.enlogin = message.text[10..-1].strip
       user.save!
+      answer_with_message "Встановлено логін: *#{message.text[10..-1].strip}*", message.chat
     end
 
     on %r{^\/setpassword } do
@@ -361,6 +385,7 @@ class MessageResponder
       user = User.find_or_create_by(uid: admin_id)
       user.enpassword = message.text[13..-1].strip
       user.save!
+      answer_with_message "Встановлено пароль: *#{message.text[13..-1].strip}*", message.chat
     end
 
     on %r{^\/setuserlogin } do
@@ -368,6 +393,7 @@ class MessageResponder
       user = User.find_or_create_by(uid: message.from.id)
       user.enlogin = message.text[14..-1].strip
       user.save!
+      answer_with_message "Встановлено логін: *#{user.enlogin}*", message.chat
     end
 
     on %r{^\/setuserpassword } do
@@ -375,6 +401,7 @@ class MessageResponder
       user = User.find_or_create_by(uid: message.from.id)
       user.enpassword = message.text[17..-1].strip
       user.save!
+      answer_with_message "Встановлено пароль: *#{user.enpassword}*", message.chat
     end
 
     on %r{^\/setchatcurrent$} do
@@ -382,6 +409,13 @@ class MessageResponder
       return if message.from.id != admin_id
       # return if chat.id != message.chat.id && message.chat.id != AppConfigurator.get_personal_chat_id
       @chat = message.chat
+      game = Game.first
+      unless game.nil?
+        game.chat_id = message.chat.id
+        game.chat_type = message.chat.type
+        game.save!
+      end
+      answer_with_message "Встановлено чат гри", message.chat
     end
 
     on %r{^\/stoptimer$} do
@@ -389,6 +423,7 @@ class MessageResponder
       return if message.from.id != admin_id
       return if message.chat.id != personal_chat_id
       @start_timer = false
+      answer_with_message "Відключено оновлення по таймеру", message.chat
     end
 
     on %r{^\/starttimer } do
@@ -397,6 +432,7 @@ class MessageResponder
       return if message.chat.id != personal_chat_id
       @timer_interval = message.text[12..-1].strip.to_i
       @start_timer = true
+      answer_with_message "Підключено оновлення по таймеру з інтервалом #{@timer_interval} секунд", message.chat
     end
 
     on %r{^\/starttimer$} do
@@ -405,6 +441,7 @@ class MessageResponder
       return if message.chat.id != personal_chat_id
       @timer_interval = 5
       @start_timer = true
+      answer_with_message "Підключено оновлення по таймеру з інтервалом 5 секунд", message.chat
     end
 
     on %r{^\/setnotifytime } do
@@ -639,7 +676,8 @@ class MessageResponder
         answer_with_message msg, chat
       end
     end
-  rescue
+  rescue e
+    logger.debug "Помилка в send_level_text: #{e}!"
     return
   end
 
@@ -667,8 +705,8 @@ class MessageResponder
     coords.each do |k, v|
       v.each_with_index do |coord, index|
         folder.features << KML::Placemark.new(
-            name: "#{k}. Точка #{index + 1}",
-            geometry: KML::Point.new(coordinates: {lat: coord[:latitude], lng: coord[:longitude]})
+          name: "#{k}. Точка #{index + 1}",
+          geometry: KML::Point.new(coordinates: {lat: coord[:latitude], lng: coord[:longitude]})
         )
       end
     end

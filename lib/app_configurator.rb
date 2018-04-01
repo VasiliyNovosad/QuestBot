@@ -13,15 +13,15 @@ class AppConfigurator
   end
 
   def get_token
-    YAML::load(IO.read('config/secret.yml'))['telegram_bot_token']
+    ENV['TELEGRAM_BOT_TOKEN'] || YAML::load(IO.read('config/secret.yml'))['telegram_bot_token']
   end
 
   def self.get_personal_chat_id
-    YAML::load(IO.read('config/secret.yml'))['personal_chat_id']
+    (ENV['PERSONAL_CHAT_ID'] || YAML::load(IO.read('config/secret.yml'))['personal_chat_id']).to_i
   end
 
   def self.get_admin_id
-    YAML::load(IO.read('config/secret.yml'))['admin_id']
+    (ENV['ADMIN_ID'] || YAML::load(IO.read('config/secret.yml'))['admin_id']).to_i
   end
 
   private
