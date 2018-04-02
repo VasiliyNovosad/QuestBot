@@ -8,8 +8,7 @@ class QuestParserJson
   ENGINE_URL = '/gameengines/encounter/play/'.freeze
   FORMAT_URL = '?json=1'.freeze
 
-  attr_accessor :domain_name, :game_id, :login,
-                :password, :cookie, :errors, :level, :block_sector_update, :notify_before
+  attr_accessor :domain_name, :game_id, :login, :password, :cookie, :errors, :level, :block_sector_update, :notify_before
 
   def initialize(domain_name, game_id)
     @domain_name = domain_name

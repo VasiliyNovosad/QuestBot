@@ -18,6 +18,8 @@ class MessageResponder
     @logger = options[:logger]
     @timer_interval = 5
     @start_timer = false
+    @block_answer = false
+    @blocked_answer = true
     @chat = @message.chat
     game = Game.first
     @admin_id = AppConfigurator.get_admin_id
@@ -28,6 +30,10 @@ class MessageResponder
     @parser = nil
     unless game.nil?
       @parser = QuestParserJson.new(game.domain, game.uid)
+      @timer_interval = game.timer_interval
+      @start_timer = game.start_timer
+      @block_answer = game.block_answer
+      @blocked_answer = game.blocked_answer
       unless user.nil?
         @parser.login = user.enlogin
         @parser.password = user.enpassword
@@ -40,8 +46,6 @@ class MessageResponder
       end
       logger.debug "Domain: #{@parser.domain_name}; Game_id: #{@parser.game_id}; Chat_id: #{@chat.id}; Chat_type: #{@chat.type}"
     end
-    @block_answer = false
-    @blocked_answer = true
   end
 
   def respond
@@ -66,10 +70,11 @@ class MessageResponder
       return if message.chat.id != personal_chat_id
       game_domain = message.text[7..-1].strip.split(';')[0]
       game_id = message.text[7..-1].strip.split(';')[1]
+      Game.destroy_all
       game = Game.find_or_create_by(uid: game_id, domain: game_domain)
       @parser = QuestParserJson.new(
-        game_domain,
-        game_id
+        game.domain,
+        game.uid
       )
       @chat = message.chat
       logger.debug "Domain: #{@parser.domain_name}; Game_id: #{@parser.game_id}; Chat_id: #{@chat.id}; Chat_type: #{@chat.type}"
@@ -329,6 +334,11 @@ class MessageResponder
       return if message.from.id != admin_id
       return if message.chat.id != personal_chat_id
       @block_answer = true
+      game = Game.first
+      unless game.nil?
+        game.block_answer = true
+        game.save!
+      end
     end
 
     on %r{^\/on$} do
@@ -336,6 +346,11 @@ class MessageResponder
       return if message.from.id != admin_id
       return if message.chat.id != personal_chat_id
       @block_answer = false
+      game = Game.first
+      unless game.nil?
+        game.block_answer = false
+        game.save!
+      end
     end
 
     on %r{^\/bloff$} do
@@ -343,6 +358,11 @@ class MessageResponder
       return if message.from.id != admin_id
       return if message.chat.id != personal_chat_id
       @blocked_answer = true
+      game = Game.first
+      unless game.nil?
+        game.blocked_answer = true
+        game.save!
+      end
     end
 
     on %r{^\/blon$} do
@@ -350,20 +370,39 @@ class MessageResponder
       return if message.from.id != admin_id
       return if message.chat.id != personal_chat_id
       @blocked_answer = false
+      game = Game.first
+      unless game.nil?
+        game.blocked_answer = false
+        game.save!
+      end
     end
 
     on %r{^\/updoff$} do
       logger.debug "@#{message.from.username}: #{message.text}"
       return if message.from.id != admin_id
       return if message.chat.id != personal_chat_id
-      parser.block_sector_update = true if parser
+      unless parser.nil?
+        parser.block_sector_update = true
+        game = Game.first
+        unless game.nil?
+          game.block_sector_update = true
+          game.save!
+        end
+      end
     end
 
     on %r{^\/updon$} do
       logger.debug "@#{message.from.username}: #{message.text}"
       return if message.from.id != admin_id
       return if message.chat.id != personal_chat_id
-      parser.block_sector_update = false if parser
+      unless parser.nil?
+        parser.block_sector_update = false
+        game = Game.first
+        unless game.nil?
+          game.block_sector_update = false
+          game.save!
+        end
+      end
     end
 
     on %r{^\/setlogin } do
@@ -423,6 +462,11 @@ class MessageResponder
       return if message.from.id != admin_id
       return if message.chat.id != personal_chat_id
       @start_timer = false
+      game = Game.first
+      unless game.nil?
+        game.start_timer = false
+        game.save!
+      end
       answer_with_message "Відключено оновлення по таймеру", message.chat
     end
 
@@ -432,6 +476,12 @@ class MessageResponder
       return if message.chat.id != personal_chat_id
       @timer_interval = message.text[12..-1].strip.to_i
       @start_timer = true
+      game = Game.first
+      unless game.nil?
+        game.start_timer = true
+        game.timer_interval = @timer_interval
+        game.save!
+      end
       answer_with_message "Підключено оновлення по таймеру з інтервалом #{@timer_interval} секунд", message.chat
     end
 
@@ -441,6 +491,12 @@ class MessageResponder
       return if message.chat.id != personal_chat_id
       @timer_interval = 5
       @start_timer = true
+      game = Game.first
+      unless game.nil?
+        game.start_timer = true
+        game.timer_interval = @timer_interval
+        game.save!
+      end
       answer_with_message "Підключено оновлення по таймеру з інтервалом 5 секунд", message.chat
     end
 
@@ -448,7 +504,14 @@ class MessageResponder
       logger.debug "@#{message.from.username}: #{message.text}"
       return if message.from.id != admin_id
       return if message.chat.id != personal_chat_id
-      parser.notify_before = message.text[15..-1].strip.to_i if parser
+      unless parser.nil?
+        parser.notify_before = message.text[15..-1].strip.to_i
+        game = Game.first
+        unless game.nil?
+          game.notify_before = parser.notify_before
+          game.save!
+        end
+      end
     end
 
     on %r{^\/morze } do
