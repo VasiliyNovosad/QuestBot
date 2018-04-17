@@ -1,6 +1,6 @@
 .idea/*
 *.iml
 *.log
-config/*.yml
-kml/*.kml
-kml/*.gpx
+config/secret.yml
+lib/kml/*.kml
+lib/kml/*.gpx
