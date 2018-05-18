@@ -602,7 +602,7 @@ class MessageResponder
 
     on %r{^\/coords$} do
       logger.debug "@#{message.from.username}: #{message.text}"
-      return if message.from.id != admin_id
+      # return if message.from.id != admin_id
       return if chat.id != message.chat.id && message.chat.id != personal_chat_id
       return if parser.nil? || parser.level.nil?
       full_info = parser.full_info
@@ -611,7 +611,7 @@ class MessageResponder
 
     on %r{^\/coords2$} do
       logger.debug "@#{message.from.username}: #{message.text}"
-      return if message.from.id != admin_id
+      # return if message.from.id != admin_id
       return if chat.id != message.chat.id && message.chat.id != personal_chat_id
       return if parser.nil? || parser.level.nil?
       full_info = parser.full_info
