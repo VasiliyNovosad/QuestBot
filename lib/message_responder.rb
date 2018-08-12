@@ -24,8 +24,8 @@ class MessageResponder
     game = Game.first
     @admin_id = AppConfigurator.get_admin_id
     @personal_chat_id = AppConfigurator.get_personal_chat_id
-    logger.debug "@admin_id: #{@admin_id}"
-    logger.debug "@personal_chat_id: #{@personal_chat_id}"
+    # logger.debug "@admin_id: #{@admin_id}"
+    # logger.debug "@personal_chat_id: #{@personal_chat_id}"
     user = User.where(uid: @admin_id).first
     @parser = nil
     unless game.nil?
@@ -44,18 +44,18 @@ class MessageResponder
         new_chat.type = game.chat_type
         @chat = new_chat
       end
-      logger.debug "Domain: #{@parser.domain_name}; Game_id: #{@parser.game_id}; Chat_id: #{@chat.id}; Chat_type: #{@chat.type}"
+      # logger.debug "Domain: #{@parser.domain_name}; Game_id: #{@parser.game_id}; Chat_id: #{@chat.id}; Chat_type: #{@chat.type}"
     end
   end
 
   def respond
     on %r{^\/start$} do
-      logger.debug "@#{message.from.username}: #{message.text}"
+      # logger.debug "@#{message.from.username}: #{message.text}"
       answer_with_greeting_message
     end
 
     on %r{^\/stop$} do
-      logger.debug "@#{message.from.username}: #{message.text}"
+      # logger.debug "@#{message.from.username}: #{message.text}"
       return if message.from.id != admin_id
       return if message.chat.id != personal_chat_id
       Game.destroy_all
@@ -65,7 +65,7 @@ class MessageResponder
     end
 
     on %r{^\/start } do
-      logger.debug "@#{message.from.username}: #{message.text}"
+      # logger.debug "@#{message.from.username}: #{message.text}"
       return if message.from.id != admin_id
       return if message.chat.id != personal_chat_id
       game_domain = message.text[7..-1].strip.split(';')[0]
@@ -77,12 +77,12 @@ class MessageResponder
         game.uid
       )
       @chat = message.chat
-      logger.debug "Domain: #{@parser.domain_name}; Game_id: #{@parser.game_id}; Chat_id: #{@chat.id}; Chat_type: #{@chat.type}"
+      # logger.debug "Domain: #{@parser.domain_name}; Game_id: #{@parser.game_id}; Chat_id: #{@chat.id}; Chat_type: #{@chat.type}"
       answer_with_message "Підключено гру: домен: #{@parser.domain_name}; id: #{@parser.game_id}", message.chat
     end
 
     on %r{^\/restart$} do
-      logger.debug "@#{message.from.username}: #{message.text}"
+      # logger.debug "@#{message.from.username}: #{message.text}"
       return if message.from.id != admin_id
       return if message.chat.id != personal_chat_id
       if parser
@@ -94,13 +94,13 @@ class MessageResponder
         @parser = QuestParserJson.new(domain_name, game_id)
         @parser.login = login
         @parser.password = password
-        logger.debug "Domain: #{@parser.domain_name}; Game_id: #{@parser.game_id}; Chat_id: #{@chat.id}; Chat_type: #{@chat.type}"
+        # logger.debug "Domain: #{@parser.domain_name}; Game_id: #{@parser.game_id}; Chat_id: #{@chat.id}; Chat_type: #{@chat.type}"
         answer_with_message "Перезапущено бот для гри: домен: #{@parser.domain_name}; id: #{@parser.game_id}", message.chat
       end
     end
 
     on %r{^\/help$} do
-      logger.debug "@#{message.from.username}: #{message.text}"
+      # logger.debug "@#{message.from.username}: #{message.text}"
       text = 'Список команд:
 /start <domain\\_name>;<game\\_id> - (!) встановити домен і ІД гри
 /setlogin <login> - (!) ввести логін гравця в движку
@@ -152,67 +152,67 @@ class MessageResponder
     end
 
     on %r{^\/\+$} do
-      logger.debug "@#{message.from.username}: #{message.text}"
+      # logger.debug "@#{message.from.username}: #{message.text}"
       return if chat.id != message.chat.id && message.chat.id != personal_chat_id
       send_updated_level(chat || message.chat, true) if parser
     end
 
     on %r{^\/\+\+$} do
-      logger.debug "@#{message.from.username}: #{message.text}"
+      # logger.debug "@#{message.from.username}: #{message.text}"
       return if chat.id != message.chat.id && message.chat.id != personal_chat_id
       send_updated_level(message.chat, true) if parser
     end
 
     on %r{^\/parse$} do
-      logger.debug "@#{message.from.username}: #{message.text}"
+      # logger.debug "@#{message.from.username}: #{message.text}"
       return if chat.id != message.chat.id && message.chat.id != personal_chat_id
       send_updated_level(chat || message.chat) if parser
     end
 
     on %r{^\/-$} do
-      logger.debug "@#{message.from.username}: #{message.text}"
+      # logger.debug "@#{message.from.username}: #{message.text}"
       return if chat.id != message.chat.id && message.chat.id != personal_chat_id
       send_needed_sectors(chat || message.chat) if parser
     end
 
     on %r{^\/--$} do
-      logger.debug "@#{message.from.username}: #{message.text}"
+      # logger.debug "@#{message.from.username}: #{message.text}"
       return if chat.id != message.chat.id && message.chat.id != personal_chat_id
       send_needed_sectors(message.chat) if parser
     end
 
     on %r{^\/[:;]$} do
-      logger.debug "@#{message.from.username}: #{message.text}"
+      # logger.debug "@#{message.from.username}: #{message.text}"
       return if chat.id != message.chat.id && message.chat.id != personal_chat_id
       send_bonuses(chat || message.chat) if parser
     end
 
     on %r{^\/-\+$} do
-      logger.debug "@#{message.from.username}: #{message.text}"
+      # logger.debug "@#{message.from.username}: #{message.text}"
       return if chat.id != message.chat.id && message.chat.id != personal_chat_id
       send_all_sectors(chat || message.chat) if parser
     end
 
     on %r{^\/--\+$} do
-      logger.debug "@#{message.from.username}: #{message.text}"
+      # logger.debug "@#{message.from.username}: #{message.text}"
       return if chat.id != message.chat.id && message.chat.id != personal_chat_id
       send_all_sectors(message.chat) if parser
     end
 
     on %r{^\/\*$} do
-      logger.debug "@#{message.from.username}: #{message.text}"
+      # logger.debug "@#{message.from.username}: #{message.text}"
       return if chat.id != message.chat.id && message.chat.id != personal_chat_id
       send_full_level(chat || message.chat) if parser
     end
 
     on %r{^\/\*\*$} do
-      logger.debug "@#{message.from.username}: #{message.text}"
+      # logger.debug "@#{message.from.username}: #{message.text}"
       return if chat.id != message.chat.id && message.chat.id != personal_chat_id
       send_full_level(message.chat) if parser
     end
 
     on %r{^\/[.,] } do
-      logger.debug "@#{message.from.username}: #{message.text}"
+      # logger.debug "@#{message.from.username}: #{message.text}"
       return if parser.nil?
       return if chat.id != message.chat.id && message.chat.id != personal_chat_id
       text = ''
@@ -270,7 +270,7 @@ class MessageResponder
     # end
 
     on %r{^\/[.,]} do
-      logger.debug "@#{message.from.username}: #{message.text}"
+      # logger.debug "@#{message.from.username}: #{message.text}"
       return if parser.nil?
       return if chat.id != message.chat.id && message.chat.id != personal_chat_id
       if block_answer
@@ -300,7 +300,7 @@ class MessageResponder
     end
 
     on %r{^[.,]} do
-      logger.debug "@#{message.from.username}: #{message.text}"
+      # logger.debug "@#{message.from.username}: #{message.text}"
       return if parser.nil?
       return if chat.id != message.chat.id && message.chat.id != personal_chat_id
       if block_answer
@@ -330,7 +330,7 @@ class MessageResponder
     end
 
     on %r{^\/off$} do
-      logger.debug "@#{message.from.username}: #{message.text}"
+      # logger.debug "@#{message.from.username}: #{message.text}"
       return if message.from.id != admin_id
       return if message.chat.id != personal_chat_id
       @block_answer = true
@@ -342,7 +342,7 @@ class MessageResponder
     end
 
     on %r{^\/on$} do
-      logger.debug "@#{message.from.username}: #{message.text}"
+      # logger.debug "@#{message.from.username}: #{message.text}"
       return if message.from.id != admin_id
       return if message.chat.id != personal_chat_id
       @block_answer = false
@@ -354,7 +354,7 @@ class MessageResponder
     end
 
     on %r{^\/bloff$} do
-      logger.debug "@#{message.from.username}: #{message.text}"
+      # logger.debug "@#{message.from.username}: #{message.text}"
       return if message.from.id != admin_id
       return if message.chat.id != personal_chat_id
       @blocked_answer = true
@@ -366,7 +366,7 @@ class MessageResponder
     end
 
     on %r{^\/blon$} do
-      logger.debug "@#{message.from.username}: #{message.text}"
+      # logger.debug "@#{message.from.username}: #{message.text}"
       return if message.from.id != admin_id
       return if message.chat.id != personal_chat_id
       @blocked_answer = false
@@ -378,7 +378,7 @@ class MessageResponder
     end
 
     on %r{^\/updoff$} do
-      logger.debug "@#{message.from.username}: #{message.text}"
+      # logger.debug "@#{message.from.username}: #{message.text}"
       return if message.from.id != admin_id
       return if message.chat.id != personal_chat_id
       unless parser.nil?
@@ -392,7 +392,7 @@ class MessageResponder
     end
 
     on %r{^\/updon$} do
-      logger.debug "@#{message.from.username}: #{message.text}"
+      # logger.debug "@#{message.from.username}: #{message.text}"
       return if message.from.id != admin_id
       return if message.chat.id != personal_chat_id
       unless parser.nil?
@@ -406,7 +406,7 @@ class MessageResponder
     end
 
     on %r{^\/setlogin } do
-      logger.debug "@#{message.from.username}: #{message.text}"
+      # logger.debug "@#{message.from.username}: #{message.text}"
       return if message.from.id != admin_id
       return if message.chat.id != personal_chat_id
       parser.login = message.text[10..-1].strip if parser
@@ -417,7 +417,7 @@ class MessageResponder
     end
 
     on %r{^\/setpassword } do
-      logger.debug "@#{message.from.username}: #{message.text}"
+      # logger.debug "@#{message.from.username}: #{message.text}"
       return if message.from.id != admin_id
       return if message.chat.id != personal_chat_id
       parser.password = message.text[13..-1].strip if parser
@@ -428,7 +428,7 @@ class MessageResponder
     end
 
     on %r{^\/setuserlogin } do
-      logger.debug "@#{message.from.username}: #{message.text}"
+      # logger.debug "@#{message.from.username}: #{message.text}"
       user = User.find_or_create_by(uid: message.from.id)
       user.enlogin = message.text[14..-1].strip
       user.save!
@@ -436,7 +436,7 @@ class MessageResponder
     end
 
     on %r{^\/setuserpassword } do
-      logger.debug "@#{message.from.username}: #{message.text}"
+      # logger.debug "@#{message.from.username}: #{message.text}"
       user = User.find_or_create_by(uid: message.from.id)
       user.enpassword = message.text[17..-1].strip
       user.save!
@@ -444,7 +444,7 @@ class MessageResponder
     end
 
     on %r{^\/setchatcurrent$} do
-      logger.debug "@#{message.from.username}: #{message.text}"
+      # logger.debug "@#{message.from.username}: #{message.text}"
       return if message.from.id != admin_id
       # return if chat.id != message.chat.id && message.chat.id != AppConfigurator.get_personal_chat_id
       @chat = message.chat
@@ -458,7 +458,7 @@ class MessageResponder
     end
 
     on %r{^\/stoptimer$} do
-      logger.debug "@#{message.from.username}: #{message.text}"
+      # logger.debug "@#{message.from.username}: #{message.text}"
       return if message.from.id != admin_id
       return if message.chat.id != personal_chat_id
       @start_timer = false
@@ -471,7 +471,7 @@ class MessageResponder
     end
 
     on %r{^\/starttimer } do
-      logger.debug "@#{message.from.username}: #{message.text}"
+      # logger.debug "@#{message.from.username}: #{message.text}"
       return if message.from.id != admin_id
       return if message.chat.id != personal_chat_id
       @timer_interval = message.text[12..-1].strip.to_i
@@ -486,7 +486,7 @@ class MessageResponder
     end
 
     on %r{^\/starttimer$} do
-      logger.debug "@#{message.from.username}: #{message.text}"
+      # logger.debug "@#{message.from.username}: #{message.text}"
       return if message.from.id != admin_id
       return if message.chat.id != personal_chat_id
       @timer_interval = 5
@@ -501,7 +501,7 @@ class MessageResponder
     end
 
     on %r{^\/setnotifytime } do
-      logger.debug "@#{message.from.username}: #{message.text}"
+      # logger.debug "@#{message.from.username}: #{message.text}"
       return if message.from.id != admin_id
       return if message.chat.id != personal_chat_id
       unless parser.nil?
@@ -601,7 +601,7 @@ class MessageResponder
     end
 
     on %r{^\/coords$} do
-      logger.debug "@#{message.from.username}: #{message.text}"
+      # logger.debug "@#{message.from.username}: #{message.text}"
       # return if message.from.id != admin_id
       return if chat.id != message.chat.id && message.chat.id != personal_chat_id
       return if parser.nil? || parser.level.nil?
@@ -610,7 +610,7 @@ class MessageResponder
     end
 
     on %r{^\/coords2$} do
-      logger.debug "@#{message.from.username}: #{message.text}"
+      # logger.debug "@#{message.from.username}: #{message.text}"
       # return if message.from.id != admin_id
       return if chat.id != message.chat.id && message.chat.id != personal_chat_id
       return if parser.nil? || parser.level.nil?
@@ -627,7 +627,7 @@ class MessageResponder
     end
 
     on %r{^(\d{2}[.,]\d{3,}),?\s*(\d{2}[.,]\d{3,})$} do
-      logger.debug message.text
+      # logger.debug message.text
       # logger.debug message.location
       if message.location.nil?
         numbersRe = /(\d{2}[.,]\d{3,}),?\s*(\d{2}[.,]\d{3,})/
@@ -649,7 +649,6 @@ class MessageResponder
 
   def on regex, &block
     text = message.text
-    text = "#{message.location.latitude}, #{message.location.longitude}" unless message.location.nil?
     regex =~ text
 
     return unless $~
