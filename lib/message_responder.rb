@@ -628,15 +628,15 @@ class MessageResponder
 
     on %r{^(\d{2}[.,]\d{3,}),?\s*(\d{2}[.,]\d{3,})$} do
       logger.debug message.text
-      logger.debug message.location
+      # logger.debug message.location
       if message.location.nil?
         numbersRe = /(\d{2}[.,]\d{3,}),?\s*(\d{2}[.,]\d{3,})/
         mrNumbersRe = message.text.to_enum(:scan, numbersRe).map { Regexp.last_match }
         mrNumbersRe.each do |match|
           answer_with_location({ latitude: match[1], longitude: match[2]}, message.chat)
         end
-      else
-        answer_with_location({ latitude: message.location.latitude, longitude: message.location.longitude }, message.chat)
+      # else
+      #   answer_with_location({ latitude: message.location.latitude, longitude: message.location.longitude }, message.chat)
       end
     end
   end
