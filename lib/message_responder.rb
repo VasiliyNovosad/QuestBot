@@ -738,7 +738,7 @@ class MessageResponder
         answer_with_message msg, chat
       end
     end
-  rescue e
+  rescue => e
     logger.debug "Помилка в send_level_text: #{e}!"
     return
   end
