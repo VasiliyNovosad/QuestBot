@@ -9,7 +9,7 @@ class AppConfigurator
   end
 
   def get_logger
-    Logger.new(STDOUT, Logger::DEBUG)
+    Logger.new("#{File.expand_path File.dirname(__FILE__)}/../questbot.log", Logger::DEBUG)
   end
 
   def get_token
