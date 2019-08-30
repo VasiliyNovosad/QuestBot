@@ -21,11 +21,11 @@ class DatabaseConnector
     private
 
     def active_record_logger_path
-      'debug.log'
+      "#{File.expand_path File.dirname(__FILE__)}/../logger.log"
     end
 
     def database_config_path
-      'config/database.yml'
+      "#{File.expand_path File.dirname(__FILE__)}/../config/database.yml"
     end
   end
 end

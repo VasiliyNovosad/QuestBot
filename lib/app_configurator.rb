@@ -9,7 +9,7 @@ class AppConfigurator
   end
 
   def get_logger
-    file = File.open("#{File.expand_path File.dirname(__FILE__)}/../questbot.log", File::WRONLY | File::APPEND)
+    file = File.open("#{File.expand_path File.dirname(__FILE__)}/../questbot.log", File::WRONLY | File::APPEND | File::CREAT)
     Logger.new(file, Logger::DEBUG)
   end
 
