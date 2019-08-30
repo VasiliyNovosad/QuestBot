@@ -7,7 +7,9 @@ require 'yaml'
 
 namespace :db do
 
-  DATABASE_URI = ENV['DATABASE_URL'] || 'postgres://postgres:V0rtex@localhost:5432/questbot'
+  CONFIGURATION = YAML::load(IO.read('config/database.yml'))
+  puts CONFIGURATION
+  DATABASE_URI = ENV['DATABASE_URL'] || CONFIGURATION["database_url"]
 
   desc 'Migrate the database'
   task :migrate do
@@ -15,6 +17,7 @@ namespace :db do
     connection_details = {
       adapter: db.scheme == 'postgres' ? 'postgresql' : db.scheme,
       host: db.host,
+      port: db.port,
       username: db.user,
       password: db.password,
       database: db.path[1..-1],
@@ -22,7 +25,7 @@ namespace :db do
     }
 
     ActiveRecord::Base.establish_connection(connection_details)
-    ActiveRecord::Migrator.migrate('db/migrate/')
+    ActiveRecord::Migration.new.migration_context.migrate
   end
 
   desc 'Create the database'
@@ -31,6 +34,7 @@ namespace :db do
     connection_details = {
         adapter: db.scheme == 'postgres' ? 'postgresql' : db.scheme,
         host: db.host,
+        port: db.port,
         username: db.user,
         password: db.password,
         database: db.path[1..-1],
@@ -50,6 +54,7 @@ namespace :db do
     connection_details = {
         adapter: db.scheme == 'postgres' ? 'postgresql' : db.scheme,
         host: db.host,
+        port: db.port,
         username: db.user,
         password: db.password,
         database: db.path[1..-1],
