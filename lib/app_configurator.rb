@@ -9,7 +9,8 @@ class AppConfigurator
   end
 
   def get_logger
-    Logger.new("#{File.expand_path File.dirname(__FILE__)}/../questbot.log", Logger::DEBUG)
+    file = File.open("#{File.expand_path File.dirname(__FILE__)}/../questbot.log", File::WRONLY | File::APPEND)
+    Logger.new(file, Logger::DEBUG)
   end
 
   def get_token
