@@ -2,8 +2,8 @@
 
 require 'telegram/bot'
 
-require './lib/message_responder'
-require './lib/app_configurator'
+require "#{File.expand_path File.dirname(__FILE__)}/lib/message_responder"
+require "#{File.expand_path File.dirname(__FILE__)}/lib/app_configurator"
 require 'openssl'
 
 OpenSSL::SSL::VERIFY_PEER = OpenSSL::SSL::VERIFY_NONE
