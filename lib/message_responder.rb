@@ -1,11 +1,11 @@
-require './lib/message_sender'
-require './lib/quest_parser_json'
-require './lib/app_configurator'
-require './lib/morze'
-require './lib/braille'
-require './lib/lutsk_street'
-require './models/user'
-require './models/game'
+require "#{File.expand_path File.dirname(__FILE__)}/message_sender"
+require "#{File.expand_path File.dirname(__FILE__)}/quest_parser_json"
+require "#{File.expand_path File.dirname(__FILE__)}/app_configurator"
+require "#{File.expand_path File.dirname(__FILE__)}/morze"
+require "#{File.expand_path File.dirname(__FILE__)}/braille"
+require "#{File.expand_path File.dirname(__FILE__)}/lutsk_street"
+require "#{File.expand_path File.dirname(__FILE__)}/../models/user"
+require "#{File.expand_path File.dirname(__FILE__)}/../models/game"
 
 class MessageResponder
   attr_accessor :message, :blocked_answer

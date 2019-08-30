@@ -1,10 +1,10 @@
-require_relative '../lib/task'
-require_relative '../lib/sector'
-require_relative '../lib/bonus'
-require_relative '../lib/help'
-require_relative '../lib/penalty_help'
-require_relative '../lib/message'
-require_relative '../lib/bot_utils'
+require_relative "#{File.expand_path File.dirname(__FILE__)}/task"
+require_relative "#{File.expand_path File.dirname(__FILE__)}/sector"
+require_relative "#{File.expand_path File.dirname(__FILE__)}/bonus"
+require_relative "#{File.expand_path File.dirname(__FILE__)}/help"
+require_relative "#{File.expand_path File.dirname(__FILE__)}/penalty_help"
+require_relative "#{File.expand_path File.dirname(__FILE__)}/message"
+require_relative "#{File.expand_path File.dirname(__FILE__)}/bot_utils"
 
 class Level
   include BotUtils

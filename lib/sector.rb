@@ -14,7 +14,7 @@
 #     "IsAnswered": true
 # }
 #
-require_relative '../lib/bot_utils'
+require_relative 'bot_utils'
 
 class Sector
   include BotUtils

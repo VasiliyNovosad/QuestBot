@@ -10,7 +10,7 @@
 #     "RemainSeconds": 878,
 #     "PenaltyMessage": null
 # }
-require_relative '../lib/bot_utils'
+require_relative "#{File.expand_path File.dirname(__FILE__)}/bot_utils"
 
 class Help
   include BotUtils
