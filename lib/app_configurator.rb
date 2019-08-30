@@ -1,7 +1,7 @@
 require 'logger'
 require 'yaml'
 
-require 'database_connector'
+require_relative 'database_connector'
 
 class AppConfigurator
   def configure
