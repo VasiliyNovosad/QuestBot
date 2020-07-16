@@ -24,7 +24,7 @@ class DatabaseConnector
       #     database_url: ENV['DATABASE_URL'] || 'postgres://postgres:V0rtex@localhost:5432/questbot'
       # }
 
-      ActiveRecord::Base.establish_connection("#{configuration['database_url']}?pool=#{configuration['pool'] || 10}&timeout=#{configuration['timeout'] || 5000}")
+      ActiveRecord::Base.establish_connection("#{configuration['database_url']}?adapter=#{configuration['adapter'] || 'postgresql'}&pool=#{configuration['pool'] || 10}&timeout=#{configuration['timeout'] || 5000}")
     end
 
     private
