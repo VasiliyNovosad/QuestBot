@@ -13,7 +13,6 @@ class DatabaseConnector
         timeout: 5000,
         database_url: ENV['DATABASE_URL'] || 'postgres://postgres:@localhost:32768/questbot'
       }
-      p configuration
       ActiveRecord::Base.establish_connection("#{configuration[:database_url]}?pool=#{configuration[:pool] || 10}&timeout=#{configuration[:timeout] || 5000}")
     end
 
