@@ -7,7 +7,7 @@ class DatabaseConnector
     def establish_connection
       ActiveRecord::Base.logger = Logger.new(active_record_logger_path)
 
-      configuration = if database_config_path.exists?
+      configuration = if File.exist?(database_config_path)
                         YAML::load(IO.read(database_config_path))
                       else
                         {
