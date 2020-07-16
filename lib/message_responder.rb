@@ -4,6 +4,7 @@ require "#{File.expand_path File.dirname(__FILE__)}/app_configurator"
 require "#{File.expand_path File.dirname(__FILE__)}/morze"
 require "#{File.expand_path File.dirname(__FILE__)}/braille"
 require "#{File.expand_path File.dirname(__FILE__)}/lutsk_street"
+require "#{File.expand_path File.dirname(__FILE__)}/kovel_street"
 require "#{File.expand_path File.dirname(__FILE__)}/../models/user"
 require "#{File.expand_path File.dirname(__FILE__)}/../models/game"
 
@@ -623,6 +624,14 @@ class MessageResponder
       text = message.text[8..-1].strip
       return if text == '' || text.nil?
       answer = LutskStreet.like_name(text).join("\n")
+      send_level_text answer, message.chat
+    end
+
+    on %r{^\/streetk } do
+      # logger.debug "@#{message.from.username}: #{message.text}"
+      text = message.text[8..-1].strip
+      return if text == '' || text.nil?
+      answer = KovelStreet.like_name(text).join("\n")
       send_level_text answer, message.chat
     end
 
