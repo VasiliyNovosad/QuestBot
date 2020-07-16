@@ -7,7 +7,16 @@ class DatabaseConnector
     def establish_connection
       ActiveRecord::Base.logger = Logger.new(active_record_logger_path)
 
-      configuration = YAML::load(IO.read(database_config_path))
+      configuration = if database_config_path.exists?
+                        YAML::load(IO.read(database_config_path))
+                      else
+                        {
+                          adapter: 'postgresql',
+                          pool: 10,
+                          timeout: 5000,
+                          database_url: ENV['DATABASE_URL'] || 'postgres://postgres:V0rtex@localhost:5432/questbot'
+                        }
+                      end
       # configuration = {
       #     adapter: 'postgresql',
       #     pool: 10,
@@ -15,7 +24,7 @@ class DatabaseConnector
       #     database_url: ENV['DATABASE_URL'] || 'postgres://postgres:V0rtex@localhost:5432/questbot'
       # }
 
-      ActiveRecord::Base.establish_connection("#{configuration['database_url'] || ENV['DATABASE_URL']}?pool=#{configuration['pool'] || 10}&timeout=#{configuration['timeout'] || 5000}")
+      ActiveRecord::Base.establish_connection("#{configuration['database_url']}?pool=#{configuration['pool'] || 10}&timeout=#{configuration['timeout'] || 5000}")
     end
 
     private
