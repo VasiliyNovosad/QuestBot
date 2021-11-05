@@ -22,16 +22,21 @@ threads = []
 threads << Thread.new do
   Telegram::Bot::Client.run(token) do |bot|
     bot.listen do |message|
-      if message.text && message.text.lines.count == 1
-        options = { bot: bot, message: message, logger: logger }
-        message_responder ||= MessageResponder.new(options)
-        message_responder.message = message
-        begin
-          message_responder.respond
-        rescue => e
-          logger.debug e.message
-          logger.debug e.backtrace.inspect
+      case message
+      when Telegram::Bot::Types::Message
+        if message.text && message.text.lines.count == 1
+          options = { bot: bot, message: message, logger: logger }
+          message_responder ||= MessageResponder.new(options)
+          message_responder.message = message
+          begin
+            message_responder.respond
+          rescue => e
+            logger.debug e.message
+            logger.debug e.backtrace.inspect
+          end
         end
+      else
+        bot.logger.info('Not sure what to do with this type of message')
       end
     end
   end

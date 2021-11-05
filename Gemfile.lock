@@ -53,7 +53,7 @@ GEM
     gpx (1.0.0)
       nokogiri (~> 1.7)
       rake
-    i18n (1.8.10)
+    i18n (1.8.11)
       concurrent-ruby (~> 1.0)
     ice_nine (0.11.2)
     mini_portile2 (2.6.1)
@@ -63,7 +63,7 @@ GEM
       mini_portile2 (~> 2.6.1)
       racc (~> 1.4)
     pg (1.2.3)
-    racc (1.5.2)
+    racc (1.6.0)
     rake (13.0.6)
     ruby2_keywords (0.0.5)
     telegram-bot-ruby (0.16.0)
@@ -77,7 +77,7 @@ GEM
       axiom-types (~> 0.1)
       coercible (~> 1.0)
       descendants_tracker (~> 0.0, >= 0.0.3)
-    zeitwerk (2.4.2)
+    zeitwerk (2.5.1)
 
 PLATFORMS
   ruby
