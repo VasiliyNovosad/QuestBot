@@ -10,7 +10,6 @@
 #     "RemainSeconds": 0,
 #     "PenaltyMessage": null
 # }
-require_relative 'bot_utils'
 
 class PenaltyHelp
   include BotUtils

@@ -1,11 +1,3 @@
-require_relative "#{File.expand_path File.dirname(__FILE__)}/task"
-require_relative "#{File.expand_path File.dirname(__FILE__)}/sector"
-require_relative "#{File.expand_path File.dirname(__FILE__)}/bonus"
-require_relative "#{File.expand_path File.dirname(__FILE__)}/help"
-require_relative "#{File.expand_path File.dirname(__FILE__)}/penalty_help"
-require_relative "#{File.expand_path File.dirname(__FILE__)}/message"
-require_relative "#{File.expand_path File.dirname(__FILE__)}/bot_utils"
-
 class Level
   include BotUtils
   attr_accessor :id, :number, :has_answer_block_rule, :block_duration, :block_target_id, :attemts_number,

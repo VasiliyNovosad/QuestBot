@@ -1,8 +1,3 @@
-require 'net/http'
-require 'uri'
-require 'json'
-require_relative 'level'
-
 class QuestParserJson
   SIGNIN_URL = '/login/signin'.freeze
   ENGINE_URL = '/gameengines/encounter/play/'.freeze

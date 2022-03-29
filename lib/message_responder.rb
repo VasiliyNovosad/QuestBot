@@ -1,13 +1,3 @@
-require "#{File.expand_path File.dirname(__FILE__)}/message_sender"
-require "#{File.expand_path File.dirname(__FILE__)}/quest_parser_json"
-require "#{File.expand_path File.dirname(__FILE__)}/app_configurator"
-require "#{File.expand_path File.dirname(__FILE__)}/morze"
-require "#{File.expand_path File.dirname(__FILE__)}/braille"
-require "#{File.expand_path File.dirname(__FILE__)}/lutsk_street"
-require "#{File.expand_path File.dirname(__FILE__)}/kovel_street"
-require "#{File.expand_path File.dirname(__FILE__)}/../models/user"
-require "#{File.expand_path File.dirname(__FILE__)}/../models/game"
-
 class MessageResponder
   attr_accessor :message, :blocked_answer
   attr_reader :bot, :logger, :admin_id, :personal_chat_id, :user
@@ -769,8 +759,6 @@ class MessageResponder
   end
 
   def coords_to_kml(coords, level_name)
-    require 'bundler/setup'
-    require 'ruby_kml'
     kml = KMLFile.new
     folder = KML::Document.new(name: level_name)
     coords.each do |k, v|
@@ -788,7 +776,6 @@ class MessageResponder
   end
 
   def coords_to_gpx(coords, level_name)
-    require 'gpx'
     gpx = GPX::GPXFile.new
     coords.each do |k, v|
       v.each_with_index do |coord, index|

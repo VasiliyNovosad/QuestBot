@@ -1,4 +1,4 @@
 adapter: postgresql
 pool: 10
 timeout: 5000
-database_url: postgres://postgres:V0rtex@localhost:5432/questbot
+database_url: <%= ENV['DATABASE_URL'] %>

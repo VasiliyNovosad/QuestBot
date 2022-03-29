@@ -18,7 +18,6 @@
 #         "UserId": 69789
 #     }
 # }
-require_relative "#{File.expand_path File.dirname(__FILE__)}/bot_utils"
 
 class Bonus
   include BotUtils

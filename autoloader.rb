@@ -1,0 +1,36 @@
+require 'bundler/setup'
+require 'active_record'
+require 'ruby_kml'
+require 'logger'
+require 'yaml'
+require 'telegram/bot'
+require 'openssl'
+require 'gpx'
+require 'net/http'
+require 'uri'
+
+require_relative 'models/user'
+require_relative 'models/game'
+
+require_relative 'lib/bot_utils'
+require_relative 'lib/ee_strings'
+
+require_relative 'lib/morze'
+require_relative 'lib/braille'
+require_relative 'lib/lutsk_street'
+require_relative 'lib/kovel_street'
+
+require_relative 'lib/database_connector'
+require_relative 'lib/app_configurator'
+
+require_relative 'lib/help'
+require_relative 'lib/penalty_help'
+require_relative 'lib/message'
+require_relative 'lib/sector'
+require_relative 'lib/task'
+require_relative 'lib/level'
+
+require_relative 'lib/reply_markup_formatter'
+require_relative 'lib/quest_parser_json'
+require_relative 'lib/message_sender'
+require_relative 'lib/message_responder'

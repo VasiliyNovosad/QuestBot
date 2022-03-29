@@ -1,6 +1,3 @@
-require_relative 'ee_strings'
-# require 'rgeo/shapefile'
-
 class KovelStreet
   STREETS = [
     { name: "Лесі Українки" },

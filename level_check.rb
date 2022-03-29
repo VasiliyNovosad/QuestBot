@@ -1,7 +1,7 @@
 # encoding: UTF-8
 
 require 'json'
-require_relative './lib/level'
+require_relative 'lib/level'
 
 file = File.read('c:\Users\Fr1end\Downloads\57016\57016_6_1.json')
 level_json = JSON.parse(file)

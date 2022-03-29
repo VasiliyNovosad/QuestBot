@@ -13,8 +13,6 @@
 #     },
 #     "IsAnswered": true
 # }
-#
-require_relative 'bot_utils'
 
 class Sector
   include BotUtils

@@ -1,8 +1,3 @@
-require 'logger'
-require 'yaml'
-
-require_relative 'database_connector'
-
 class AppConfigurator
   def configure
     setup_database

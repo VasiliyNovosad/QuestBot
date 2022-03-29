@@ -1,10 +1,6 @@
 #!/usr/bin/env ruby
 
-require 'telegram/bot'
-
-require "#{File.expand_path File.dirname(__FILE__)}/lib/message_responder"
-require "#{File.expand_path File.dirname(__FILE__)}/lib/app_configurator"
-require 'openssl'
+require_relative 'autoloader'
 
 OpenSSL::SSL::VERIFY_PEER = OpenSSL::SSL::VERIFY_NONE
 
@@ -30,7 +26,7 @@ threads << Thread.new do
           message_responder.message = message
           begin
             message_responder.respond
-          rescue => e
+          rescue StandardError => e
             logger.debug e.message
             logger.debug e.backtrace.inspect
           end
@@ -43,15 +39,15 @@ threads << Thread.new do
 end
 threads << Thread.new do
   loop do
-    if message_responder&.parser && message_responder&.start_timer
-      begin
-        message_responder.send_message_by_timer
-      rescue => e
-        logger.debug e.message
-        logger.debug e.backtrace.inspect
-      end
-      sleep message_responder.timer_interval || 5
+    next unless message_responder&.parser && message_responder&.start_timer
+
+    begin
+      message_responder.send_message_by_timer
+    rescue StandardError => e
+      logger.debug e.message
+      logger.debug e.backtrace.inspect
     end
+    sleep message_responder.timer_interval || 5
   end
 end
 threads.map(&:join)

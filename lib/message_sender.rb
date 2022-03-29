@@ -1,6 +1,3 @@
-require "#{File.expand_path File.dirname(__FILE__)}/reply_markup_formatter"
-require "#{File.expand_path File.dirname(__FILE__)}/app_configurator"
-
 class MessageSender
   attr_reader :bot
   attr_reader :text

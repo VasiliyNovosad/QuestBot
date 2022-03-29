@@ -6,7 +6,6 @@
 #     "WrappedText": "Если описание расположения локации непонятно - двигайтесь по указателям. ",
 #     "ReplaceNl2Br": true
 # }
-require_relative 'bot_utils'
 
 class Message
   include BotUtils

@@ -1,7 +1,3 @@
-require 'active_record'
-require 'logger'
-require 'yaml'
-
 class DatabaseConnector
   class << self
     def establish_connection
@@ -19,11 +15,11 @@ class DatabaseConnector
     private
 
     def active_record_logger_path
-      "#{File.expand_path File.dirname(__FILE__)}/../logger.log"
+      "#{__dir__}/../logger.log"
     end
 
     def database_config_path
-      "#{File.expand_path File.dirname(__FILE__)}/../config/database.yml"
+      "#{__dir__}/../config/database.yml"
     end
   end
 end
